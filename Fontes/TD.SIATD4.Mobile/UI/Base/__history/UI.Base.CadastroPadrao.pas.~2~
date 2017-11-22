@@ -1,0 +1,33 @@
+unit UI.Base.CadastroPadraoMobile;
+
+interface
+
+uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+    System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,
+    Vcl.Buttons,
+    Vcl.ExtCtrls, Data.DB, Datasnap.DBClient, Vcl.Mask, Vcl.DBCtrls,
+    Vcl.CheckLst, UntErrorProvider, Vcl.ComCtrls, FrameWork.UI.FormBase;
+
+type
+
+    TFrmCadastroPadraoMobile = class(TFrmBase)
+        PageControl1: TPageControl;
+        pnlBotoes: TPanel;
+        btnCancelar: TBitBtn;
+        btnConfirmar: TBitBtn;
+        tbPrincipal: TTabSheet;
+        procedure btnCancelarClick(Sender: TObject);
+        procedure btnConfirmarClick(Sender: TObject);
+        procedure FormShow(Sender: TObject);
+    end;
+
+var
+    FrmCadastroPadraoMobile: TFrmCadastroPadraoMobile;
+
+implementation
+
+{$R *.dfm}
+
+end.

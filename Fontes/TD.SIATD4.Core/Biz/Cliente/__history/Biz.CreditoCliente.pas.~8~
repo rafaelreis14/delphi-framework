@@ -1,0 +1,391 @@
+unit Biz.CreditoCliente;
+
+interface
+
+uses
+    Classes, System.SysUtils, Dialogs, Lib.ClasseBase, Lib.Parametro, Lib.Enumeradores,
+    Lib.Persistable, Lib.MaxLenght, Lib.Lista, Lib.ResultFilter,
+    Framework.Interfaces.CRUD;
+
+type
+    TCreditoCliente = class(TClasseBase)
+    private
+        FSaldoPendenteCompensar: double;
+        FParcelaOrc: string;
+        FPrefixoOrc: string;
+        FNumeroNCC: string;
+        FFilial: string;
+        FRecnoDaSZ9: double;
+        FValor: double;
+        FSequencialOrc: string;
+        FDocumentoOrigem: string;
+        FUsuarioCancelamento: string;
+        FClienteOrc: string;
+        FTipoNCC: string;
+        FDataCancelamento: string;
+        FStatus: string;
+        FParcelaNCC: string;
+        FSequencialNCC: string;
+        FPrefixoNCC: string;
+        FRecno: integer;
+        FNumeroOrcamento: string;
+        FFilialNCC: string;
+        FDelete: string;
+        FMotivoCancelamento: string;
+        FUsuario: string;
+        FData: string;
+        FClienteNCC: string;
+        FTipoOrc: string;
+        FNomeCliente: string;
+        FEmissaoNCC: String;
+        FSaldoNCC: Double;
+        FValorNCC: Double;
+        FValorDisponivel: Double;
+        FValorReservado: Double;
+        FFormaPagamento: string;
+        FSequenciamento: integer;
+        procedure SetClienteNCC(const Value: string);
+        procedure SetClienteOrc(const Value: string);
+        procedure SetData(const Value: string);
+        procedure SetDataCancelamento(const Value: string);
+        procedure SetDelete(const Value: string);
+        procedure SetDocumentoOrigem(const Value: string);
+        procedure SetFilial(const Value: string);
+        procedure SetFilialNCC(const Value: string);
+        procedure SetMotivoCancelamento(const Value: string);
+        procedure SetNumeroNCC(const Value: string);
+        procedure SetNumeroOrcamento(const Value: string);
+        procedure SetParcelaNCC(const Value: string);
+        procedure SetParcelaOrc(const Value: string);
+        procedure SetPrefixoNCC(const Value: string);
+        procedure SetPrefixoOrc(const Value: string);
+        procedure SetRecno(const Value: integer);
+        procedure SetRecnoDaSZ9(const Value: double);
+        procedure SetSaldoPendenteCompensar(const Value: double);
+        procedure SetSequencialNCC(const Value: string);
+        procedure SetSequencialOrc(const Value: string);
+        procedure SetStatus(const Value: string);
+        procedure SetTipoNCC(const Value: string);
+        procedure SetTipoOrc(const Value: string);
+        procedure SetUsuario(const Value: string);
+        procedure SetUsuarioCancelamento(const Value: string);
+        procedure SetValor(const Value: double);
+        procedure SetNomeCliente(const Value: string);
+        procedure SetEmissaoNCC(const Value: String);
+        procedure SetSaldoNCC(const Value: Double);
+        procedure SetValorDisponivel(const Value: Double);
+        procedure SetValorNCC(const Value: Double);
+        procedure SetValorReservado(const Value: Double);
+        procedure SetFormaPagamento(const Value: string);
+        procedure SetSequenciamento(const Value: integer);
+    public
+        procedure PreencherObjeto(CreditoCliente: TCreditoCliente);
+
+        [TPersistable(fgPersistable, 'Z40_FILIAL')]
+        [TMaxLenght(2)]
+        property Filial: string read FFilial write SetFilial;
+
+        [TPersistable(fgPersistable, 'Z40_PRFNCC')]
+        [TMaxLenght(3)]
+        property PrefixoNCC: string read FPrefixoNCC write SetPrefixoNCC;
+
+        [TPersistable(fgPersistable, 'Z40_NUMNCC')]
+        [TMaxLenght(9)]
+        property NumeroNCC: string read FNumeroNCC write SetNumeroNCC;
+
+        [TPersistable(fgPersistable, 'Z40_PARNCC')]
+        [TMaxLenght(3)]
+        property ParcelaNCC: string read FParcelaNCC write SetParcelaNCC;
+
+        [TPersistable(fgPersistable, 'Z40_TIPNCC')]
+        [TMaxLenght(3)]
+        property TipoNCC: string read FTipoNCC write SetTipoNCC;
+
+        [TPersistable(fgPersistable, 'Z40_CLINCC')]
+        [TMaxLenght(6)]
+        property ClienteNCC: string read FClienteNCC write SetClienteNCC;
+
+        [TPersistable(fgPersistable, 'Z40_LOJNCC')]
+        [TMaxLenght(2)]
+        property SequencialNCC: string read FSequencialNCC write SetSequencialNCC;
+
+        [TPersistable(fgPersistable, 'Z40_FILNCC')]
+        [TMaxLenght(2)]
+        property FilialNCC: string read FFilialNCC write SetFilialNCC;
+
+        [TPersistable(fgPersistable, 'Z40_NUMORC')]
+        [TMaxLenght(6)]
+        property NumeroOrcamento: string read FNumeroOrcamento write SetNumeroOrcamento;
+
+        [TPersistable(fgPersistable, 'Z40_VALOR')]
+        property Valor: double read FValor write SetValor;
+
+        [TPersistable(fgPersistable, 'Z40_STATUS')]
+        [TMaxLenght(1)]
+        property Status: string read FStatus write SetStatus;
+
+        [TPersistable(fgPersistable, 'Z40_DATA')]
+        [TMaxLenght(8)]
+        property Data: string read FData write SetData;
+
+        [TPersistable(fgPersistable, 'Z40_USERID')]
+        [TMaxLenght(50)]
+        property Usuario: string read FUsuario write SetUsuario;
+
+        [TPersistable(fgPersistable, 'Z40_DTCANC')]
+        [TMaxLenght(8)]
+        property DataCancelamento: string read FDataCancelamento write SetDataCancelamento;
+
+        [TPersistable(fgPersistable, 'Z40_USECAN')]
+        [TMaxLenght(50)]
+        property UsuarioCancelamento: string read FUsuarioCancelamento write SetUsuarioCancelamento;
+
+        [TPersistable(fgPersistable, 'Z40_MOTCAN')]
+        [TMaxLenght(100)]
+        property MotivoCancelamento: string read FMotivoCancelamento write SetMotivoCancelamento;
+
+        [TPersistable(fgPersistable, 'D_E_L_E_T_')]
+        [TMaxLenght(1)]
+        property Delete: string read FDelete write SetDelete;
+
+        [TPersistable(fgPersistable, 'R_E_C_N_O_')]
+        property Recno: integer read FRecno write SetRecno;
+
+        [TPersistable(fgPersistable, 'Z40_SLDCMP')]
+        property SaldoPendenteCompensar: double read FSaldoPendenteCompensar write SetSaldoPendenteCompensar;
+
+        [TPersistable(fgPersistable, 'Z40_PRFORC')]
+        [TMaxLenght(3)]
+        property PrefixoOrc: string read FPrefixoOrc write SetPrefixoOrc;
+
+        [TPersistable(fgPersistable, 'Z40_PARORC')]
+        [TMaxLenght(3)]
+        property ParcelaOrc: string read FParcelaOrc write SetParcelaOrc;
+
+        [TPersistable(fgPersistable, 'Z40_CLIORC')]
+        [TMaxLenght(6)]
+        property ClienteOrc: string read FClienteOrc write SetClienteOrc;
+
+        [TPersistable(fgPersistable, 'Z40_LOJORC')]
+        [TMaxLenght(2)]
+        property SequencialOrc: string read FSequencialOrc write SetSequencialOrc;
+
+        [TPersistable(fgPersistable, 'Z40_TIPORC')]
+        [TMaxLenght(3)]
+        property TipoOrc: string read FTipoOrc write SetTipoOrc;
+
+        [TPersistable(fgPersistable, 'Z40_DOCORC')]
+        [TMaxLenght(9)]
+        property DocumentoOrigem: string read FDocumentoOrigem write SetDocumentoOrigem;
+
+        [TPersistable(fgPersistable, 'Z40_REC_Z9')]
+        property RecnoDaSZ9: double read FRecnoDaSZ9 write SetRecnoDaSZ9;
+
+        // Propriedades para mostrar informações na tela.
+        property NomeCliente: string read FNomeCliente write SetNomeCliente;
+        property SaldoNCC: Double read FSaldoNCC write SetSaldoNCC;
+        property ValorReservado: Double read FValorReservado write SetValorReservado;
+        property ValorDisponivel: Double read FValorDisponivel write SetValorDisponivel;
+        property ValorNCC: Double read FValorNCC write SetValorNCC;
+        property EmissaoNCC: String read FEmissaoNCC write SetEmissaoNCC;
+
+        // Propriedades para lincamento entre grids
+        property FormaPagamento: string read FFormaPagamento write SetFormaPagamento;
+        property Sequenciamento: integer read FSequenciamento write SetSequenciamento;
+
+    end;
+
+implementation
+
+{ TCreditoCliente }
+
+uses Lib.Filter, Lib.Biblioteca;
+
+{$REGION 'Métodos CRUD'}
+{$ENDREGION}
+
+{$REGION 'Regras de Negócio'}
+
+
+
+{$ENDREGION}
+{$REGION 'Métodos de Propriedades'}
+
+procedure TCreditoCliente.PreencherObjeto(CreditoCliente: TCreditoCliente);
+begin
+    CreditoCliente.CopiarPara(Self);
+    FPreenchido := true;
+end;
+
+procedure TCreditoCliente.SetClienteNCC(const Value: string);
+begin
+    FClienteNCC := Value;
+end;
+
+procedure TCreditoCliente.SetClienteOrc(const Value: string);
+begin
+    FClienteOrc := Value;
+end;
+
+procedure TCreditoCliente.SetData(const Value: string);
+begin
+    FData := Value;
+end;
+
+procedure TCreditoCliente.SetDataCancelamento(const Value: string);
+begin
+    FDataCancelamento := Value;
+end;
+
+procedure TCreditoCliente.SetDelete(const Value: string);
+begin
+    FDelete := Value;
+end;
+
+procedure TCreditoCliente.SetDocumentoOrigem(const Value: string);
+begin
+    FDocumentoOrigem := Value;
+end;
+
+procedure TCreditoCliente.SetEmissaoNCC(const Value: String);
+begin
+  FEmissaoNCC := Value;
+end;
+
+procedure TCreditoCliente.SetFilial(const Value: string);
+begin
+    FFilial := Value;
+end;
+
+procedure TCreditoCliente.SetFilialNCC(const Value: string);
+begin
+    FFilialNCC := Value;
+end;
+
+procedure TCreditoCliente.SetFormaPagamento(const Value: string);
+begin
+  FFormaPagamento := Value;
+end;
+
+procedure TCreditoCliente.SetMotivoCancelamento(const Value: string);
+begin
+    FMotivoCancelamento := Value;
+end;
+
+procedure TCreditoCliente.SetNomeCliente(const Value: string);
+begin
+  FNomeCliente := Value;
+end;
+
+procedure TCreditoCliente.SetNumeroNCC(const Value: string);
+begin
+    FNumeroNCC := Value;
+end;
+
+procedure TCreditoCliente.SetNumeroOrcamento(const Value: string);
+begin
+    FNumeroOrcamento := Value;
+end;
+
+procedure TCreditoCliente.SetParcelaNCC(const Value: string);
+begin
+    FParcelaNCC := Value;
+end;
+
+procedure TCreditoCliente.SetParcelaOrc(const Value: string);
+begin
+    FParcelaOrc := Value;
+end;
+
+procedure TCreditoCliente.SetPrefixoNCC(const Value: string);
+begin
+    FPrefixoNCC := Value;
+end;
+
+procedure TCreditoCliente.SetPrefixoOrc(const Value: string);
+begin
+    FPrefixoOrc := Value;
+end;
+
+procedure TCreditoCliente.SetRecno(const Value: integer);
+begin
+    FRecno := Value;
+end;
+
+procedure TCreditoCliente.SetRecnoDaSZ9(const Value: double);
+begin
+    FRecnoDaSZ9 := Value;
+end;
+
+procedure TCreditoCliente.SetSaldoNCC(const Value: Double);
+begin
+  FSaldoNCC := Value;
+end;
+
+procedure TCreditoCliente.SetSaldoPendenteCompensar(const Value: double);
+begin
+    FSaldoPendenteCompensar := Value;
+end;
+
+procedure TCreditoCliente.SetSequencialNCC(const Value: string);
+begin
+    FSequencialNCC := Value;
+end;
+
+procedure TCreditoCliente.SetSequencialOrc(const Value: string);
+begin
+    FSequencialOrc := Value;
+end;
+
+procedure TCreditoCliente.SetSequenciamento(const Value: integer);
+begin
+  FSequenciamento := Value;
+end;
+
+procedure TCreditoCliente.SetStatus(const Value: string);
+begin
+    FStatus := Value;
+end;
+
+procedure TCreditoCliente.SetTipoNCC(const Value: string);
+begin
+    FTipoNCC := Value;
+end;
+
+procedure TCreditoCliente.SetTipoOrc(const Value: string);
+begin
+    FTipoOrc := Value;
+end;
+
+procedure TCreditoCliente.SetUsuario(const Value: string);
+begin
+    FUsuario := Value;
+end;
+
+procedure TCreditoCliente.SetUsuarioCancelamento(const Value: string);
+begin
+    FUsuarioCancelamento := Value;
+end;
+
+procedure TCreditoCliente.SetValor(const Value: double);
+begin
+    FValor := Value;
+end;
+
+procedure TCreditoCliente.SetValorDisponivel(const Value: Double);
+begin
+  FValorDisponivel := Value;
+end;
+
+procedure TCreditoCliente.SetValorNCC(const Value: Double);
+begin
+  FValorNCC := Value;
+end;
+
+procedure TCreditoCliente.SetValorReservado(const Value: Double);
+begin
+  FValorReservado := Value;
+end;
+{$ENDREGION}
+
+end.

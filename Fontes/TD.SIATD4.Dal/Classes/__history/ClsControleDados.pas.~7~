@@ -1,0 +1,479 @@
+unit ClsControleDados;
+
+interface
+
+uses ClsLib, Db, DbCommon, Generics.Collections, System.Rtti, DBClient,
+     Data.Win.ADODB, ClsParametro, DBConnectSIATD_TLB, ClsBase, ClsLista, Xml.XMLIntf, Xml.XMLDoc,
+     ClsErro, ClsPersistable;
+
+type
+     TDAO<T> = class
+     strict private
+         class var FDataControl: IDataControl;
+     protected
+         NomeTabela: string;
+         function ConsultarBase(sql:string; parametro: TParametro): WideString;
+     public
+         function DataControl: IDataControl;
+         function ConverterParametro(parametro: TParametro): _Parameters;
+         function Consultar(sql: string; parametro: TParametro): T; virtual; abstract;
+     end;
+
+
+     TXmlDAO = class(TDAO<TXMLDocument>)
+     public
+         function Consultar(sql: string; parametro: TParametro): TXMLDocument; override;
+
+
+     end;
+
+
+     TDataSetDAO = class(TDAO<TClientDataSet>)
+     private
+
+         function XmlToDataset(XML: Widestring): TClientDataSet;
+     public
+         function Consultar(sql: string; parametro: TParametro): TClientDataSet; override;
+     end;
+
+
+     TListaDAO<T: class> = class(TDAO<TLista<T>>)
+     private
+         function RetornaPropriedade(typ: TRttiType; campo: string): TRttiProperty;
+         function XmlToObject(XML: Widestring): TLista<T>;
+
+     public
+         function Consultar(sql: string; parametro: TParametro): TLista<T>; override;
+         constructor Create();
+     end;
+
+
+     TControleDados<T; A: TDAO<T>, constructor> = class
+     public
+         function Consultar(sql: string; parametro: TParametro): T;
+         function Inserir(sql: string; parametro: TParametro; nomeTabela: string): boolean;
+         function Alterar(sql: string; parametro: TParametro; nomeTabela: string): boolean;
+         function Deletar(sql: string; parametro: TParametro; nomeTabela: string): boolean;
+         function ExecutaProc(nome: string; parametro: TParametro): TParametro;
+         function IniciarTransacao(nomeTransancao: string; nivelIsolamento: TIsolationLevel = ilReadUncommitted): boolean;
+         function ConfirmarTransacao(nomeTransancao: string): boolean;
+         function ReverterTransacao(nomeTransancao: string): boolean;
+      end;
+
+implementation
+
+uses
+    System.SysUtils, Vcl.Forms, ClsMensagens, Classes;
+
+
+{ TXmlDAO }
+
+function TXmlDAO.Consultar(sql: string; parametro: TParametro): TXMLDocument;
+var
+    XMLDocument: TXMLDocument;
+    resultado: string;
+begin
+    try
+        resultado := ConsultarBase(sql,parametro);
+        XMLDocument := TXMLDocument.Create(Application);
+        XMLDocument.Xml.Text := resultado;
+        XMLDocument.Active := True;
+
+        result := XMLDocument;
+    except
+        XMLDocument.Free;
+        result := nil;
+    end;
+end;
+
+
+{ TDataSetDAO }
+
+function TDataSetDAO.Consultar(sql: string; parametro: TParametro): TClientDataSet;
+var
+    resultado: string;
+begin
+    try
+        resultado := ConsultarBase(sql,parametro);
+        result := XmlToDataset(resultado);
+    except
+        raise;
+        result := nil;
+    end;
+end;
+
+
+function TDataSetDAO.XmlToDataset(xml: Widestring): TClientDataSet;
+    function TipoDados(pTipo: String): Tfieldtype;
+    begin
+        if pTipo = 'Memo' then
+            Result := ftMemo
+        else if pTipo = 'Bigint' then
+            Result := ftLargeint
+        else if pTipo = 'BCD' then
+            Result := ftBCD
+        else if pTipo = 'WideString' then
+            Result := ftWideString
+        else if pTipo = 'String' then
+            Result := ftString
+        else if pTipo = 'Numeric' then
+            Result := ftFMTBcd
+        else if pTipo = 'Integer' then
+            Result := ftInteger
+        else if pTipo = 'Money' then
+            Result := ftCurrency
+        else if pTipo = 'Date' then
+            Result := ftDate
+        else if pTipo = 'TIMESTAMP' then
+            Result := ftDateTime
+        else if pTipo = 'AUTOINC' then
+            Result := ftInteger
+        else if pTipo = 'Date' then
+            Result := ftTimeStamp
+        else if pTipo = 'Word' then
+            Result := ftWord
+        else if pTipo = 'Boolean' then
+            Result := ftBoolean
+        else if pTipo = 'Time' then
+            Result := ftTime
+        else if pTipo = 'Bytes' then
+            Result := ftBytes
+        else if pTipo = 'SmallInt' then
+            Result := ftSmallint
+        else if pTipo = 'BLOB' then
+            Result := ftBlob;
+    end;
+var
+    XMLDocument: TXMLDocument;
+    NoRetorno: IXMLNode;
+    NoMetadados: IXMLNode;
+    NoDataSet: IXMLNode;
+    NoCampo: IXMLNode;
+    NoDados: IXMLNode;
+    NoLinha: IXMLNode;
+    NoColuna: IXMLNode;
+    iCont, iCont2, iCont3: integer;
+    CDSResultado: TClientDataSet;
+    cRetorno: string;
+    Field: TField;
+    iContLinhas: integer;
+    vTipoDado: Tfieldtype;
+    iTamanho: integer;
+begin
+    try
+        try
+            CDSResultado := TClientDataSet.Create(Application);
+            XMLDocument := TXMLDocument.Create(Application);
+            XMLDocument.Xml.Text := XML;
+            XMLDocument.Active := True;
+            //
+            NoRetorno := XMLDocument.ChildNodes.Nodes['Retorno'];
+            //
+            NoDataSet := NoRetorno.ChildNodes.Nodes['DataSet'];
+            //
+            NoMetadados := NoDataSet.ChildNodes.Nodes['Metadados'];
+            for iCont := 0 to NoMetadados.ChildNodes.Count - 1 do
+            begin
+                NoCampo := NoMetadados.ChildNodes[iCont];
+                //
+                if (NoCampo.NodeName = 'Campo') and (NoCampo.Attributes['Nome'] = 'Padrao') then
+                begin
+                    NoDados := NoDataSet.ChildNodes.Nodes['Dados'];
+                    NoLinha := NoDados.ChildNodes.Nodes[0];
+                    raise Erro.Create(NoLinha.ChildNodes.Nodes[iCont2].Attributes['Valor']);
+                end;
+                //
+                vTipoDado := TipoDados(NoCampo.Attributes['TipoDado']);
+                iTamanho := StrToInt(NoCampo.Attributes['Tamanho']);
+                //
+                CDSResultado.FieldDefs.Add(NoCampo.Attributes['Nome'], vTipoDado, iTamanho);
+            end;
+            CDSResultado.CreateDataSet;
+            //
+            iContLinhas := 0;
+            NoDados := NoDataSet.ChildNodes.Nodes['Dados'];
+            for iCont := 0 to NoDados.ChildNodes.Count - 1 do
+            // percorrendo as linhas
+            begin
+                inc(iContLinhas);
+                CDSResultado.Append();
+                NoLinha := NoDados.ChildNodes.Nodes[iCont];
+                for iCont2 := 0 to NoLinha.ChildNodes.Count - 1 do
+                // percorrendo as colunas das linhas
+                begin
+                    CDSResultado.FieldList.Fields[iCont2].AsString := NoLinha.ChildNodes.Nodes[iCont2].Attributes['Valor'];
+                end;
+                CDSResultado.Post;
+            end;
+            Application.ProcessMessages;
+            CDSResultado.First;
+            Result := CDSResultado;
+            Application.ProcessMessages;
+        except
+            on E: Exception do
+                raise Erro.Create('Erro ao converter o XML em dataSet' + #13 + 'Mensagem interna: ' + E.Message);
+        end;
+    finally
+        FreeAndNil(XMLDocument);
+    end;
+end;
+
+{ TDAO<T> }
+
+function TDAO<T>.ConsultarBase(sql: string; parametro: TParametro): WideString;
+var
+    resultado: WideString;
+begin
+    if parametro <> nil then
+        result := DataControl.Query(sql, ConverterParametro(parametro), '', '', 0)
+    else
+        result := DataControl.Query(sql, nil, '', '', 0);
+
+end;
+
+function TDAO<T>.ConverterParametro(parametro: TParametro): _Parameters;
+var
+    param: IParameter;
+    itemParametro: TItemParametro;
+begin
+    param := CoParameters.Create() as IParameter;
+    for itemParametro in parametro.Item do
+    begin
+        if itemParametro.Valor = '' then
+            param.Add(itemParametro.Chave, ' ', '', '')
+        else
+            param.Add(itemParametro.Chave, itemParametro.Valor, '', '');
+    end;
+    result := (param as _Parameters);
+end;
+
+
+function TDAO<T>.DataControl: IDataControl;
+begin
+    if not Assigned(FDataControl) then
+        FDataControl := CoSQLDataControl.Create() as IDataControl;
+
+    result := FDataControl;
+end;
+
+
+{ TControleDados<T, A> }
+
+function TControleDados<T, A>.Alterar(sql: string; parametro: TParametro; nomeTabela: string): boolean;
+var
+    cd: A;
+begin
+    cd := A.Create;
+    try
+        if parametro <> nil then
+            result := cd.DataControl.Update(sql, cd.ConverterParametro(parametro), '', '')
+        else
+            result := cd.DataControl.Update(sql, nil, '', '')
+    finally
+        cd.Free;
+    end;
+end;
+
+function TControleDados<T, A>.ConfirmarTransacao(nomeTransancao: string): boolean;
+begin
+
+end;
+
+function TControleDados<T, A>.Consultar(sql: string; parametro: TParametro): T;
+var
+    cd: A;
+begin
+    cd := A.Create;
+    try
+        Result := cd.Consultar(sql, parametro);
+    finally
+        cd.Free;
+    end;
+end;
+
+function TControleDados<T, A>.Deletar(sql: string; parametro: TParametro; nomeTabela: string): boolean;
+var
+    cd: A;
+begin
+    cd := A.Create;
+    try
+        if parametro <> nil then
+            result := cd.DataControl.Delete(sql, cd.ConverterParametro(parametro), '', '')
+        else
+            result := cd.DataControl.Delete(sql, nil, '', '')
+    finally
+        cd.Free;
+    end;
+end;
+
+function TControleDados<T, A>.ExecutaProc(nome: string;  parametro: TParametro): TParametro;
+var
+    cd: A;
+    retorno: widestring;
+    parte TStringList;
+    itemRetorno: Widestring;
+begin
+    cd := A.Create;
+    try
+        if parametro <> nil then
+        begin
+            retorno := cd.DataControl.StoredProcedure(nome, cd.ConverterParametro(parametro), '', '')
+
+            ExtractStrings([';'],[], PChar(retorno), Parte);
+
+            for itemRetorno in Parte do
+            begin
+                 Retorno.Add(TLib.PegaParametro(TLib.PegaParametro(ItemRetorno, '1', ';'), '1', '|'),
+                 TLib.PegaParametro(TLib.PegaParametro(ItemRetorno, '1', ';'), '2', '|'));
+            end;
+
+            result :=
+
+        end;
+    finally
+        cd.Free;
+    end;
+end;
+
+function TControleDados<T, A>.IniciarTransacao(nomeTransancao: string; nivelIsolamento: TIsolationLevel): boolean;
+begin
+
+end;
+
+function TControleDados<T, A>.Inserir(sql: string; parametro: TParametro; nomeTabela: string): boolean;
+var
+    cd: A;
+begin
+    cd := A.Create;
+    try
+        if parametro <> nil then
+            result := cd.DataControl.Insert(sql, cd.ConverterParametro(parametro), '', '')
+        else
+            result := cd.DataControl.Insert(sql, nil, '', '')
+    finally
+        cd.Free;
+    end;
+end;
+
+
+
+function TControleDados<T, A>.ReverterTransacao(nomeTransancao: string): boolean;
+begin
+
+end;
+
+{ TListaDAO }
+
+function TListaDAO<T>.Consultar(sql: string; parametro: TParametro): TLista<T>;
+var
+    resultado: string;
+begin
+    try
+        resultado := ConsultarBase(sql,parametro);
+        result := XmlToObject(resultado);
+    except
+        raise;
+        result := nil;
+    end;
+end;
+
+constructor TListaDAO<T>.Create;
+begin
+    inherited Create();
+end;
+
+function TListaDAO<T>.RetornaPropriedade(typ: TRttiType;  campo: string): TRttiProperty;
+var
+    _ctx: TRttiContext;
+    _typ: TRttiType;
+    _pro: TRttiProperty;
+    oAtt: TCustomAttribute;
+begin
+    // _ctx := TRttiContext.Create;
+    _typ := typ;
+    Result := nil;
+    for _pro in _typ.GetProperties do
+    begin
+        for oAtt in _pro.GetAttributes do
+        begin
+            if oAtt is TPersistable then
+            begin
+                if TPersistable(oAtt).FieldName = campo then
+                begin
+                    Result := _pro;
+                    exit;
+                end;
+            end;
+        end;
+    end;
+end;
+
+function TListaDAO<T>.XmlToObject(XML: Widestring): TLista<T>;
+var
+    XMLDocument: TXMLDocument;
+    NoRetorno: IXMLNode;
+    NoMetadados: IXMLNode;
+    NoDataSet: IXMLNode;
+    NoCampo: IXMLNode;
+    NoDados: IXMLNode;
+    NoLinha: IXMLNode;
+    NoColuna: IXMLNode;
+    iCont, iCont2, iCont3: integer;
+    cRetorno: string;
+    Field: TField;
+    iContLinhas: integer;
+    vTipoDado: Tfieldtype;
+    iTamanho: integer;
+    cCampo, cValor, cTipo: string;
+    lista: TLista<T>;
+    objeto: T;
+    context: TRttiContext;
+    prop: TRttiProperty;
+begin
+    try
+        try
+            lista := TLista<T>.Create;
+            XMLDocument := TXMLDocument.Create(Application);
+            XMLDocument.Xml.Text := XML;
+            XMLDocument.Active := True;
+            //
+            NoRetorno := XMLDocument.ChildNodes.Nodes['Retorno'];
+            //
+            NoDataSet := NoRetorno.ChildNodes.Nodes['DataSet'];
+            //
+            iContLinhas := 0;
+            NoDados := NoDataSet.ChildNodes.Nodes['Dados'];
+            for iCont := 0 to NoDados.ChildNodes.Count - 1 do
+            // percorrendo as linhas
+            begin
+                objeto := tlib.CriaInstancia<T>;
+                inc(iContLinhas);
+                NoLinha := NoDados.ChildNodes.Nodes[iCont];
+                for iCont2 := 0 to NoLinha.ChildNodes.Count - 1 do
+                // percorrendo as colunas das linhas
+                begin
+                    cCampo := NoLinha.ChildNodes.Nodes[iCont2].Attributes['Campo'];
+                    cValor := NoLinha.ChildNodes.Nodes[iCont2].Attributes['Valor'];
+                    cTipo := NoLinha.ChildNodes.Nodes[iCont2].Attributes['TipoDado'];
+                    //
+                    prop := RetornaPropriedade(context.GetType(TObject(objeto).ClassType), cCampo);
+                    //
+                    if Assigned(prop) then
+                        tlib.ConverteEPopularValorPropriedade(prop, objeto, cValor);
+                    //
+                end;
+                lista.Add(objeto);
+            end;
+            //
+            Result := lista;
+        Except
+            on E: Exception do
+                raise Erro.Create(E.Message);
+        end;
+    finally
+        // FreeAndNil(lista);
+        FreeAndNil(XMLDocument);
+    end;
+end;
+
+end.

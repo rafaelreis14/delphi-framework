@@ -1,0 +1,34 @@
+unit UI.Base.Controlador.ConsultaDesktop;
+
+interface
+
+uses UI.Base.ConsultaPadrao, Framework.Interfaces.CRUD, Lib.Biblioteca;
+
+type
+    TControladorConsultaDesktop<T: Class> = class(TFrmConsultaPadrao)
+    public
+        ObjetoBase: T;
+        CRUD: ICRUD<T>;
+
+        procedure InstanciarObjeto;
+        procedure Inicializar;
+    end;
+
+implementation
+
+
+
+{ TControladorConsultaDesktop<T> }
+
+procedure TControladorConsultaDesktop<T>.Inicializar;
+begin
+
+end;
+
+procedure TControladorConsultaDesktop<T>.InstanciarObjeto;
+begin
+    ObjetoBase := Tlib.CriaInstancia<T>;
+    CRUD := ICRUD<T>(ObjetoBase);
+end;
+
+end.

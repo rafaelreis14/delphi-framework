@@ -1,0 +1,398 @@
+unit UI.Sistema.Principal;
+
+interface
+
+uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+    System.Classes, Vcl.Graphics, System.StrUtils,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Framework.UI.FormBase, Vcl.ToolWin, Vcl.ActnMan,
+    Vcl.ActnCtrls, Vcl.ActnMenus, Vcl.ActnList,
+    Vcl.PlatformDefaultStyleActnCtrls,
+    Vcl.ComCtrls, Vcl.StdCtrls, Vcl.Buttons,
+    Lib.Biblioteca, Vcl.Imaging.pngimage, Vcl.ExtCtrls,
+    UntErrorProvider, UI.Sistema.Login, Vcl.Grids,
+    Vcl.DBGrids, Data.DB, Vcl.Menus, UI.Sistema.Teste,
+    RGrid, UI.Sistema.TrocaSenha, UI.Sistema.TesteRelatorio, MIDASLIB,
+    Biz.UsuarioLogado, RCheckListBox;
+
+type
+    TFrmPrincipal = class(TFrmBase)
+        SttsBrPadrao: TStatusBar;
+        Image1: TImage;
+        menuPrincipal: TMainMenu;
+        Cadastro: TMenuItem;
+        Processo: TMenuItem;
+        Utilitarios1: TMenuItem;
+        Relatorios: TMenuItem;
+        Ajuda1: TMenuItem;
+        Suporte1: TMenuItem;
+        Sobreosistema1: TMenuItem;
+        pnlDebug: TPanel;
+        BitBtn1: TBitBtn;
+        Logoff1: TMenuItem;
+        AlterarSenha1: TMenuItem;
+        Button1: TButton;
+        Panel1: TPanel;
+        procedure FormShow(Sender: TObject);
+        procedure FormCreate(Sender: TObject);
+        procedure BitBtn1Click(Sender: TObject);
+        procedure Logoff1Click(Sender: TObject);
+        procedure AlterarSenha1Click(Sender: TObject);
+        procedure Button1Click(Sender: TObject);
+
+
+    private
+        { Private declarations }
+        procedure SetBarraStatus;
+        procedure PreparaMenu;
+    procedure CadastroUsuario;
+//        procedure CadastroPermissaoRotina;
+    public
+        mobile:boolean;
+    published
+        procedure MenuErro;
+
+        {$REGION 'Módulo Venda'}
+            {$REGION 'Cadastro'}
+            {GERAR_METODOVENDAS}
+            {$ENDREGION}
+
+            {$REGION 'Processo'}
+
+
+            {$ENDREGION}
+
+            {$REGION 'Utilitários'}
+
+            {$ENDREGION}
+
+            {$REGION 'Relatórios'}
+
+            {$ENDREGION}
+
+            {$REGION 'Ajuda'}
+
+            {$ENDREGION}
+        {$ENDREGION}
+
+        {$REGION 'Módulo Logística'}
+            {$REGION 'Cadastro'}
+            {GERAR_METODO_LOGISTICA}
+            {$ENDREGION}
+
+            {$REGION 'Processo'}
+            {$ENDREGION}
+
+            {$REGION 'Utilitários'}
+
+            {$ENDREGION}
+
+            {$REGION 'Relatórios'}
+
+            {$ENDREGION}
+
+            {$REGION 'Ajuda'}
+
+            {$ENDREGION}
+        {$ENDREGION}
+
+        {$REGION 'Módulo Segurança'}
+            {$REGION 'Cadastro'}
+            procedure CadastroEmpresa;
+            procedure CadastroFilial;
+            procedure CadastroRotina;
+            procedure CadastroPermissao;
+            procedure CadastroModulo;
+            procedure CadastroGrupo;
+            {GERAR_METODO_SEGURANCA}
+            {$ENDREGION}
+
+            {$REGION 'Processo'}
+
+
+            {$ENDREGION}
+
+            {$REGION 'Utilitários'}
+
+            {$ENDREGION}
+
+            {$REGION 'Relatórios'}
+
+            {$ENDREGION}
+
+            {$REGION 'Ajuda'}
+
+            {$ENDREGION}
+        {$ENDREGION}
+
+        {$REGION 'Módulo Configurador'}
+            {$REGION 'Cadastro'}
+            {GERAR_METODO_CONFIGURADOR}
+            {$ENDREGION}
+
+            {$REGION 'Processo'}
+
+
+            {$ENDREGION}
+
+            {$REGION 'Utilitários'}
+
+            {$ENDREGION}
+
+            {$REGION 'Relatórios'}
+
+            {$ENDREGION}
+
+            {$REGION 'Ajuda'}
+
+            {$ENDREGION}
+        {$ENDREGION}
+    end;
+
+
+var
+    FrmPrincipal: TFrmPrincipal;
+
+implementation
+
+{$R *.dfm}
+
+uses Lib.CRUDFactory, System.TypInfo, Biz.Filial,
+     Biz.Cliente, Lib.Enumeradores, Lib.ResultFilter, Biz.Rotina,
+     Lib.Atualizador, Lib.Aguarde, UI.Usuario.Consulta, UI.Empresa.Consulta, UI.Rotina.Consulta, UI.Permissao.Consulta, UI.Modulo.Consulta, UI.Grupo.Consulta,
+  UI.Filial.Consulta{GERAR_USES};
+
+
+procedure TFrmPrincipal.PreparaMenu();
+var
+
+    event: TNotifyEvent;
+    novoItem: TMenuItem;
+    nomeMetodo: string;
+    rotina: TRotina;
+    I: integer;
+begin
+    try
+        inherited;
+
+        for I := Cadastro.Count - 1 downto 0 do
+          if Cadastro.Items[I].Tag = 1 then
+            Cadastro.Items[I].Free;
+
+        for I := Processo.Count - 1 downto 0 do
+          if Processo.Items[I].Tag = 1 then
+            Processo.Items[I].Free;
+
+        for I := Utilitarios1.Count - 1 downto 0 do
+          if Utilitarios1.Items[I].Tag = 1 then
+            Utilitarios1.Items[I].Free;
+
+        for I := Relatorios.Count - 1 downto 0 do
+          if Relatorios.Items[I].Tag = 1 then
+            Relatorios.Items[I].Free;
+
+        for I := Ajuda1.Count - 1 downto 0 do
+          if Ajuda1.Items[I].Tag = 1 then
+            Ajuda1.Items[I].Free;
+
+
+        TUsuarioLogado.ObterInstancia.CarregarGruposAcesso;
+        TUsuarioLogado.ObterInstancia.ObterRotinasDeAcesso;
+
+
+        for rotina in TUsuarioLogado.ObterInstancia.RotinasAcesso do
+        begin
+            novoItem := TMenuItem.Create(Self);
+            novoItem.Tag := 1;
+            novoItem.Caption := rotina.Descricao;
+
+            case AnsiIndexStr(UpperCase(rotina.Categoria), ['CADASTRO', 'PROCESSO','UTILITARIOS','RELATORIOS','AJUDA']) of
+                0: menuPrincipal.items[0].Add(novoItem);
+                1: menuPrincipal.items[1].add(novoItem);
+                2: menuPrincipal.items[2].add(novoItem);
+                3: menuPrincipal.items[3].add(novoItem);
+                4: menuPrincipal.items[4].add(novoItem);
+            end;
+            nomeMetodo := trim(rotina.AcaoMenu);
+            TMethod(event).Code := MethodAddress(nomeMetodo);
+            TMethod(event).Data := self;
+
+            if  Assigned(TMethod(event).Code) then
+                novoItem.OnClick := event
+            else
+            begin
+                TMethod(event).Code := MethodAddress('MenuErro');
+                TMethod(event).Data := self;
+                novoItem.OnClick := event;
+            end;
+        end;
+    finally
+
+    end;
+end;
+
+procedure TFrmPrincipal.AlterarSenha1Click(Sender: TObject);
+begin
+    inherited;
+    if TUsuarioLogado.ObterInstancia.AlteraSenha <> 'S' then
+    begin
+      Tlib.MensagemAdvertencia('Usuário não tem permissão para alterar a senha.');
+      exit;
+    end;
+    //
+    tlib.AbrirFormulario(TFrmTrocaSenha);
+end;
+
+procedure TFrmPrincipal.BitBtn1Click(Sender: TObject);
+begin
+    inherited;
+//     tlib.MensagemPergunta('teste','teste');
+//     TAguardeProcesso.AguardandoFinalizacaoProcesso(25, 'O sistema foi atualizado e fechará em 10 minutos'+#13+'   Por favor, feche o sistema assim que possível.  ', $001D17DD);
+//     sleep(2000);   // 2 seg
+//     TAguardeProcesso.ProcessoFinalizado;
+    try
+        frmTeste := TfrmTeste.Create(Application);
+        frmTeste.ShowModal;
+     finally
+        FreeAndNil(frmTeste);
+     end;
+
+
+//    tlib.AbrirFormulario(TFrmConFilialAcesso)
+
+end;
+
+
+
+procedure TFrmPrincipal.Button1Click(Sender: TObject);
+begin
+    inherited;
+    tlib.AbrirFormulario(TFrmTesteRelatorio);
+end;
+
+
+procedure TFrmPrincipal.FormCreate(Sender: TObject);
+var
+  atualizador: TAtualizador;
+begin
+    inherited;
+    Application.OnException := TLib.TrataErro;
+    atualizador := TAtualizador.Create('clienteSIATD');
+    atualizador.Start;
+end;
+
+procedure TFrmPrincipal.FormShow(Sender: TObject);
+var
+  Item : string;
+
+begin
+    inherited;
+    Self.SetBarraStatus;
+    PreparaMenu;
+    mobile := false;
+    pnlDebug.Visible := Tlib.SistemaEstaEmModoDebug;
+end;
+
+
+
+procedure TFrmPrincipal.Logoff1Click(Sender: TObject);
+begin
+  try
+    FrmLogin := TFrmLogin.Create(Self);
+    If FrmLogin.ShowModal <> MrOk then
+    begin
+        FreeandNil(FrmPrincipal);
+        FreeandNil(FrmLogin);
+        Application.Terminate;
+    end
+    else
+    begin
+        SetBarraStatus();
+        PreparaMenu();
+    end;
+  finally
+      FreeAndNil(FrmLogin);
+  end;
+end;
+
+procedure TFrmPrincipal.MenuErro;
+begin
+    Tlib.MensagemInformacao('Ação do menu não configurada.');
+end;
+
+
+procedure TFrmPrincipal.SetBarraStatus;
+begin
+    SttsBrPadrao.Panels[1].Text := Tlib.ObterVersao;
+    SttsBrPadrao.Panels[3].Text := TUsuarioLogado.ObterInstancia.Login;
+    SttsBrPadrao.Panels[5].Text := TUsuarioLogado.ObterInstancia.Filial.Empresa + '-' +TUsuarioLogado.ObterInstancia.Filial.NomeEmpresa;
+    SttsBrPadrao.Panels[7].Text := TUsuarioLogado.ObterInstancia.Filial.Filial + '-' +TUsuarioLogado.ObterInstancia.Filial.Descricao;
+    SttsBrPadrao.Panels[9].Text := TUsuarioLogado.ObterInstancia.ModuloLogado.Modulo;
+//    SttsBrPadrao.Panels[9].Text := IntToStr(TLib.UsuarioLogado.Conexao.SPID);
+//    SttsBrPadrao.Panels[11].Text := UpperCase(TLib.UsuarioLogado.Conexao.DataBase);
+    //
+//    lblServidorSocket.Caption :=
+//    Tlib.IfTernario(UpperCase(DMCliente.HostName) = '',
+//    DMCliente.IPaddress,UpperCase(DMCliente.HostName)) +' - ['+
+//    IntToStr(DMCliente.ClientSocket.Port)+']';
+
+end;
+
+procedure TFrmPrincipal.CadastroUsuario;
+begin
+    tlib.AbrirFormulario(TfrmConUsuario);
+end;
+
+
+procedure TFrmPrincipal.CadastroEmpresa;
+begin
+    tlib.AbrirFormulario(TfrmConEmpresa);  
+end;
+procedure TFrmPrincipal.CadastroFilial;
+begin
+    tlib.AbrirFormulario(TFrmConFilial);
+end;
+
+procedure TFrmPrincipal.CadastroRotina;
+begin
+    tlib.AbrirFormulario(TfrmConRotina);  
+end;
+procedure TFrmPrincipal.CadastroPermissao;
+begin
+    tlib.AbrirFormulario(TfrmConPermissao);  
+end;
+procedure TFrmPrincipal.CadastroModulo;
+begin
+    tlib.AbrirFormulario(TfrmConModulo);  
+end;
+procedure TFrmPrincipal.CadastroGrupo;
+begin
+    tlib.AbrirFormulario(TfrmConGrupo);  
+end;
+{GERAR_CORPO_METODO}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+end.
+
+
+
+
+
+

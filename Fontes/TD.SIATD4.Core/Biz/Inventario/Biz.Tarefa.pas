@@ -1,0 +1,597 @@
+unit Biz.Tarefa;
+
+interface
+
+uses
+    Classes, System.SysUtils, Dialogs, Lib.ClasseBase, Lib.Parametro, Lib.Enumeradores,
+    Lib.Persistable, Lib.Biblioteca, Biz.Produto, Biz.Filial, Lib.Lista,
+    Lib.ResultFilter, Dal.ControleDados, Framework.Interfaces.CRUD;
+
+type
+
+    [TReferenceTable('Z83010')]
+    TTarefa = class(TClasseBase, ICRUD<TTarefa>)
+    private
+        FQuantidadeContada: double;
+        FDelet: string;
+        FCodigoProduto: string;
+        FCodigoFilial: string;
+        FIDOperacao: integer;
+        FRecno: integer;
+        FCodigoEndereco: string;
+        FProduto: TProduto;
+        FFilial: TFilial;
+        FObservacao: string;
+        FCustoMedioProduto: double;
+        FDescricaoProduto: string;
+        FQtdAtualEndereco: double;
+        FQtdReservadaEndereco: double;
+        FCodigoArmazem: String;
+        FCodigoTipoEndereco: string;
+        FQuantidadeCarrinho: double;
+        FCodigoEnderecoDestino: string;
+        FQuantidadeDescarregada: double;
+        FCodigoDispositivo: string;
+        FCodigoFilialDestino: string;
+        FCodigoTipoOperacao: string;
+        FCodigoArmazemDestino: String;
+        FFilialDestino: TFilial;
+        FCodigoTipoEnderecoDestino: string;
+        FDescFilialDestino: string;
+        FStatusTarefa: string;
+        FCodigoTarefa: integer;
+        FTipoManutencao: TTipoManutencao;
+        FQuantidadeMultipla: double;
+
+        procedure SetCodigoFilial(const Value: string);
+        procedure SetCodigoProduto(const Value: string);
+        procedure SetDelet(const Value: string);
+        procedure SetCodigoEndereco(const Value: string);
+        procedure SetIDOperacao(const Value: integer);
+        procedure SetQuantidadeContada(const Value: double);
+        procedure SetRecno(const Value: integer);
+        procedure SetProduto(const Value: TProduto);
+        procedure SetFilial(const Value: TFilial);
+        procedure SetObservacao(const Value: string);
+        procedure SetCustoMedioProduto(const Value: double);
+        procedure SetDescricaoProduto(const Value: string);
+        procedure SetQtdAtualEndereco(const Value: double);
+        procedure SetQtdReservadaEndereco(const Value: double);
+        procedure SetCodigoArmazem(const Value: String);
+        procedure SetCodigoTipoEndereco(const Value: string);
+        procedure SetCodigoArmazemDestino(const Value: String);
+        procedure SetCodigoDispositivo(const Value: string);
+        procedure SetCodigoEnderecoDestino(const Value: string);
+        procedure SetCodigoFilialDestino(const Value: string);
+        procedure SetCodigoTipoEnderecoDestino(const Value: string);
+        procedure SetCodigoTipoOperacao(const Value: string);
+        procedure SetFilialDestino(const Value: TFilial);
+        procedure SetQuantidadeCarrinho(const Value: double);
+        procedure SetQuantidadeDescarregada(const Value: double);
+        procedure SetQuantidadeRemanescente(const Value: double);
+        procedure SetDescFilialDestino(const Value: string);
+        function GetProdutoConferido: string;
+        function GetPendente: boolean;
+        function GetQuantidadeRemanescente: double;
+        procedure SetStatusTarefa(const Value: string);
+        procedure SetCodigoTarefa(const Value: integer);
+        procedure SetTipoManutencao(const Value: TTipoManutencao);
+
+        function ObterQueryPadrão(where: string): String;
+        procedure SetQuantidadeMultipla(const Value: double);
+    public
+        class var dao: TControleDados<TLista<TTarefa>, TListaDAO<TTarefa>>;
+
+        constructor Create;
+        destructor Destroy;
+
+        /// <summary>
+        /// Metodo que faz a alteração
+        /// </summary>
+        function Inserir: integer;
+
+        /// <summary>
+        /// Metodo que faz a alteração
+        /// </summary>
+        function Alterar: boolean;
+
+        function Excluir: boolean;
+
+        function Listar(tipoOperacao: TOparationTypes; multselect: boolean): TResultFilter;
+
+        function Obter(ID: string): TTarefa; overload;
+        function Obter(Parametro: TParametro): TTarefa; overload;
+
+        // <summary>
+        /// Métodos que retorna uma lista  de objetos de uma consulta
+        /// pré-definida pelos parâmentros passados.
+        /// </summary>
+        function Consultar(parametros: TParametro): TLista<TTarefa>;
+
+        /// <summary>
+        /// Obtem uma lista de tarefas por ID Operação
+        /// </summary>
+        function ObterListaTarefas(idoper: integer; codigoOperacao: string; reenvio: string = 'NULL'): TLista<TTarefa>;
+
+        /// <summary>
+        /// Obtem uma lista de tarefas Divergentes por ID Operação
+        /// </summary>
+        function ObterListaTarefasDivergentes(idoper: integer; codigoOperacao: string): TLista<TTarefa>;
+
+        /// <summary>
+        /// Método que preenche a instância do Objeto
+        /// </summary>
+        /// <param name="ClasseBase">
+        /// objeto de parametro para preenchimento da instância
+        /// </param>
+        procedure PopularObjeto(Tarefa: TTarefa);
+
+        [TPersistable(fgPersistable, 'Z83_FILIAL')]
+        property CodigoFilial: string read FCodigoFilial write SetCodigoFilial;
+
+        property Filial: TFilial read FFilial write SetFilial;
+
+        [TPersistable(fgPersistable, 'Z83_IDOPER')]
+        property IDOperacao: integer read FIDOperacao write SetIDOperacao;
+
+        [TPersistable(fgPersistable, 'Z83_ARMAZEM')]
+        property CodigoArmazem: String read FCodigoArmazem write SetCodigoArmazem;
+
+        [TPersistable(fgPersistable, 'Z83_END')]
+        [TMaxLenght(10)]
+        property CodigoEndereco: string read FCodigoEndereco write SetCodigoEndereco;
+
+        [TPersistable(fgPersistable, 'Z83_TIPOEND')]
+        property CodigoTipoEndereco: string read FCodigoTipoEndereco write SetCodigoTipoEndereco;
+
+        [TPersistable(fgPersistable, 'Z83_PROD')]
+        property CodigoProduto: string read FCodigoProduto write SetCodigoProduto;
+
+        property Produto: TProduto read FProduto write SetProduto;
+
+        [TPersistable(fgPersistable, 'Z83_QTCONT')]
+        property QuantidadeContada: double read FQuantidadeContada write SetQuantidadeContada;
+
+        [TPersistable(fgPersistable, 'Z83_OBSERVACAO')]
+        property Observacao: string read FObservacao write SetObservacao;
+
+        [TPersistable(fgUpdateable, 'D_E_L_E_T_')]
+        property Delet: string read FDelet write SetDelet;
+
+        [TPersistable(fgUpdateable, 'R_E_C_N_O_')]
+        property Recno: integer read FRecno write SetRecno;
+
+        [TPersistable(fgReadOnly, 'Z02_QTDE')]
+        property QtdAtualEndereco: double read FQtdAtualEndereco write SetQtdAtualEndereco;
+
+        [TPersistable(fgReadOnly, 'Z02_QTDER')]
+        property QtdReservadaEndereco: double read FQtdReservadaEndereco write SetQtdReservadaEndereco;
+
+        [TPersistable(fgReadOnly, 'B1_DESC')]
+        property DescricaoProduto: string read FDescricaoProduto write SetDescricaoProduto;
+
+        [TPersistable(fgReadOnly, 'B2_CMEDIO')]
+        property CustoMedioProduto: double read FCustoMedioProduto write SetCustoMedioProduto;
+
+        [TPersistable(fgPersistable, 'Z83_ARMAZEMDEST')]
+        property CodigoArmazemDestino: String read FCodigoArmazemDestino write SetCodigoArmazemDestino;
+
+        [TPersistable(fgPersistable, 'Z83_ENDDEST')]
+        property CodigoEnderecoDestino: string read FCodigoEnderecoDestino write SetCodigoEnderecoDestino;
+
+        [TPersistable(fgPersistable, 'Z83_TIPOENDDEST')]
+        property CodigoTipoEnderecoDestino: string read FCodigoTipoEnderecoDestino write SetCodigoTipoEnderecoDestino;
+
+        [TPersistable(fgReadOnly, 'FILIALDESTINO')]
+        property CodigoFilialDestino: string read FCodigoFilialDestino write SetCodigoFilialDestino;
+
+        [TPersistable(fgReadOnly, 'DESCFILIALDESTINO')]
+        property DescFilialDestino: string read FDescFilialDestino write SetDescFilialDestino;
+
+        property FilialDestino: TFilial read FFilialDestino write SetFilialDestino;
+
+        [TPersistable(fgPersistable, 'Z83_QTCARRINHO')]
+        property QuantidadeCarrinho: double read FQuantidadeCarrinho write SetQuantidadeCarrinho;
+
+        [TPersistable(fgPersistable, 'Z83_QTDESCARREGADA')]
+        property QuantidadeDescarregada: double read FQuantidadeDescarregada write SetQuantidadeDescarregada;
+
+        property QuantidadeRemanescente: double read GetQuantidadeRemanescente;
+
+        [TPersistable(fgPersistable, 'Z83_DISPOSITIVO')]
+        property CodigoDispositivo: string read FCodigoDispositivo write SetCodigoDispositivo;
+
+        [TPersistable(fgPersistable, 'Z83_OPERAC')]
+        property CodigoTipoOperacao: string read FCodigoTipoOperacao write SetCodigoTipoOperacao;
+
+        [TPersistable(fgPersistable, 'Z83_STATUS')]
+        property StatusTarefa: string read FStatusTarefa write SetStatusTarefa;
+
+        [TPersistable(fgPersistable, 'Z83_TAREFA')]
+        property CodigoTarefa: integer read FCodigoTarefa write SetCodigoTarefa;
+
+        property Conferido: string read GetProdutoConferido;
+
+        property Pendente: boolean read GetPendente;
+
+        property TipoManutencao: TTipoManutencao read FTipoManutencao write SetTipoManutencao;
+
+        property QuantidadeMultipla: double read FQuantidadeMultipla write SetQuantidadeMultipla;
+
+    end;
+
+implementation
+
+{ TTarefa }
+
+uses Lib.Filter, Dal.FabricaSQL, Dal.CondicaoConsulta;
+
+{$REGION 'Métodos CRUD'}
+
+function TTarefa.Alterar: boolean;
+begin
+    try
+        try
+            dao.Alterar(Self);
+        except
+            on e: exception do
+                raise exception.Create('Erro ao alterar a Tarefa. ' + #13 + e.Message);
+        end;
+    finally
+    end;
+end;
+
+function TTarefa.Consultar(parametros: TParametro): TLista<TTarefa>;
+var
+    query: string;
+    condicao: TCondicaoConsulta;
+begin
+    try
+        condicao := TCondicaoConsulta.Create(parametros);
+        condicao.Adiciona('Z83_FILIAL', ccIgual, lgAND);
+        condicao.Adiciona('Z83_IDOPER', ccIgual, lgAND);
+        condicao.Adiciona('Z83_END', ccIgual, lgAND);
+        condicao.Adiciona('Z83_PROD', ccIgual, lgAND);
+        condicao.Adiciona('Z83_QTCONT', ccIgual, lgAND);
+        condicao.Adiciona('Z83_OBSERVACAO', ccLike, lgAND);
+        condicao.Adiciona('Z83_OPERAC', ccLike, lgAND);
+        condicao.Adiciona('D_E_L_E_T_', ccIgual, lgAND);
+        condicao.Adiciona('R_E_C_N_O_', ccIgual, lgAND);
+
+        query := ObterQueryPadrão(condicao.ToString(true));
+
+        result := dao.Consultar(query, parametros)
+    finally
+        if condicao <> nil then
+            FreeAndNil(condicao);
+    end;
+
+end;
+
+constructor TTarefa.Create;
+begin
+    FProduto := TProduto.Create;
+    FFilial := TFilial.Create;
+end;
+
+destructor TTarefa.Destroy;
+begin
+    FreeAndNil(FProduto);
+    FreeAndNil(FFilial);
+end;
+
+function TTarefa.Excluir: boolean;
+begin
+
+end;
+
+function TTarefa.GetProdutoConferido: string;
+begin
+    if (Self.QuantidadeCarrinho > 0) or (Self.QuantidadeDescarregada > 0) then
+        result := 'OK'
+    else
+        result := EmptyStr;
+end;
+
+function TTarefa.GetQuantidadeRemanescente: double;
+begin
+    result := Self.QuantidadeDescarregada - Self.QuantidadeContada;
+end;
+
+function TTarefa.Inserir: integer;
+begin
+    try
+        try
+            result := dao.Inserir(Self);
+        except
+            on e: exception do
+                raise exception.Create('Erro ao inserir a tarefa. ' + #13 + e.Message);
+        end;
+    finally
+    end;
+
+end;
+
+function TTarefa.Listar(tipoOperacao: TOparationTypes; multselect: boolean): TResultFilter;
+begin
+
+end;
+
+function TTarefa.GetPendente: boolean;
+begin
+
+    // ShowMessage(inttostr(self.Recno)+ ' - ' +self.CodigoProduto + ' - '+floattostr(self.QuantidadeContada) + ' - ' +floattostr(self.QuantidadeDescarregada) );
+    if Self.QuantidadeContada <> Self.QuantidadeDescarregada then
+        result := true
+    else
+        result := false;
+end;
+
+function TTarefa.ObterListaTarefasDivergentes(idoper: integer; codigoOperacao: string): TLista<TTarefa>;
+var
+    query: String;
+    Parametro: TParametro;
+begin
+    try
+        Parametro := TParametro.Create;
+        Parametro.add('', 'Z83_IDOPER', inttostr(idoper));
+        Parametro.add('', 'Z83_OPERAC', codigoOperacao);
+
+        query := ObterQueryPadrão('  AND Z83.Z83_QTCONT <> Z02.Z02_QTDE  AND Z83_IDOPER = :Z83_IDOPER AND Z83_OPERAC = :Z83_OPERAC');
+
+        result := dao.Consultar(query, Parametro);
+    finally
+        FreeAndNil(Parametro);
+    end;
+end;
+
+function TTarefa.ObterQueryPadrão(where: string): String;
+begin
+    result := 'SELECT Z83.R_E_C_N_O_, ' + 'Z83.Z83_FILIAL, ' + 'Z83.Z83_IDOPER, ' + 'Z83.Z83_ARMAZEM, ' + 'Z83.Z83_END,' + 'Z83.Z83_TIPOEND,  ' +
+      'Z83.Z83_PROD,' + 'Z83.Z83_QTCONT, ' + 'Z83.Z83_OBSERVACAO, ' + 'Z83_ARMAZEMDEST, ' + 'Z83_ENDDEST, ' + 'Z83_STATUS, ' + 'Z83_TAREFA, ' +
+      'Z09.Z09_FILDOC AS FILIALDESTINO, ' + 'Z09.Z09_DESC AS DESCFILIALDESTINO, ' + 'Z83_TIPOENDDEST, ' + 'Z83_QTCARRINHO, ' +
+      'Z83_QTDESCARREGADA,   ' + 'Z83_DISPOSITIVO,   ' + 'Z83_OPERAC,   ' + 'Z83.D_E_L_E_T_,  ' + 'CASE ' +
+      'WHEN Z83.Z83_TIPOEND = ''4'' THEN SUM(Z12_SALDO) ELSE SUM(Z02.Z02_QTDE) ' + 'END Z02_QTDE, ' + 'CASE ' +
+      'WHEN Z83.Z83_TIPOEND = ''4'' THEN SUM(Z12_QTDER) ELSE SUM(Z02.Z02_QTDER) ' + 'END Z02_QTDER, ' + 'SB1.B1_DESC,   ' + 'SB2.B2_CMEDIO ' +
+      'FROM Z83010 Z83 ' + 'LEFT OUTER JOIN Z02010 as Z02 WITH(NOLOCK) ' + 'ON Z83.Z83_END = Z02.Z02_ENDER AND ' +
+      'Z83.Z83_FILIAL = Z02.Z02_FILIAL AND ' + 'Z83_PROD = Z02_PRODUTO AND ' + 'Z02.D_E_L_E_T_ = '''' ' + 'INNER JOIN SB1010 as SB1 WITH(NOLOCK) ' +
+      'ON Z83.Z83_PROD = SB1.B1_COD AND ' + 'SB1.D_E_L_E_T_ = '''' ' + 'INNER JOIN SB2010 as SB2 WITH(NOLOCK) ' +
+      'ON Z83.Z83_FILIAL = SB2.B2_FILIAL AND ' + 'SB2.B2_LOCAL = 01 AND ' + 'SB2.B2_COD = Z83.Z83_PROD AND ' + 'SB2.D_E_L_E_T_ = '''' ' +
+      'LEFT OUTER JOIN Z09010 as Z09 WITH(NOLOCK) ' + 'ON Z83.Z83_ENDDEST = Z09.Z09_DOCA AND ' + 'Z83.Z83_ARMAZEMDEST = Z09.Z09_ARMAZEM AND ' +
+      'Z83.Z83_FILIAL = Z09.Z09_FILIAL AND ' + 'Z09.D_E_L_E_T_ = '''' ' + 'LEFT OUTER JOIN Z12010 as Z12 WITH(NOLOCK) ' +
+      'ON Z83_FILIAL = Z12_FILIAL AND ' + 'Z83_ARMAZEM = Z12_ARMAZEM AND ' + 'Z83_END = Z12_DOCA AND ' + 'Z83_PROD = Z12_PROD AND ' +
+      'Z12.D_E_L_E_T_ = '''' ' + ' WHERE Z83.D_E_L_E_T_ = '''' ' + where + ' GROUP BY ' + 'Z83.R_E_C_N_O_, ' + 'Z83.Z83_FILIAL, ' + 'Z83.Z83_IDOPER, '
+      + 'Z83.Z83_ARMAZEM, ' + 'Z83.Z83_END, ' + 'Z83.Z83_TIPOEND, ' + 'Z83.Z83_PROD, ' + 'Z83.Z83_QTCONT, ' + 'Z83.Z83_OBSERVACAO,   ' +
+      'Z83_ARMAZEMDEST, ' + 'Z83_ENDDEST, ' + 'Z83_STATUS, ' + 'Z83_TAREFA, ' + 'Z09.Z09_FILDOC, ' + 'Z09.Z09_DESC, ' + 'Z83_TIPOENDDEST, ' +
+      'Z83_QTCARRINHO, ' + 'Z83_QTDESCARREGADA, ' + 'Z83_DISPOSITIVO, ' + 'Z83_OPERAC, ' + 'Z83.D_E_L_E_T_, ' + 'SB1.B1_DESC, ' + 'SB2.B2_CMEDIO ';
+end;
+
+function TTarefa.Obter(Parametro: TParametro): TTarefa;
+var
+    Lista: TLista<TTarefa>;
+    query: string;
+begin
+    try
+        Lista := nil;
+        Lista := Self.Consultar(Parametro);
+
+        if Lista.Count = 1 then
+        begin
+            PopularObjeto(Lista[0]);
+            result := Self;
+        end
+        else
+        begin
+            raise exception.Create('Nenhum registro encontrado.');
+            result := nil;
+        end;
+    finally
+        FreeAndNil(Lista);
+    end;
+
+end;
+
+function TTarefa.Obter(ID: string): TTarefa;
+begin
+
+end;
+
+function TTarefa.ObterListaTarefas(idoper: integer; codigoOperacao: string; reenvio: string): TLista<TTarefa>;
+var
+    query: String;
+    Parametro: TParametro;
+begin
+    try
+        Parametro := TParametro.Create;
+        Parametro.add('', 'Z83_IDOPER', inttostr(idoper));
+        Parametro.add('', 'Z83_OPERAC', codigoOperacao);
+        Parametro.add('', 'REENVIO', reenvio);
+
+        query := ObterQueryPadrão
+          ('  AND (Z83_QTCONT = 0 OR :REENVIO = ''NULL'') AND Z83_STATUS <> ''F'' AND Z83_IDOPER = :Z83_IDOPER AND Z83_OPERAC = :Z83_OPERAC');
+
+        result := dao.Consultar(query, Parametro);
+    finally
+        FreeAndNil(Parametro);
+    end;
+end;
+
+{$ENDREGION}
+{$REGION 'Regras de Negócio'}
+
+procedure TTarefa.PopularObjeto(Tarefa: TTarefa);
+begin
+    Tarefa.CopiarPara(Self);
+    FPreenchido := true;
+    // Self.CodigoFilial := Tarefa.CodigoFilial;
+    // Self.IDOperacao := Tarefa.IDOperacao;
+    // Self.CodigoEndereco := Tarefa.CodigoEndereco;
+    // Self.CodigoProduto := Tarefa.CodigoProduto;
+    // Self.QuantidadeContada := Tarefa.QuantidadeContada;
+    // Self.Observacao := Tarefa.Observacao;
+    // Self.Delet := Tarefa.Delet;
+    // Self.Recno := Tarefa.Recno;
+
+end;
+
+{$ENDREGION}
+{$REGION 'Métodos de Propriedades'}
+
+procedure TTarefa.SetCodigoFilial(const Value: string);
+begin
+    FCodigoFilial := Value;
+end;
+
+procedure TTarefa.SetCodigoFilialDestino(const Value: string);
+begin
+    FCodigoFilialDestino := Value;
+end;
+
+procedure TTarefa.SetCodigoProduto(const Value: string);
+begin
+    FCodigoProduto := Value;
+end;
+
+procedure TTarefa.SetCodigoTarefa(const Value: integer);
+begin
+    FCodigoTarefa := Value;
+end;
+
+procedure TTarefa.SetCodigoTipoEndereco(const Value: string);
+begin
+    FCodigoTipoEndereco := Value;
+end;
+
+procedure TTarefa.SetCodigoTipoEnderecoDestino(const Value: string);
+begin
+    FCodigoTipoEnderecoDestino := Value;
+end;
+
+procedure TTarefa.SetCodigoTipoOperacao(const Value: string);
+begin
+    FCodigoTipoOperacao := Value;
+end;
+
+procedure TTarefa.SetCustoMedioProduto(const Value: double);
+begin
+    FCustoMedioProduto := Value;
+end;
+
+procedure TTarefa.SetDelet(const Value: string);
+begin
+    FDelet := Value;
+end;
+
+procedure TTarefa.SetDescFilialDestino(const Value: string);
+begin
+    FDescFilialDestino := Value;
+end;
+
+procedure TTarefa.SetDescricaoProduto(const Value: string);
+begin
+    FDescricaoProduto := Value;
+end;
+
+procedure TTarefa.SetFilial(const Value: TFilial);
+begin
+    FFilial := Value;
+end;
+
+procedure TTarefa.SetFilialDestino(const Value: TFilial);
+begin
+    FFilialDestino := Value;
+end;
+
+procedure TTarefa.SetCodigoArmazem(const Value: String);
+begin
+    FCodigoArmazem := Value;
+end;
+
+procedure TTarefa.SetCodigoArmazemDestino(const Value: String);
+begin
+    FCodigoArmazemDestino := Value;
+end;
+
+procedure TTarefa.SetCodigoDispositivo(const Value: string);
+begin
+    FCodigoDispositivo := Value;
+end;
+
+procedure TTarefa.SetCodigoEndereco(const Value: string);
+begin
+    FCodigoEndereco := Value;
+end;
+
+procedure TTarefa.SetCodigoEnderecoDestino(const Value: string);
+begin
+    FCodigoEnderecoDestino := Value;
+end;
+
+procedure TTarefa.SetIDOperacao(const Value: integer);
+begin
+    FIDOperacao := Value;
+end;
+
+procedure TTarefa.SetObservacao(const Value: string);
+begin
+    FObservacao := Value;
+end;
+
+procedure TTarefa.SetProduto(const Value: TProduto);
+begin
+    FProduto := Value;
+end;
+
+procedure TTarefa.SetQtdAtualEndereco(const Value: double);
+begin
+    FQtdAtualEndereco := Value;
+end;
+
+procedure TTarefa.SetQtdReservadaEndereco(const Value: double);
+begin
+    FQtdReservadaEndereco := Value;
+end;
+
+procedure TTarefa.SetQuantidadeCarrinho(const Value: double);
+begin
+    FQuantidadeCarrinho := Value;
+end;
+
+procedure TTarefa.SetQuantidadeContada(const Value: double);
+begin
+    FQuantidadeContada := Value;
+end;
+
+procedure TTarefa.SetQuantidadeDescarregada(const Value: double);
+begin
+    FQuantidadeDescarregada := Value;
+end;
+
+procedure TTarefa.SetQuantidadeMultipla(const Value: double);
+begin
+    FQuantidadeMultipla := Value;
+end;
+
+procedure TTarefa.SetQuantidadeRemanescente(const Value: double);
+begin
+
+end;
+
+procedure TTarefa.SetRecno(const Value: integer);
+begin
+    FRecno := Value;
+end;
+
+procedure TTarefa.SetStatusTarefa(const Value: string);
+begin
+    FStatusTarefa := Value;
+end;
+
+procedure TTarefa.SetTipoManutencao(const Value: TTipoManutencao);
+begin
+    FTipoManutencao := Value;
+end;
+
+{$ENDREGION}
+
+end.

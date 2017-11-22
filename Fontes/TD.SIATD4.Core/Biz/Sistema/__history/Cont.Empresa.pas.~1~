@@ -1,0 +1,274 @@
+unit ClsEmpresa;
+
+interface
+
+uses
+    Classes, System.SysUtils, Dialogs, Lib.Base, Lib.Parametro, Lib.Enumeradores,
+    Lib.Persistable,  Lib.Lista, Lib.ResultFilter;
+
+type
+    TEmpresa = class(TBase)
+  private
+    FRecno: integer;
+    FEmpresa: string;
+    FNome: string;
+    procedure SetEmpresa(const Value: string);
+    procedure SetNome(const Value: string);
+    procedure SetRecno(const Value: integer);
+    public
+        ///	<summary>
+        ///	  Metodo que faz a inserção da Empresa
+        ///	</summary>
+        function Inserir: integer; override;
+
+        ///	<summary>
+        ///	  Métodos que retorna uma lista  de objetos de uma consulta
+        ///	  pré-definida pelos parâmentros passados.
+        ///	</summary>
+        function Consultar(parametros: TParametro): Tlist;
+
+        ///	<summary>
+        ///	  Metodo que faz a alteração da Empresa
+        ///	</summary>
+        function Alterar: integer; override;
+
+        ///	<summary>
+        ///	  Métido que faz a Deleção da Empresa
+        ///	</summary>
+        ///	<param name="ID">
+        ///	  Chave  primária da tabela
+        ///	</param>
+        function Deletar(ID:string): integer; override;
+
+        ///	<summary>
+        ///	  Método que chama a tela de filtro
+        ///	</summary>
+        ///	<param name="tipoOperacao">
+        ///	  Tipo da operação, se é somente filtro, ou seleção de registro
+        ///	</param>
+        function Listar(tipoOperacao: TOparationTypes; multselect: Boolean): TResultFilter; override;
+
+        ///	<summary>
+        ///	  Método que retorna um objeto preenchido
+        ///	</summary>
+        ///	<param name="ID">
+        ///	  Chave primária da tabela
+        ///	</param>
+        function Obter(ID: string): TObject; overload; override;
+
+        ///	<summary>
+        ///	  Método que retorna um objeto preenchido
+        ///	</summary>
+        ///	<param name="parametros">
+        ///	  Parametros para a consulta do objeto a ser preenchido
+        ///	</param>
+        function Obter(parametros:TParametro): TObject; overload;
+
+        ///	<summary>
+        ///	  Método que retorna todos os objetos da empresa
+        ///	</summary>
+        ///	<param name="parametros">
+        ///	  Parametros para a consulta do objeto a ser preenchido
+        ///	</param>
+        function ObterTodasEmpresa: Tlista<TEmpresa>;
+
+        ///	<summary>
+        ///	  Método que preenche a instância do Objeto
+        ///	</summary>
+        ///	<param name="Empresa">
+        ///	  objeto de parametro para preenchimento da instância
+        ///	</param>
+        procedure PreencherObjeto(Empresa: TEmpresa);
+
+        [TPersistable(fgPersistable, 'S12_EMPRESA')]
+        property Empresa: string read FEmpresa write SetEmpresa;
+
+        [TPersistable(fgPersistable, 'S12_NOME')]
+        property Nome: string read FNome write SetNome;
+
+        [TPersistable(fgPersistable, 'R_E_C_N_O_')]
+        property Recno: integer read FRecno write SetRecno;
+
+    end;
+
+implementation
+
+
+{ TEmpresa }
+
+uses Lib.Filter, Lib.Biblioteca;
+
+{$REGION 'Métodos CRUD'}
+
+function TEmpresa.Inserir: integer;
+begin
+    // BaseLib.ExecutaTarefa('InserirEmpresa', 'Empresa', ObjetoParaParametros(acInsercao));
+    //###Validar retorno da função
+    //result := 0;
+end;
+
+function TEmpresa.Consultar(parametros: TParametro): Tlist;
+begin
+  // Result := BaseLib.XmlToObject<TEmpresa>(
+  //  BaseLib.ExecutaTarefa('ConsultarEmpresa', 'TEmpresa', parametros)).Tolist;
+end;
+
+
+function TEmpresa.Alterar: integer;
+begin
+   // BaseLib.ExecutaTarefa('AlterarEmpresa', 'Empresa' , ObjetoParaParametros(acAlteracao));
+    //###Validar retorno da função
+    //result := 0;
+end;
+
+function TEmpresa.Deletar(ID: string): integer;
+var
+    parametro: TParametro;
+begin
+    try
+        parametro := TParametro.Create;
+        parametro.Add('', 'R_E_C_N_O_', ID);
+
+       // BaseLib.ExecutaTarefa('DeletarEmpresa', 'TEmpresa', parametro);
+
+        //###Validar retorno da função
+        result := 0;
+    finally
+        parametro.Free;
+    end;
+end;
+
+function TEmpresa.Listar(tipoOperacao: TOparationTypes; multselect: Boolean): TResultFilter;
+var
+    campoFiltro:TFieldFilter;
+    filtro : TFilter<TEmpresa>;
+    //parametro : TParametro;
+    lista:TLista<TEmpresa>;
+begin
+    try
+     //   Lista := BaseLib.XmlToObject<TEmpresa>(BaseLib.ExecutaTarefa('ConsultarEmpresa', 'TEmpresa', nil));
+
+        filtro := TFilter<TEmpresa>.Create;
+        filtro.ScreenName := 'Filtro de Empresa';
+        filtro.OperationType := tipoOperacao;
+        filtro.MultiSelect := multselect;
+        filtro.AddIndex(1, 'Nome=S12_NOME', 'Nome');
+        filtro.Task := 'ConsultarEmpresa';
+        //###Criar os Índices do filtro
+
+        {$REGION 'Campo Filtro'}
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Nome';
+        campoFiltro.Name := 'Nome';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.IDFieldName := 'Nome';
+        campoFiltro.DescriptionFieldName := 'Nome';
+        campoFiltro.FieldType := fdDataListCombo;
+        campoFiltro.DataSource := Lista.ToList;
+        filtro.AddField(campoFiltro);
+
+//        campoFiltro := TFieldFilter.Create;
+//        campoFiltro.Description := 'Nome';
+//        campoFiltro.Name := 'Nome';
+//        campoFiltro.MaskTypes := mtNone;
+//        campoFiltro.GridSize := 100;
+//        campoFiltro.FieldType := fdNormal;
+//        filtro.AddField(campoFiltro);
+//
+//        campoFiltro := TFieldFilter.Create;
+//        campoFiltro.Description := 'Recno';
+//        campoFiltro.Name := 'Recno';
+//        campoFiltro.MaskTypes := mtNone;
+//        campoFiltro.GridSize := 100;
+//        campoFiltro.FieldType := fdNormal;
+//        filtro.AddField(campoFiltro);
+
+        {$ENDREGION}
+
+        result := filtro.Execute(filtro);
+    finally
+        // FreeAndNil(parametro);
+        // FreeAndNil(lista.Destroy);
+    end;
+end;
+
+function TEmpresa.Obter(parametros: TParametro): TObject;
+var
+  lista: TLista<TEmpresa>;
+begin
+    try
+   //     lista := BaseLib.XmlToObject<TEmpresa>(BaseLib.ExecutaTarefa('ConsultarEmpresa', 'TEmpresa', parametros));
+
+        if lista.Count = 1 then
+        begin
+           PreencherObjeto(lista[0]);
+           Result := Self;
+        end
+        else
+        begin
+            TLib.MensagemAdvertencia('Nenhum registro encontrado.', 'Aviso');
+            Result := nil;
+        end;
+    finally
+        lista.Destroy;
+    end;
+end;
+
+function TEmpresa.ObterTodasEmpresa: Tlista<TEmpresa>;
+begin
+//    result := BaseLib.XmlToObject<TEmpresa>
+  //  (BaseLib.ExecutaTarefa('ConsultarEmpresa', 'TEmpresa', nil));
+end;
+
+function TEmpresa.Obter(ID: string): TObject;
+var
+    parametros: TParametro;
+
+begin
+    try
+        parametros := TParametro.Create;
+        parametros.Add('', 'R_E_C_N_O_', ID);
+        result := Obter(parametros);
+    finally
+        FreeAndNil(parametros);
+    end;
+end;
+
+{$ENDREGION}
+
+{$REGION 'Regras de Negócio'}
+
+procedure TEmpresa.PreencherObjeto(Empresa: TEmpresa);
+begin
+    Empresa.CopiarPara(Self);
+    FPreenchido := true;
+end;
+
+
+procedure TEmpresa.SetEmpresa(const Value: string);
+begin
+  FEmpresa := Value;
+end;
+
+procedure TEmpresa.SetNome(const Value: string);
+begin
+  FNome := Value;
+end;
+
+procedure TEmpresa.SetRecno(const Value: integer);
+begin
+  FRecno := Value;
+end;
+
+{$ENDREGION}
+
+{$REGION 'Métodos de Propriedades'}
+
+
+{$ENDREGION}
+
+end.
+
+

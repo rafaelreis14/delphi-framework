@@ -1,0 +1,1155 @@
+unit RGrid;
+
+interface
+
+uses
+    SysUtils, Classes, Controls, Buttons, Grids, Windows, MaskUtils, TypInfo,
+    Graphics, Forms, Dialogs, Vcl.ExtCtrls, Generics.Collections, RTTI, ComObj, math,
+  Data.DB;
+
+type
+
+    TMaskTypes = (mtNone, mtString, mtInteger, mtDouble, mtCurrency, mtDate, mtLongTime, mtShortTime, mtPhone, mtShortPhone, mtCEP, mtCPF, mtCNPJ);
+
+    TAlign = (alLeft, alRight, alCenter);
+
+    TMasterDetailType = (mdMaster, mdDetail, mdMasterDetail);
+
+    TCol = class
+    private
+        FName: string;
+        FDescription: string;
+        FSize: integer;
+        FFormatCol: TMaskTypes;
+        FAlign: TAlign;
+        FEditing: Boolean;
+        FInvisible: Boolean;
+        FDecimalPlaces: integer;
+
+        procedure SetDescription(const Value: string);
+        procedure SetName(const Value: string);
+        procedure SetSize(const Value: integer);
+        procedure SeTMaskTypes(const Value: TMaskTypes);
+        procedure SetAlign(const Value: TAlign);
+        procedure SetEditing(const Value: Boolean);
+        procedure SetInvisible(const Value: Boolean);
+        procedure SetDecimalPlaces(const Value: integer);
+
+    public
+        property Name: string read FName write SetName;
+        property Description: string read FDescription write SetDescription;
+        property Size: integer read FSize write SetSize;
+        property FormatCol: TMaskTypes read FFormatCol write SeTMaskTypes;
+        property Align: TAlign read FAlign write SetAlign;
+        property Editing: Boolean read FEditing write SetEditing;
+        property Invisible: Boolean read FInvisible write SetInvisible;
+        property DecimalPlaces: integer read FDecimalPlaces write SetDecimalPlaces;
+    end;
+
+    TRGrid = class(TStringGrid)
+    private
+        FColList: TList<TCol>;
+        FDataSource: TList<TObject>;
+        FListSource: TList;
+        FDataSet: TDataSet;
+        // Index: integer;
+        FMultiSelect: Boolean;
+        pnl: TPanel;
+        FSelectedAll: Boolean;
+        FDetailGrid: TRGrid;
+        FMasterDetailType: TMasterDetailType;
+        FMasterDetailFields: TStrings;
+        FSelectedRow: Boolean;
+
+        function GetCol(Index: integer): TCol;
+        procedure SetMultiSelect(const Value: Boolean);
+        procedure SetSelectedAll(const Value: Boolean);
+        procedure SetDetailGrid(const Value: TRGrid);
+
+        procedure DataBind(masterValues: TStringList); overload;
+        function GetPropertyValueByName(obj: TObject; propertyName: string): string;
+        function GetIndex: integer;
+        procedure SetMasterDetailType(const Value: TMasterDetailType);
+        procedure SetMasterDetailFields(const Value: TStrings);
+        procedure SetSelectedRow(const Value: Boolean);
+        property SelectedAll: Boolean read FSelectedAll write SetSelectedAll default False;
+        procedure ExecuteDetailGridDataBind;
+
+    protected
+        procedure CreateColumn;
+        function GeTMaskTypes(field: string; formatType: TMaskTypes; decimalPlaces: integer = 2): string;
+
+    published
+        property MultiSelect: Boolean read FMultiSelect write SetMultiSelect;
+        property SelectedRow: Boolean read FSelectedRow write SetSelectedRow;
+        property DetailGrid: TRGrid read FDetailGrid write SetDetailGrid;
+        property MasterDetailFields: TStrings read FMasterDetailFields write SetMasterDetailFields;
+        property MasterDetailType: TMasterDetailType read FMasterDetailType write SetMasterDetailType;
+
+    public
+
+        property Columns[index: integer]: TCol read GetCol;
+
+        procedure GridOnCLick(Sender: TObject);
+        procedure GridDrawCell(Sender: TObject; ACol, ARow: integer; Rect: TRect; State: TGridDrawState);
+        procedure GridSelectCell(Sender: TObject; ACol, ARow: integer; var CanSelect: Boolean);
+        procedure GridKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+        function SelectCell(ACol, ARow: Longint): Boolean; override;
+        procedure KeyDown(var Key: Word; Shift: TShiftState); override;
+
+        procedure SetEditText(Sender: TObject; ACol, ARow: integer; const Value: string);
+
+        procedure pnlClick(Sender: TObject);
+
+        procedure AddCol(name: string); overload;
+        procedure AddCol(name: string; Size: integer); overload;
+        procedure AddCol(name: string; Description: string; Size: integer; format: TMaskTypes); overload;
+        procedure AddCol(name: string; Description: string; decimalPlaces: integer; currency: boolean = false); overload;
+
+        procedure AddCol(name: string; Size: integer; Editing: Boolean); overload;
+        procedure AddCol(name: string; Description: string; Size: integer; format: TMaskTypes; Editing: Boolean); overload;
+
+        procedure AddCol(name: string; Description: string; Size: integer; format: TMaskTypes; Align: TAlign); overload;
+        procedure AddCol(name: string; Description: string; Size: integer; format: TMaskTypes; Align: TAlign; Editing: Boolean; decimalPlaces: integer); overload;
+
+        function GetColByName(name: string): TCol;
+        procedure SetColInvisible(col: TCol);
+        procedure SetColVisible(col: TCol);
+
+        function GetObject<T: class>: T; overload;
+        function GetObject: TFields; overload;
+        procedure DataSource<T>(dataSouce: TList<T>); overload;
+        procedure DataSource(dataSouce: TList); overload;
+        procedure DataSource(dataSouce: TDataSet); overload;
+        function GetDataSource<T>: TList<T>; overload;
+        function GetDataSource: TList; overload;
+
+        function GetSelectedItems: TList; overload;
+        function GetSelectedItems<T>: TList<T>; overload;
+        procedure SetAsChecked(Index: integer);
+        procedure SetAsUnchecked(Index: integer);
+        function GetTotal(colname: string; selectedItens: Boolean = False): currency;
+        function ToSerializeColumns(colname: string): string;
+
+        procedure DataBind; overload;
+        procedure Clear;
+        function IsEmpty: Boolean;
+        function HasSelectedItens: Boolean;
+        function GetTotalItens: integer;
+        procedure DeleteRow;
+        function SaveAsExcelFile: Boolean;
+        procedure ClearDataSource;
+        function IsAssigned: boolean;
+
+
+        constructor Create(AOwner: TComponent); override;
+        destructor Destroy; override;
+    end;
+
+procedure Register;
+
+implementation
+
+uses
+  StrUtils, Lib.Enumeradores, Lib.Base;
+
+procedure Register;
+begin
+    RegisterComponents('SIATD', [TRGrid]);
+end;
+
+{ TRGrid }
+
+procedure TRGrid.AddCol(name, Description: string; Size: integer; format: TMaskTypes; Align: TAlign);
+begin
+    AddCol(name, Description, Size, format, Align, False, 2);
+end;
+
+procedure TRGrid.AddCol(name: string; Size: integer);
+begin
+    AddCol(name, name, Size, mtString, alLeft, False, 2);
+end;
+
+procedure TRGrid.AddCol(name: string);
+begin
+    AddCol(name, name, 100, mtString, alLeft);
+end;
+
+procedure TRGrid.AddCol(name, Description: string; Size: integer; format: TMaskTypes);
+var
+    a: TAlign;
+begin
+    if (format = mtInteger) or (format = mtCurrency) or (format = mtDouble) then
+        a := alRight
+    else
+        a := alLeft;
+
+    AddCol(name, Description, Size, format, a, False, 2);
+end;
+
+procedure TRGrid.AddCol(name, Description: string; Size: integer; format: TMaskTypes; Align: TAlign; Editing: Boolean; decimalPlaces: integer);
+var
+    col: TCol;
+begin
+    col := TCol.Create;
+    col.name := name;
+    col.Description := Description;
+    col.Size := Size;
+    col.FormatCol := format;
+    col.Align := Align;
+    col.Editing := Editing;
+    col.DecimalPlaces := decimalPlaces;
+    FColList.Add(col);
+end;
+
+procedure TRGrid.AddCol(name, Description: string; decimalPlaces: integer; currency: boolean);
+var
+    format: TMaskTypes;
+begin
+
+    if currency then
+        format := mtCurrency
+    else
+        format := mtDouble;
+
+    AddCol(name, Description, 100, format, alLeft, false, decimalPlaces);
+
+end;
+
+procedure TRGrid.AddCol(name: string; Size: integer; Editing: Boolean);
+begin
+    AddCol(name, name, Size, mtString, alLeft, Editing, 0);
+end;
+
+procedure TRGrid.AddCol(name, Description: string; Size: integer; format: TMaskTypes; Editing: Boolean);
+var
+    a: TAlign;
+begin
+    if (format = mtInteger) or (format = mtCurrency) or (format = mtDouble) then
+        a := alRight
+    else
+        a := alLeft;
+
+    AddCol(name, Description, Size, format, a, Editing, 0);
+end;
+
+procedure TRGrid.pnlClick(Sender: TObject);
+var
+    char: string;
+    i: integer;
+begin
+    if Assigned(FDataSource) then
+    begin
+        if SelectedAll then
+            char := EmptyStr
+        else
+            char := 'X';
+
+        SelectedAll := not SelectedAll;
+
+        for i := 1 to FDataSource.Count do
+            Cells[0, i] := char;
+    end;
+end;
+
+procedure TRGrid.Clear;
+var
+    i: integer;
+begin
+    for i := 0 to RowCount - 1 do
+        Rows[i].Clear;
+
+    RowCount := 2;
+    ColCount := 2;
+end;
+
+procedure TRGrid.ClearDataSource;
+begin
+    if FDataSource <> nil then
+        FreeAndNil(FDataSource);
+end;
+
+constructor TRGrid.Create(AOwner: TComponent);
+begin
+    inherited Create(AOwner);
+    RowCount := 2;
+    ColCount := 2;
+    FixedCols := 1;
+    FixedRows := 1;
+    DefaultRowHeight := 18;
+    self.ColWidths[0] := 11;
+    self.Options := self.Options + [goRowSelect];
+    OnSetEditText := SetEditText;
+
+    self.DrawingStyle := gdsClassic;
+    FColList := TList<TCol>.Create;
+    OnDrawCell := GridDrawCell;
+    OnSelectCell := GridSelectCell;
+    OnKeyUp := GridKeyUp;
+    OnClick := GridOnCLick;
+    self.FMasterDetailFields := TStringList.Create;
+
+    pnl := TPanel.Create(self);
+    pnl.Left := 0;
+    pnl.Top := 0;
+    pnl.Width := 13;
+    pnl.Height := 17;
+    pnl.Caption := 'I';
+    pnl.Font.name := 'Times New Roman';
+    pnl.Hint := 'Marcar/Desmarcar todos';
+    pnl.ShowHint := True;
+    pnl.BevelKind := bkSoft;
+    pnl.BevelOuter := bvNone;
+    pnl.Visible := False;
+    pnl.Parent := self;
+    pnl.OnClick := pnlClick;
+
+    FSelectedRow := true;
+
+    FDataSource := nil;
+    FListSource := nil;
+    FDataSet := nil;
+end;
+
+procedure TRGrid.CreateColumn;
+var
+    i: integer;
+    context: TRttiContext;
+    prop: TRttiProperty;
+    obj: TObject;
+begin
+
+    if FColList.Count > 0 then
+    begin
+        self.ColCount := FColList.Count + 1;
+        for i := 0 to FColList.Count - 1 do
+        begin
+            if Columns[i].Invisible then
+                self.ColWidths[i + 1] := -1
+            else
+                self.ColWidths[i + 1] := Columns[i].Size;
+            self.Cells[i + 1, 0] := ' ' + Columns[i].Description;
+        end;
+        // add one more collumn at the end just to keep the index
+        self.ColCount := self.ColCount + 1;
+
+    end
+    else
+    begin
+        if (FDataSource <> nil) or (FListSource <> nil) then
+        begin
+            if (FDataSource <> nil) then obj := FDataSource[0]
+            else obj := FListSource[0];
+
+            // if there is no colluns, i populate all properties
+            for prop in context.GetType(obj.ClassType).GetProperties do
+            begin
+                try
+                    if (prop.PropertyType.ToString = 'string') or (prop.PropertyType.ToString = 'Double') or (prop.PropertyType.ToString = 'Integer') or
+                      (prop.PropertyType.ToString = 'Boolean') then
+                    begin
+
+                        self.ColWidths[self.ColCount - 1] := 100;
+                        self.Cells[self.ColCount - 1, 0] := ' ' + prop.name;
+                        self.ColCount := self.ColCount + 1;
+                    end;
+                except
+                    raise Exception.Create('Erro ao tentar acessar a todas as propriedades. Verifique Configuração');
+
+                end;
+
+            end;
+        end
+        else
+        if FDataSet <> nil then
+        begin
+            for i := 0 to FDataSet.FieldCount-1 do
+            begin
+                self.ColWidths[self.ColCount - 1] := 100;
+                self.Cells[self.ColCount - 1, 0] := ' ' + FDataSet.Fields[i].FieldName;
+                self.ColCount := self.ColCount + 1;
+            end;
+        end;
+    end;
+
+     // the last colllum serve to keep the index of object list
+    self.ColWidths[self.ColCount-1] := -1;
+    self.Cells[self.ColCount-1, 0] := 'INDEX';
+    // self.ColCount := self.ColCount - 1;
+end;
+
+function TRGrid.GetPropertyValueByName(obj: TObject; propertyName: string): string;
+var
+    context: TRttiContext;
+    prop: TRttiProperty;
+begin
+    try
+        prop := context.GetType(obj.ClassType).GetProperty(propertyName);
+        result := prop.GetValue(obj).ToString;
+    except
+        raise Exception.Create('Erro ao acessar propriedade: ' + propertyName);
+    end;
+end;
+
+procedure TRGrid.DataBind(masterValues: TStringList);
+  function AreTheyEquals(obj: TObject): boolean;
+  var
+      i: integer;
+  begin
+
+      result := true;
+      if obj <> nil then
+      begin
+          for i := 0 to Self.MasterDetailFields.Count-1 do
+          begin
+             if (GetPropertyValueByName(obj, self.MasterDetailFields[i]) <> masterValues[i]) then
+             begin
+                 result := false;
+                 break;
+             end;
+          end;
+      end;
+  end;
+
+var
+    i, j: integer;
+    context: TRttiContext;
+    prop: TRttiProperty;
+    text: string;
+    lastIndex: integer;
+    propertiesCount: integer;
+    count: integer;
+    obj: TObject;
+
+begin
+    lastIndex := self.Row;
+    self.Clear;
+    self.RowCount := 2;
+
+    try
+        if (FDataSource <> nil) or (FDataSet <> nil) or (FListSource <> nil) then
+        begin
+            if (FDataSource <> nil) then count := FDataSource.Count
+            else if (FDataSet <> nil) then count := FDataSet.recordcount
+            else if (FListSource <> nil) then count := FListSource.count;
+
+            if count > 0 then
+            begin
+                self.RowCount := 1;
+                CreateColumn;
+                for i := 0 to count-1 do
+                begin
+                    if (FDataSource <> nil) then obj := FDataSource[i]
+                    else if (FListSource <> nil) then obj := FListSource[i]
+                    else obj := nil;
+
+                    if (obj = nil) or (obj.InheritsFrom(TBase) and (TBase(obj).TipoManutencao <> Exclusao)) or (not obj.InheritsFrom(TBase)) then
+                    begin
+                        if (self.MasterDetailType in [mdMasterDetail, mdDetail]) and (masterValues <> nil) then
+                        begin
+                            if  not (AreTheyEquals(obj))  then
+                                Continue;
+                        end;
+
+                        self.RowCount := self.RowCount + 1;
+
+                        if (FColList.Count > 0) then
+                        begin
+                            for j := 0 to FColList.Count - 1 do
+                            begin
+                                try
+                                    // ShowMessage(TObject(FDataSource[i]).ClassType.ClassName);
+                                    if FDataSet = nil then
+                                    begin
+                                        prop := context.GetType(obj.ClassType).GetProperty(Columns[j].name);
+                                        text := prop.GetValue(obj).ToString;
+                                    end
+                                    else
+                                    begin
+                                        FDataSet.RecNo := i+1;
+                                        text := FDataSet.FieldByName(Columns[j].name).AsString;
+                                    end;
+                                                 
+                                    self.Cells[j + 1, self.RowCount - 1] := GeTMaskTypes(text, Columns[j].FormatCol, Columns[j].DecimalPlaces);
+                                except
+                                    raise Exception.Create('Erro ao tentar acessar a propriedade: ' + Columns[j].name + '. Verifique Configuração');
+
+                                end;
+                            end;
+                        end
+                        else
+                        begin
+                            if FDataSet = nil then
+                            begin
+                                j := 0;
+                                for prop in context.GetType(obj.ClassType).GetProperties do
+                                begin
+
+                                    if (prop.PropertyType.ToString = 'string') or (prop.PropertyType.ToString = 'Double') or
+                                      (prop.PropertyType.ToString = 'Integer') or (prop.PropertyType.ToString = 'Boolean') then
+                                    begin
+                                        try
+                                            j := j + 1;
+                                            text := prop.GetValue(obj).ToString;
+                                            self.Cells[j, self.RowCount - 1] := text;
+
+                                        except
+                                            raise Exception.Create('Erro ao tentar acessar as propriedades. Verifique Configuração');
+
+                                        end;
+                                    end;
+                                end;
+                            end
+                            else
+                            begin
+                                FDataSet.RecNo := i+1;
+                                for j := 0 to FDataSet.FieldCount-1 do
+                                begin
+                                    try
+
+                                        text := FDataSet.Fields[j].AsString;
+                                        self.Cells[j+1, self.RowCount - 1] := text;
+
+                                    except
+                                        raise Exception.Create('Erro ao tentar acessar as propriedades. Verifique Configuração');
+
+                                    end;
+                                end;
+                            end;
+                        end;
+                        self.Cells[self.ColCount - 1, self.RowCount - 1] := inttostr(i);
+                    end;
+
+                end;
+
+                 if Self.MasterDetailType = mdMasterDetail then
+                 begin
+                    self.DetailGrid.DataBind(masterValues);
+                 end;
+
+            end;
+        end;
+
+        if not IsEmpty then
+            self.FixedRows := 1;
+
+        if (FDataSource <> nil) or (FDataSet <> nil) or (FListSource <> nil) then
+            if (lastIndex > 0) and (RowCount > 2) and (lastIndex <= RowCount-1) then
+                self.Row := lastIndex;
+    finally
+        context.Free;
+    end;
+end;
+
+procedure TRGrid.DataBind;
+begin
+    DataBind(nil);
+end;
+
+procedure TRGrid.DataSource(dataSouce: TList);
+begin
+    FListSource := dataSouce;
+end;
+
+procedure TRGrid.DataSource(dataSouce: TDataSet);
+begin
+    FDataSet := dataSouce;
+end;
+
+procedure TRGrid.DataSource<T>(dataSouce: TList<T>);
+begin
+    Self.FDataSource := TList<TObject>(dataSouce);
+end;
+
+procedure TRGrid.DeleteRow;
+begin
+    if FDataSource <> nil then
+    begin
+        FDataSource.Delete(self.Row - 1);
+        self.DataBind;
+    end;
+end;
+
+destructor TRGrid.Destroy;
+var
+    i: integer;
+begin
+    for i := 0 to FColList.Count - 1 do
+        FColList[i].Free;
+
+    FreeAndNil(FColList);
+
+    FreeAndNil(FMasterDetailFields);
+
+    pnl.Free;
+
+    inherited Destroy;
+end;
+
+procedure TRGrid.ExecuteDetailGridDataBind;
+var
+    listValues: TStringList;
+    i: Integer;
+    return: boolean;
+begin
+    if (DetailGrid <> nil) then // and (not DetailGrid.IsEmpty) then
+    begin
+        return := false;
+        //if (self.MasterDetailFields.Count > 1) and (<> DetailGrid.MasterDetailFields.Count)then
+
+
+//        for I := 0 to MasterDetailFields.Count-1 do
+//        begin
+//            if self.MasterDetailFields[i] <> DetailGrid.MasterDetailFields[i] then
+//            begin
+//                return := false;
+//                break
+//            end;
+//            // if there ir no materdetailfields
+//            return := true;
+//        end;
+
+//        if return = false then
+//            raise Exception.Create('Propriedade MasterDetailFields configurada errada.');
+
+        listValues := TStringList.Create;
+        for i := 0 to self.MasterDetailFields.Count-1 do
+             listValues.Add(GetPropertyValueByName(self.GetObject<TObject>, self.MasterDetailFields[i]));
+
+        DetailGrid.DataBind(listValues);
+
+        FreeAndNil(listValues);
+    end;
+end;
+
+function TRGrid.GetSelectedItems: TList;
+var
+    i: integer;
+    list: TList;
+begin
+    if FListSource <> nil then
+    begin
+        list := TList.Create;
+        for i := 0 to FListSource.Count - 1 do
+        begin
+            if Cells[0, i + 1] = 'X' then
+            begin
+                list.Add(TObject(FListSource[i]));
+            end;
+        end;
+        result := list;
+    end;
+end;
+
+function TRGrid.GetSelectedItems<T>: TList<T>;
+var
+    i: integer;
+    list: TList<T>;
+begin
+    result := nil;
+    if FDataSource <> nil then
+    begin
+        list := TList<T>.Create;
+        for i := 0 to FDataSource.Count - 1 do
+        begin
+            if Cells[0, i + 1] = 'X' then
+            begin
+                list.Add(TList<T>(FDataSource)[i]);
+            end;
+        end;
+        result := list;
+    end;
+
+end;
+
+function TRGrid.GetCol(Index: integer): TCol;
+begin
+    result := FColList[index];
+end;
+
+function TRGrid.GetColByName(name: string): TCol;
+var
+    col: TCol;
+begin
+    result := nil;
+    for col in FColList do
+    begin
+        if col.name = name then
+        begin
+            result := col;
+            break;
+        end;
+    end;
+end;
+
+function TRGrid.GetDataSource: TList;
+begin
+    result := FListSource;
+end;
+
+
+function TRGrid.GetDataSource<T>: TList<T>;
+begin
+    result := TList<T>(FDataSource);
+end;
+
+function TRGrid.GetIndex: integer;
+begin
+    if (not IsEmpty) and (self.Row > 0) then
+        result := strtoint(self.Cells[self.ColCount - 1, self.Row])
+    else
+        result := 0;
+end;
+
+function TRGrid.SelectCell(ACol, ARow: integer): Boolean;
+begin
+    result := True;
+
+    // Index := ARow - 1;
+
+    if Assigned(FColList) then
+    begin
+        if (self.FColList.Count > 0) and (aCol < self.FColList.Count) then
+        begin
+            if self.FColList[ACol - 1].Editing then
+                self.Options := self.Options + [goEditing] - [goRowSelect]
+            else
+                if self.SelectedRow then
+                    self.Options := self.Options - [goEditing] + [goRowSelect]
+                else
+                    self.Options := self.Options - [goEditing] - [goRowSelect];
+        end;
+    end;
+
+    inherited;
+end;
+
+procedure TRGrid.SetColInvisible(col: TCol);
+begin
+    self.ColWidths[FColList.IndexOf(col) + 1] := 0;
+end;
+
+procedure TRGrid.SetColVisible(col: TCol);
+begin
+    self.ColWidths[FColList.IndexOf(col) + 1] := col.Size;
+end;
+
+
+procedure TRGrid.SetDetailGrid(const Value: TRGrid);
+begin
+    if FDetailGrid <> value then
+      FDetailGrid := Value;
+end;
+
+
+
+procedure TRGrid.SetMasterDetailFields(const Value: TStrings);
+begin
+  if FMasterDetailFields <> Value then
+    FMasterDetailFields.Assign(Value);
+end;
+
+procedure TRGrid.SetMasterDetailType(const Value: TMasterDetailType);
+begin
+    if FMasterDetailType <> Value then
+      FMasterDetailType := Value;
+end;
+
+procedure TRGrid.SetMultiSelect(const Value: Boolean);
+begin
+    if FMultiSelect <> Value then
+        FMultiSelect := Value;
+end;
+
+procedure TRGrid.SetSelectedAll(const Value: Boolean);
+begin
+    FSelectedAll := Value;
+end;
+
+procedure TRGrid.SetSelectedRow(const Value: Boolean);
+begin
+      FSelectedRow := Value;
+
+      if FSelectedRow then
+        self.Options := self.Options + [goRowSelect]
+      else
+        self.Options := self.Options - [goRowSelect];
+end;
+
+procedure TRGrid.GridDrawCell(Sender: TObject; ACol, ARow: integer; Rect: TRect; State: TGridDrawState);
+var
+    strTemp: string;
+    format: integer;
+const
+    LM = 10; { margem esquerda de cada célula }
+    TM = 5; { margem superior de cada célula }
+begin
+
+    inherited;
+
+    if (gdSelected in State) then
+    begin
+        if not SelectedRow then
+        begin
+            self.Canvas.Font.Color := clWhite;
+            Self.Canvas.Brush.Color := clHighlight;
+            //self.Canvas.Font.Style := self.Canvas.Font.Style + [FSBOLD];
+        end;
+    end
+    else
+    begin
+        if (ARow mod 2) = 0 then
+            self.Canvas.Brush.Color := clWindow
+        else
+            self.Canvas.Brush.Color := $00E4E4E4; // $F9F9F9;
+
+        self.Canvas.FillRect(Rect);
+    end;
+
+    self.Canvas.TextRect(Rect, Rect.Left + LM, Rect.Top + TM, self.Cells[ACol, ARow]);
+
+    strTemp := self.Cells[ACol, ARow];
+    self.Canvas.FillRect(Rect);
+
+    format := DT_LEFT;
+    if (ARow > 0) and (ACol > 0) and (FColList.Count > 0) then
+    begin
+        if (Columns[ACol - 1].Align = alRight) then
+            format := DT_RIGHT
+        else if (Columns[ACol - 1].Align = alCenter) then
+            format := DT_CENTER
+        else
+            format := DT_LEFT;
+    end;
+    DrawText(self.Canvas.Handle, PChar(strTemp), -1, Rect, format);
+
+    if MultiSelect then
+    begin
+        self.ColWidths[0] := 15;
+        pnl.Visible := True;
+        if (ACol = 0) and (ARow > 0) then
+        begin
+            if self.Cells[ACol, ARow] = 'X' then
+            begin
+                DrawFrameControl(self.Canvas.Handle, Rect, DFC_BUTTON, DFCS_BUTTONCHECK or DFCS_CHECKED)
+            end
+            else
+            begin
+                DrawFrameControl(self.Canvas.Handle, Rect, DFC_BUTTON, DFCS_BUTTONCHECK);
+            end;
+        end;
+    end;
+end;
+
+procedure TRGrid.GridKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+
+    case Key of
+        VK_UP, VK_DOWN:
+            begin
+                ExecuteDetailGridDataBind;
+            end;
+    end;
+
+end;
+
+procedure TRGrid.GridOnCLick(Sender: TObject);
+begin
+    ExecuteDetailGridDataBind;
+end;
+
+procedure TRGrid.GridSelectCell(Sender: TObject; ACol, ARow: integer; var CanSelect: Boolean);
+begin
+    // Index := ARow - 1;
+    // if self.FColList.Count > 0 then
+    // begin
+    // if self.FColList[ACol - 1].Editing then
+    // self.Options := self.Options + [goEditing] - [goRowSelect]
+    // else
+    // self.Options := self.Options - [goEditing] + [goRowSelect];
+    // end;
+end;
+
+function TRGrid.HasSelectedItens: Boolean;
+var
+    i: integer;
+begin
+    result := False;
+    if (FDataSource <> nil) or (FDataSet <> nil) or (FListSource <> nil) then
+    begin
+        for i := 0 to Self.RowCount - 1 do
+        begin
+            if Cells[0, i + 1] = 'X' then
+            begin
+                result := True;
+                break;
+            end;
+        end;
+    end;
+end;
+
+function TRGrid.IsAssigned: boolean;
+begin
+    result :=  (FDataSource <> nil) or (FDataSet <> nil) or (FListSource <> nil)
+end;
+
+function TRGrid.IsEmpty: Boolean;
+var
+    Count: integer;
+begin
+    Count := 1;
+    if (FDataSource <> nil) then count := FDataSource.Count
+    else if (FDataSet <> nil) then count := FDataSet.recordcount
+    else if (FListSource <> nil) then count := FListSource.count;
+
+
+
+    result := ((FDataSource = nil) and (FDataSet = nil) and (FListSource = nil)) or (not(self.RowCount > 1) or (Count = 0));
+end;
+
+procedure TRGrid.KeyDown(var Key: Word; Shift: TShiftState);
+begin
+
+    case Key of
+        VK_SPACE:
+            begin
+                if MultiSelect then
+                begin
+                    if (self.Cells[0, self.Row] = EmptyStr) then
+                        self.Cells[0, self.Row] := 'X'
+                    else
+                        self.Cells[0, self.Row] := EmptyStr;
+                end;
+            end;
+
+    end;
+
+    inherited;
+
+end;
+
+procedure TRGrid.SetAsChecked(Index: integer);
+begin
+    if self.MultiSelect then
+        Cells[0, index] := 'X';
+end;
+
+procedure TRGrid.SetAsUnchecked(Index: integer);
+begin
+    if self.MultiSelect then
+        Cells[0, index] := '';
+end;
+
+procedure TRGrid.SetEditText(Sender: TObject; ACol, ARow: integer; const Value: string);
+var
+    context: TRttiContext;
+    prop: TRttiProperty;
+begin
+    if ARow >= 0 then
+    begin
+        if not self.EditorMode then
+        begin
+            if Columns[ACol - 1].Editing then
+            begin
+                prop := context.GetType(TObject(FDataSource[ARow - 1]).ClassType).GetProperty(Columns[ACol - 1].name);
+                prop.SetValue(TObject(FDataSource[ARow - 1]), Value);
+                self.Cells[ACol, ARow] := EmptyStr;
+                self.Cells[ACol, ARow] := GeTMaskTypes(Value, Columns[ACol - 1].FormatCol, Columns[ACol - 1].DecimalPlaces)
+            end;
+
+        end;
+    end;
+end;
+
+function TRGrid.GeTMaskTypes(field: string; formatType: TMaskTypes; decimalPlaces: integer): string;
+var
+    text: string;
+begin
+    text := field;
+    if trim(field) <> EmptyStr then
+    begin
+        if formatType = mtCurrency then
+            text := FormatCurr('R$ ###,##0.'+DupeString('0', decimalPlaces), StrToCurr(field))
+        else if formatType = mtDouble then
+            text := FormatCurr('###,##0.'+DupeString('0', decimalPlaces), StrToCurr(field))
+        else if formatType = mtDate then
+        begin
+            if field <> EmptyStr then
+                text := copy(field, 7, 2) + '/' + copy(field, 5, 2) + '/' + copy(field, 1, 4)
+            else
+                text := EmptyStr;
+            // date := StrToFloat(field);
+            // if date > 0 then
+            // text := FormatDateTime('dd/mm/yyyy',  date)
+            // else
+            // text := EmptyStr;
+        end
+        else if formatType = mtCPF then
+            text := MaskDoFormatText('000.999.999-00;1;', field, ' ')
+        else if formatType = mtCEP then
+            text := MaskDoFormatText('00999-00;1;', field, ' ')
+        else if formatType = mtPhone then
+            text := MaskDoFormatText('!\(999\) #0000-0000;1;_', field, ' ')
+        else if formatType = mtShortPhone then
+            text := MaskDoFormatText('!#0000-0000;1;_', field, ' ')
+
+    end;
+
+    result := ' ' + text + ' ';
+end;
+
+function TRGrid.GetObject: TFields;
+begin
+    result := nil;
+    if FDataSet <> nil then
+    begin
+        FDataSet.RecNo := GetIndex+1;
+        result := FDataSet.Fields;
+    end;
+
+end;
+
+function TRGrid.GetObject<T>: T;
+begin
+    result := nil;
+    if (GetIndex >= 0) then
+    begin
+        if (FDataSource <> nil) then
+            result := T(TObject(FDataSource[GetIndex]))
+        else
+        if (FListSource <> nil) then
+            result := T(TObject(FListSource[GetIndex]));
+    end;
+end;
+
+function TRGrid.ToSerializeColumns(colname: string): string;
+var
+    i: integer;
+    context: TRttiContext;
+    prop: TRttiProperty;
+    text: string;
+begin
+    for i := 0 to FDataSource.Count - 1 do
+    begin
+        prop := context.GetType(TObject(FDataSource[i]).ClassType).GetProperty(colname);
+        text := text + prop.GetValue(TObject(FDataSource[i])).ToString + ',';
+    end;
+    System.Delete(text, Length(text), 1);
+    result := text;
+end;
+
+function TRGrid.GetTotal(colname: string; selectedItens: Boolean): currency;
+var
+    i: integer;
+    context: TRttiContext;
+    prop: TRttiProperty;
+    text: string;
+begin
+    result := 0;
+    // for  j := 0 to FColList.Count-1 do
+    // begin
+    // if Columns[j].Name  = colname then
+    // begin
+    for i := 0 to FDataSource.Count - 1 do
+    begin
+        if (IfThen(selectedItens, IfThen(Cells[0, i + 1] = 'X', 1), 1)) = 1 then
+        begin
+            prop := context.GetType(TObject(FDataSource[i]).ClassType).GetProperty(colname);
+            text := prop.GetValue(TObject(FDataSource[i])).ToString;
+
+            result := result + StrToFloatDef(text, 0);
+
+        end;
+        // end;
+        // exit;
+        // end;
+        // if total > 0  then exit;
+
+    end;
+    // result := total;
+end;
+
+function TRGrid.GetTotalItens: integer;
+begin
+    if FDataSource = nil then
+        result := 0
+    else
+    begin
+        if (FDataSource = nil) then result := FDataSource.Count
+        else if (FDataSet = nil) then result := FDataSet.RecordCount
+        else if (FListSource = nil) then result := FListSource.Count;
+    end;
+end;
+
+function TRGrid.SaveAsExcelFile: Boolean;
+var
+    excel: variant;
+    lin, col: integer;
+begin
+    try
+        excel := CreateOleObject('Excel.Application');
+        excel.Workbooks.Add(1);
+        excel.Cells.Select;
+        // excel.Selection.NumberFormat := '@';
+
+        for lin := 0 to self.RowCount do
+            for col := 1 to self.ColCount do
+            begin
+                if self.ColWidths[col] > 0 then
+                begin
+                    excel.Cells[lin + 1, col] := self.Cells[col, lin];
+                    excel.Columns.AutoFit;
+                    excel.Cells[lin + 1, col].Select;
+                end;
+            end;
+        excel.Visible := True;
+    finally
+        // excel.Free;
+    end;
+
+end;
+
+{ TCol }
+
+procedure TCol.SetAlign(const Value: TAlign);
+begin
+    FAlign := Value;
+end;
+
+procedure TCol.SetDecimalPlaces(const Value: integer);
+begin
+  FDecimalPlaces := Value;
+end;
+
+procedure TCol.SetDescription(const Value: string);
+begin
+    FDescription := Value;
+end;
+
+procedure TCol.SetEditing(const Value: Boolean);
+begin
+    FEditing := Value;
+end;
+
+procedure TCol.SetInvisible(const Value: Boolean);
+begin
+    FInvisible := Value;
+end;
+
+procedure TCol.SeTMaskTypes(const Value: TMaskTypes);
+begin
+    FFormatCol := Value;
+end;
+
+procedure TCol.SetName(const Value: string);
+begin
+    FName := Value;
+end;
+
+procedure TCol.SetSize(const Value: integer);
+begin
+    FSize := Value;
+end;
+
+end.
+

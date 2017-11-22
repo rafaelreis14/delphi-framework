@@ -1,0 +1,256 @@
+unit ClsTipoOperacao;
+
+interface
+
+uses
+    Classes, System.SysUtils, Dialogs, ClsBase, ClsParametro, ClsEnumeradores,
+    ClsPersistable, ClsLib, ClsResultFilter;
+
+type
+    TTipoOperacao = class(TBase)
+    private
+        FCodigoTipoOperacao: string;
+        FDescricao: string;
+        FDelet: string;
+        FSigla: string;
+        procedure SetCodigoTipoOperacao(const Value: string);
+        procedure SetDelet(const Value: string);
+        procedure SetDescricao(const Value: string);
+        procedure SetSigla(const Value: string);
+    public
+        ///	<summary>
+        ///	  Metodo que faz a inserção da ClasseBase
+        ///	</summary>
+        function Inserir: integer; override;
+
+        ///	<summary>
+        ///	  Metodo que faz a alteração da ClasseBase
+        ///	</summary>
+        function Alterar: integer; override;
+
+        ///	<summary>
+        ///	  Métido que faz a Deleção da ClasseBase
+        ///	</summary>
+        ///	<param name="ID">
+        ///	  Chave  primária da tabela
+        ///	</param>
+        function Deletar(ID: string): integer; override;
+
+        ///	<summary>
+        ///	  Método que chama a tela de filtro
+        ///	</summary>
+        ///	<param name="tipoOperacao">
+        ///	  Tipo da operação, se é somente filtro, ou seleção de registro
+        ///	</param>
+        function Listar(tipoOperacao: TOparationTypes): TResultFilter; override;
+
+        ///	<summary>
+        ///	  Método que retorna um objeto preenchido
+        ///	</summary>
+        ///	<param name="ID">
+        ///	  Chave primária da tabela
+        ///	</param>
+        function Obter(ID: string): TObject; overload; override;
+
+        ///	<summary>
+        ///	  Método que retorna um objeto preenchido
+        ///	</summary>
+        ///	<param name="parametros">
+        ///	  Parametros para a consulta do objeto a ser preenchido
+        ///	</param>
+        function Obter(parametros:TParametro): TObject; overload;
+
+        ///	<summary>
+        ///	  Método que preenche a instância do Objeto
+        ///	</summary>
+        ///	<param name="ClasseBase">
+        ///	  objeto de parametro para preenchimento da instância
+        ///	</param>
+        procedure PopularObjeto(tipoOperacao: TTipoOperacao);
+
+        [TPersistable(fgPersistable, 'Z16_TPMOV')]
+        property Sigla: string read FSigla write SetSigla;
+
+        [TPersistable(fgPersistable, 'Z16_CODIGO')]
+        property CodigoTipoOperacao: string read FCodigoTipoOperacao write SetCodigoTipoOperacao;
+
+        [TPersistable(fgPersistable, 'Z16_DESCRI')]
+        property Descricao: string read FDescricao write SetDescricao;
+
+        [TPersistable(fgUpdateable, 'D_E_L_E_T_')]
+        property Delet: string read FDelet write SetDelet;
+
+    end;
+
+implementation
+
+{ TTipoOperacao }
+
+
+uses ClsFilter, ClsLista, ClsFieldFilter;
+
+{$REGION 'Métodos CRUD'}
+
+function TTipoOperacao.Inserir: integer;
+begin
+    // Lib.ExecutaTarefa('InserirTipoOperacao', 'TTipoOperacao', TLib.ObjectToParameters(Self,acInsercao));
+    // ###Validar retorno da função
+    // result := 0;
+end;
+
+function TTipoOperacao.Alterar: integer;
+begin
+    // Lib.ExecutaTarefa('AlterarTipoOperacao', 'TTipoOperacao' , TLib.ObjectToParameters(Self,acAlteracao));
+    // ###Validar retorno da função
+    // result := 0;
+end;
+
+function TTipoOperacao.Deletar(ID: string): integer;
+var
+    parametro: TParametro;
+begin
+    // try
+    // parametro := TParametro.Create;
+    // parametro.Add('', 'R_E_C_N_O_', ID);
+    //
+    // Lib.ExecutaTarefa('DeletarTipoOperacao', 'TTipoOperacao', parametro);
+    //
+    // //###Validar retorno da função
+    // result := 0;
+    // finally
+    // parametro.Free;
+    // end;
+end;
+
+function TTipoOperacao.Listar(tipoOperacao: TOparationTypes): TResultFilter;
+var
+    campoFiltro: TFieldFilter;
+    filtro: TFilter<TTipoOperacao>;
+    // parametro : TParametro;
+    // lista:TLista<TTipoOperacao>
+begin
+    inherited;
+    try
+        filtro := TFilter<TTipoOperacao>.Create;
+        filtro.ScreenName := 'Filtro de TipoOperacao';
+        filtro.OperationType := tipoOperacao;
+        filtro.MultiSelect := true;
+        filtro.Task := 'ConsultarTipoOperacao';
+        // ###Criar os Índices do filtro
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Sigla';
+        campoFiltro.Name := 'Sigla';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'CodigoTipoOperacao';
+        campoFiltro.Name := 'CodigoTipoOperacao';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Descricao';
+        campoFiltro.Name := 'Descricao';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Delet';
+        campoFiltro.Name := 'Delet';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        result := filtro.Execute;
+    finally
+        // FreeAndNil(parametro);
+        // lista.Destroy;
+    end;
+end;
+
+function TTipoOperacao.Obter(parametros: TParametro): TObject;
+var
+    lista: TLista<TTipoOperacao>;
+begin
+    try
+        lista := BaseLib.XmlToObject<TTipoOperacao>(BaseLib.ExecutaTarefa('ConsultaTipoOperacao', 'TTipoOperacao', parametros));
+
+        if lista.Count = 1 then
+        begin
+            PopularObjeto(lista[0]);
+            result := Self;
+        end
+        else
+        begin
+            MessageDlg('Nenhum registro encontrado.', mtError, [mbOk], 0);
+            result := nil;
+        end;
+    finally
+        lista.Destroy;
+    end;
+end;
+
+function TTipoOperacao.Obter(ID: string): TObject;
+var
+    parametros: TParametro;
+
+begin
+    try
+        parametros := TParametro.Create;
+        parametros.Add('', 'COLOCAR_CAMPO_ID_AQUI', ID);
+        result := Obter(parametros);
+    finally
+        FreeAndNil(parametros);
+    end;
+end;
+
+{$ENDREGION}
+
+{$REGION 'Regras de Negócio'}
+
+procedure TTipoOperacao.PopularObjeto(tipoOperacao: TTipoOperacao);
+begin
+    Self.Sigla := tipoOperacao.Sigla;
+    Self.CodigoTipoOperacao := tipoOperacao.CodigoTipoOperacao;
+    Self.Descricao := tipoOperacao.Descricao;
+    Self.Delet := tipoOperacao.Delet;
+
+end;
+
+{$ENDREGION}
+
+{$REGION 'Métodos de Propriedades'}
+
+procedure TTipoOperacao.SetCodigoTipoOperacao(const Value: string);
+begin
+    FCodigoTipoOperacao := Value;
+end;
+
+procedure TTipoOperacao.SetDelet(const Value: string);
+begin
+    FDelet := Value;
+end;
+
+procedure TTipoOperacao.SetDescricao(const Value: string);
+begin
+    FDescricao := Value;
+end;
+
+procedure TTipoOperacao.SetSigla(const Value: string);
+begin
+    FSigla := Value;
+end;
+
+{$ENDREGION}
+
+end.
+

@@ -1,0 +1,1 @@
+"C:\Projetos TD\SIATD4\Fontes\Output\exe\RegAsm.exe" DBConnect.dll

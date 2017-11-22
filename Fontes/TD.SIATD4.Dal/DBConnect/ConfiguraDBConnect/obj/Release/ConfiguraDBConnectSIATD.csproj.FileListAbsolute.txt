@@ -1,0 +1,20 @@
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\ConfiguraDBConnectSIATD\bin\Release\ConfiguraDBConnectSIATD.exe
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\ConfiguraDBConnectSIATD\bin\Release\ConfiguraDBConnectSIATD.pdb
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\ConfiguraDBConnectSIATD\obj\Release\ConfiguraDBConnectSIATD.csprojResolveAssemblyReference.cache
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\ConfiguraDBConnectSIATD\obj\Release\ConfiguraDBConnectSIATD.Properties.Resources.resources
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\ConfiguraDBConnectSIATD\obj\Release\ConfiguraDBConnectSIATD.csproj.GenerateResource.Cache
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\ConfiguraDBConnectSIATD\obj\Release\ConfiguraDBConnectSIATD.exe
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\ConfiguraDBConnectSIATD\obj\Release\ConfiguraDBConnectSIATD.pdb
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\ConfiguraDBConnectSIATD\obj\Release\ConfiguraDBConnectSIATD.FormConfigurador.resources
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\ConfiguraDBConnectSIATD\bin\Release\DBConnectSIATD.dll
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\ConfiguraDBConnectSIATD\bin\Release\DBConnectSIATD.pdb
+C:\FONTES SIATD\3.0\DDL BANCO DE DADOS\DBConnect\ConfiguraDBConnectSIATD\bin\Release\ConfiguraDBConnectSIATD.exe
+C:\FONTES SIATD\3.0\DDL BANCO DE DADOS\DBConnect\ConfiguraDBConnectSIATD\bin\Release\ConfiguraDBConnectSIATD.pdb
+C:\FONTES SIATD\3.0\DDL BANCO DE DADOS\DBConnect\ConfiguraDBConnectSIATD\bin\Release\DBConnectSIATD.dll
+C:\FONTES SIATD\3.0\DDL BANCO DE DADOS\DBConnect\ConfiguraDBConnectSIATD\bin\Release\DBConnectSIATD.pdb
+C:\FONTES SIATD\3.0\DDL BANCO DE DADOS\DBConnect\ConfiguraDBConnectSIATD\obj\Release\ConfiguraDBConnectSIATD.csprojResolveAssemblyReference.cache
+C:\FONTES SIATD\3.0\DDL BANCO DE DADOS\DBConnect\ConfiguraDBConnectSIATD\obj\Release\ConfiguraDBConnectSIATD.FormConfigurador.resources
+C:\FONTES SIATD\3.0\DDL BANCO DE DADOS\DBConnect\ConfiguraDBConnectSIATD\obj\Release\ConfiguraDBConnectSIATD.Properties.Resources.resources
+C:\FONTES SIATD\3.0\DDL BANCO DE DADOS\DBConnect\ConfiguraDBConnectSIATD\obj\Release\ConfiguraDBConnectSIATD.csproj.GenerateResource.Cache
+C:\FONTES SIATD\3.0\DDL BANCO DE DADOS\DBConnect\ConfiguraDBConnectSIATD\obj\Release\ConfiguraDBConnectSIATD.exe
+C:\FONTES SIATD\3.0\DDL BANCO DE DADOS\DBConnect\ConfiguraDBConnectSIATD\obj\Release\ConfiguraDBConnectSIATD.pdb

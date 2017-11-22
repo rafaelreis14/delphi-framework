@@ -1,0 +1,533 @@
+unit ClsControleDados;
+
+interface
+
+uses ClsLib, Db, DbCommon, Generics.Collections, System.Rtti, DBClient,
+     Data.Win.ADODB, ClsParametro, DBConnectSIATD_TLB, ClsBase, ClsLista, Xml.XMLIntf, Xml.XMLDoc,
+     ClsErro, ClsPersistable;
+
+type
+     TDAO<T> = class
+     protected
+         DataControl: IDataControl;
+         NomeTabela: string;
+         function ConsultarBase(sql:string; parametro: TParametro): WideString;
+     public
+         function Consultar(sql: string; parametro: TParametro): T; virtual; abstract;
+
+         constructor Create();
+     end;
+
+
+     TXmlDAO = class(TDAO<TXMLDocument>)
+     public
+         function Consultar(sql: string; parametro: TParametro): TXMLDocument; override;
+
+
+     end;
+
+
+     TDataSetDAO = class(TDAO<TClientDataSet>)
+     private
+
+         function XmlToDataset(XML: Widestring): TClientDataSet;
+     public
+         function Consultar(sql: string; parametro: TParametro): TClientDataSet; override;
+     end;
+
+
+     TListaDAO<T: class> = class(TDAO<TLista<T>>)
+     private
+         function RetornaPropriedade(typ: TRttiType; campo: string): TRttiProperty;
+         function XmlToObject(XML: Widestring): TLista<T>;
+
+     public
+         function Consultar(sql: string; parametro: TParametro): TLista<T>; override;
+         constructor Create();
+
+     end;
+
+
+     TControleDados<T; A: TDAO<T>, constructor> = class
+     public
+         function Consultar(sql: string; parametro: TParametro): T;
+         function Inserir(sql: string): boolean;
+         function Alterar(sql: string): boolean;
+         function Deletar(sql:string): boolean;
+
+
+
+        /// <summary>
+        /// funções de conversão de XML para String escalar (retorno do
+        /// servidor socket)
+        /// </summary>
+        function XmlToString(pXML: Widestring): Widestring;
+
+
+
+        /// <summary>
+        /// funções de conversão de XML para Boolean (retorno do servidor
+        /// socket)
+        /// </summary>
+        function XmlToBool(pXML: Widestring): Boolean;
+
+
+
+
+        procedure ConverteEPopularValorPropriedade(prop: TRttiProperty; objeto: TObject; valor: string);
+     end;
+
+implementation
+
+uses
+    System.SysUtils, Vcl.Forms, ClsMensagens;
+
+
+{ TXmlDAO }
+
+function TXmlDAO.Consultar(sql: string; parametro: TParametro): TXMLDocument;
+var
+    XMLDocument: TXMLDocument;
+    resultado: string;
+begin
+    try
+        resultado := ConsultarBase(sql,parametro);
+        XMLDocument := TXMLDocument.Create(Application);
+        XMLDocument.Xml.Text := resultado;
+        XMLDocument.Active := True;
+
+        result := XMLDocument;
+    except
+        XMLDocument.Free;
+        result := nil;
+    end;
+end;
+
+
+{ TDataSetDAO }
+
+function TDataSetDAO.Consultar(sql: string; parametro: TParametro): TClientDataSet;
+var
+    resultado: string;
+begin
+    try
+        resultado := ConsultarBase(sql,parametro);
+        result := XmlToDataset(resultado);
+    except
+        raise;
+        result := nil;
+    end;
+end;
+
+
+function TDataSetDAO.XmlToDataset(xml: Widestring): TClientDataSet;
+    function TipoDados(pTipo: String): Tfieldtype;
+    begin
+        if pTipo = 'Memo' then
+            Result := ftMemo
+        else if pTipo = 'Bigint' then
+            Result := ftLargeint
+        else if pTipo = 'BCD' then
+            Result := ftBCD
+        else if pTipo = 'WideString' then
+            Result := ftWideString
+        else if pTipo = 'String' then
+            Result := ftString
+        else if pTipo = 'Numeric' then
+            Result := ftFMTBcd
+        else if pTipo = 'Integer' then
+            Result := ftInteger
+        else if pTipo = 'Money' then
+            Result := ftCurrency
+        else if pTipo = 'Date' then
+            Result := ftDate
+        else if pTipo = 'TIMESTAMP' then
+            Result := ftDateTime
+        else if pTipo = 'AUTOINC' then
+            Result := ftInteger
+        else if pTipo = 'Date' then
+            Result := ftTimeStamp
+        else if pTipo = 'Word' then
+            Result := ftWord
+        else if pTipo = 'Boolean' then
+            Result := ftBoolean
+        else if pTipo = 'Time' then
+            Result := ftTime
+        else if pTipo = 'Bytes' then
+            Result := ftBytes
+        else if pTipo = 'SmallInt' then
+            Result := ftSmallint
+        else if pTipo = 'BLOB' then
+            Result := ftBlob;
+    end;
+var
+    XMLDocument: TXMLDocument;
+    NoRetorno: IXMLNode;
+    NoMetadados: IXMLNode;
+    NoDataSet: IXMLNode;
+    NoCampo: IXMLNode;
+    NoDados: IXMLNode;
+    NoLinha: IXMLNode;
+    NoColuna: IXMLNode;
+    iCont, iCont2, iCont3: integer;
+    CDSResultado: TClientDataSet;
+    cRetorno: string;
+    Field: TField;
+    iContLinhas: integer;
+    vTipoDado: Tfieldtype;
+    iTamanho: integer;
+begin
+    try
+        try
+            CDSResultado := TClientDataSet.Create(Application);
+            XMLDocument := TXMLDocument.Create(Application);
+            XMLDocument.Xml.Text := XML;
+            XMLDocument.Active := True;
+            //
+            NoRetorno := XMLDocument.ChildNodes.Nodes['Retorno'];
+            //
+            NoDataSet := NoRetorno.ChildNodes.Nodes['DataSet'];
+            //
+            NoMetadados := NoDataSet.ChildNodes.Nodes['Metadados'];
+            for iCont := 0 to NoMetadados.ChildNodes.Count - 1 do
+            begin
+                NoCampo := NoMetadados.ChildNodes[iCont];
+                //
+                if (NoCampo.NodeName = 'Campo') and (NoCampo.Attributes['Nome'] = 'Padrao') then
+                begin
+                    NoDados := NoDataSet.ChildNodes.Nodes['Dados'];
+                    NoLinha := NoDados.ChildNodes.Nodes[0];
+                    raise Erro.Create(NoLinha.ChildNodes.Nodes[iCont2].Attributes['Valor']);
+                end;
+                //
+                vTipoDado := TipoDados(NoCampo.Attributes['TipoDado']);
+                iTamanho := StrToInt(NoCampo.Attributes['Tamanho']);
+                //
+                CDSResultado.FieldDefs.Add(NoCampo.Attributes['Nome'], vTipoDado, iTamanho);
+            end;
+            CDSResultado.CreateDataSet;
+            //
+            iContLinhas := 0;
+            NoDados := NoDataSet.ChildNodes.Nodes['Dados'];
+            for iCont := 0 to NoDados.ChildNodes.Count - 1 do
+            // percorrendo as linhas
+            begin
+                inc(iContLinhas);
+                CDSResultado.Append();
+                NoLinha := NoDados.ChildNodes.Nodes[iCont];
+                for iCont2 := 0 to NoLinha.ChildNodes.Count - 1 do
+                // percorrendo as colunas das linhas
+                begin
+                    CDSResultado.FieldList.Fields[iCont2].AsString := NoLinha.ChildNodes.Nodes[iCont2].Attributes['Valor'];
+                end;
+                CDSResultado.Post;
+            end;
+            Application.ProcessMessages;
+            CDSResultado.First;
+            Result := CDSResultado;
+            Application.ProcessMessages;
+        except
+            on E: Exception do
+                raise Erro.Create('Erro ao converter o XML em dataSet' + #13 + 'Mensagem interna: ' + E.Message);
+        end;
+    finally
+        FreeAndNil(XMLDocument);
+    end;
+end;
+
+{ TDAO<T> }
+
+function TDAO<T>.ConsultarBase(sql: string; parametro: TParametro): WideString;
+var
+    param: IParameter;
+    itemParametro: TItemParametro;
+    resultado: WideString;
+begin
+    if parametro <> nil then
+    begin
+        param := CoParameters.Create() as IParameter;
+        for itemParametro in parametro.Item do
+        begin
+            if itemParametro.Valor = '' then
+                param.Add(itemParametro.Chave, ' ', '', '')
+            else
+                param.Add(itemParametro.Chave, itemParametro.Valor, '', '');
+        end;
+        result := DataControl.Query(sql, (param as _Parameters), '', '', 0);
+    end
+    else
+        result := DataControl.Query(sql, nil, '', '', 0);
+
+end;
+
+constructor TDAO<T>.Create();
+begin
+    DataControl := CoSQLDataControl.Create() as IDataControl;
+
+end;
+
+{ TControleDados<T, A> }
+
+function TControleDados<T, A>.Alterar(sql: string): boolean;
+begin
+
+end;
+
+function TControleDados<T, A>.Consultar(sql: string; parametro: TParametro): T;
+var
+    cd: A;
+begin
+    cd := A.Create;
+    try
+        Result := cd.Consultar(sql, parametro);
+    finally
+        cd.Free;
+    end;
+end;
+
+
+
+
+
+function TControleDados<T, A>.XmlToString(pXML: Widestring): Widestring;
+var
+    XMLDocument: TXMLDocument;
+    NoRetorno: IXMLNode;
+    NoMetadados: IXMLNode;
+    NoDataSet: IXMLNode;
+    NoCampo: IXMLNode;
+    NoDados: IXMLNode;
+    NoLinha: IXMLNode;
+    NoColuna: IXMLNode;
+    iCont, iCont2, iCont3: integer;
+    cRetorno: string;
+    iContLinhas: integer;
+begin
+    try
+        XMLDocument := TXMLDocument.Create(Application);
+        XMLDocument.Xml.Text := pXML;
+        XMLDocument.Active := True;
+        //
+        cRetorno := '';
+        NoRetorno := XMLDocument.ChildNodes.Nodes['Retorno'];
+        NoDataSet := NoRetorno.ChildNodes.Nodes['DataSet'];
+        NoMetadados := NoDataSet.ChildNodes.Nodes['Metadados'];
+        NoDados := NoDataSet.ChildNodes.Nodes['Dados'];
+        for iCont := 0 to NoDados.ChildNodes.Count - 1 do
+        begin
+            NoLinha := NoDados.ChildNodes.Nodes[iCont];
+            for iCont2 := 0 to NoLinha.ChildNodes.Count - 1 do
+            begin
+                cRetorno := cRetorno + NoLinha.ChildNodes.Nodes[iCont2].Attributes['Valor'];
+            end;
+        end;
+        Result := cRetorno;
+    finally
+        FreeAndNil(XMLDocument);
+    end;
+end;
+
+function TControleDados<T, A>.XmlToBool(pXML: Widestring): Boolean;
+var
+    XMLDocument: TXMLDocument;
+    NoRetorno: IXMLNode;
+    NoMetadados: IXMLNode;
+    NoDataSet: IXMLNode;
+    NoCampo: IXMLNode;
+    NoDados: IXMLNode;
+    NoLinha: IXMLNode;
+    NoColuna: IXMLNode;
+    iCont, iCont2, iCont3: integer;
+    lRetorno: Boolean;
+    iContLinhas: integer;
+begin
+    try
+        XMLDocument := TXMLDocument.Create(Application);
+        XMLDocument.Xml.Text := pXML;
+        XMLDocument.Active := True;
+        //
+        lRetorno := False;
+        NoRetorno := XMLDocument.ChildNodes.Nodes['Retorno'];
+        NoDataSet := NoRetorno.ChildNodes.Nodes['DataSet'];
+        NoMetadados := NoDataSet.ChildNodes.Nodes['Metadados'];
+        NoDados := NoDataSet.ChildNodes.Nodes['Dados'];
+        for iCont := 0 to NoDados.ChildNodes.Count - 1 do
+        begin
+            NoLinha := NoDados.ChildNodes.Nodes[iCont];
+            for iCont2 := 0 to NoLinha.ChildNodes.Count - 1 do
+            begin
+                lRetorno := StrToBool(NoLinha.ChildNodes.Nodes[iCont2].Attributes['Valor']);
+            end;
+        end;
+        Result := lRetorno;
+    finally
+        FreeAndNil(XMLDocument);
+    end;
+end;
+
+
+function TControleDados<T, A>.Deletar(sql: string): boolean;
+begin
+
+end;
+
+function TControleDados<T, A>.Inserir(sql: string): boolean;
+begin
+
+end;
+
+procedure TControleDados<T, A>.ConverteEPopularValorPropriedade(prop: TRttiProperty; objeto: TObject; valor: string);
+begin
+    try
+        if not(prop.GetValue(objeto).IsType<TBase>) then
+        begin
+            if (prop.GetValue(objeto).IsType<integer>) then
+                prop.SetValue(TObject(objeto), StrToIntDef(valor, 0))
+            else if (prop.GetValue(objeto).IsType<Double>) then
+                prop.SetValue(TObject(objeto), StrToFloatDef(valor, 0))
+            else if (prop.GetValue(objeto).IsType<Currency>) then
+                prop.SetValue(TObject(objeto), StrToCurrDef(valor, 0))
+            else if (prop.GetValue(objeto).IsType<TDateTime>) then
+                prop.SetValue(TObject(objeto), StrToDateDef(valor, StrToDate('01/01/1900')))
+            else if (prop.GetValue(objeto).IsType<Boolean>) then
+                prop.SetValue(TObject(objeto), StrToBoolDef(valor, False))
+            else if (prop.GetValue(objeto).IsType<string>) then
+                prop.SetValue(TObject(objeto), valor);
+        end;
+        //
+        // if (tipo = 'Bigint') or (tipo = 'Integer') or (tipo = 'AUTOINC') then
+        // prop.SetValue(TObject(objeto), StrToIntDef(valor, 0))
+        // else if tipo = 'Numeric' then
+        // prop.SetValue(TObject(objeto), StrToFloatDef(valor, 0))
+        // else if tipo = 'Money' then
+        // prop.SetValue(TObject(objeto), StrToCurrDef(valor, 0))
+        // else if tipo = 'Date' then
+        // prop.SetValue(TObject(objeto), StrToDateDef(valor, StrToDate('01/01/1900')))
+        // else if tipo = 'Boolean' then
+        // prop.SetValue(TObject(objeto), StrToBoolDef(valor, False))
+        // else
+        // prop.SetValue(TObject(objeto), valor);
+    except
+        raise Erro.Create('Erro ao tentar converter valores na transformação do XML para Objeto. Veririfcar tipo da propriedade: ' + prop.Name +
+            ' da classe: ' + objeto.ClassName);
+    end;
+
+end;
+
+
+
+{ TListaDAO }
+
+function TListaDAO<T>.Consultar(sql: string; parametro: TParametro): TLista<T>;
+var
+    resultado: string;
+begin
+    try
+        resultado := ConsultarBase(sql,parametro);
+        result := XmlToObject(resultado);
+    except
+        raise;
+        result := nil;
+    end;
+end;
+
+constructor TListaDAO<T>.Create;
+begin
+    inherited Create();
+end;
+
+function TListaDAO<T>.RetornaPropriedade(typ: TRttiType;  campo: string): TRttiProperty;
+var
+    _ctx: TRttiContext;
+    _typ: TRttiType;
+    _pro: TRttiProperty;
+    oAtt: TCustomAttribute;
+begin
+    // _ctx := TRttiContext.Create;
+    _typ := typ;
+    Result := nil;
+    for _pro in _typ.GetProperties do
+    begin
+        for oAtt in _pro.GetAttributes do
+        begin
+            if oAtt is TPersistable then
+            begin
+                if TPersistable(oAtt).FieldName = campo then
+                begin
+                    Result := _pro;
+                    exit;
+                end;
+            end;
+        end;
+    end;
+end;
+
+function TListaDAO<T>.XmlToObject(XML: Widestring): TLista<T>;
+var
+    XMLDocument: TXMLDocument;
+    NoRetorno: IXMLNode;
+    NoMetadados: IXMLNode;
+    NoDataSet: IXMLNode;
+    NoCampo: IXMLNode;
+    NoDados: IXMLNode;
+    NoLinha: IXMLNode;
+    NoColuna: IXMLNode;
+    iCont, iCont2, iCont3: integer;
+    cRetorno: string;
+    Field: TField;
+    iContLinhas: integer;
+    vTipoDado: Tfieldtype;
+    iTamanho: integer;
+    cCampo, cValor, cTipo: string;
+    lista: TLista<T>;
+    objeto: T;
+    context: TRttiContext;
+    prop: TRttiProperty;
+begin
+    try
+        try
+            lista := TLista<T>.Create;
+            XMLDocument := TXMLDocument.Create(Application);
+            XMLDocument.Xml.Text := XML;
+            XMLDocument.Active := True;
+            //
+            NoRetorno := XMLDocument.ChildNodes.Nodes['Retorno'];
+            //
+            NoDataSet := NoRetorno.ChildNodes.Nodes['DataSet'];
+            //
+            iContLinhas := 0;
+            NoDados := NoDataSet.ChildNodes.Nodes['Dados'];
+            for iCont := 0 to NoDados.ChildNodes.Count - 1 do
+            // percorrendo as linhas
+            begin
+                objeto := tlib.CriaInstancia<T>;
+                inc(iContLinhas);
+                NoLinha := NoDados.ChildNodes.Nodes[iCont];
+                for iCont2 := 0 to NoLinha.ChildNodes.Count - 1 do
+                // percorrendo as colunas das linhas
+                begin
+                    cCampo := NoLinha.ChildNodes.Nodes[iCont2].Attributes['Campo'];
+                    cValor := NoLinha.ChildNodes.Nodes[iCont2].Attributes['Valor'];
+                    cTipo := NoLinha.ChildNodes.Nodes[iCont2].Attributes['TipoDado'];
+                    //
+                    prop := RetornaPropriedade(context.GetType(TObject(objeto).ClassType), cCampo);
+                    //
+                    if Assigned(prop) then
+                        tlib.ConverteEPopularValorPropriedade(prop, objeto, cValor);
+                    //
+                end;
+                lista.Add(objeto);
+            end;
+            //
+            Result := lista;
+        Except
+            on E: Exception do
+                raise Erro.Create(E.Message);
+        end;
+    finally
+        // FreeAndNil(lista);
+        FreeAndNil(XMLDocument);
+    end;
+end;
+
+end.

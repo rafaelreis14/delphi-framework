@@ -1,0 +1,893 @@
+unit ClsFila;
+
+interface
+
+uses
+    Classes, System.SysUtils, Dialogs, ClsBase, ClsParametro, ClsEnumeradores,
+    ClsPersistable, ClsLib, ClsLista, ClsResultFilter, ClsFilial,
+  ClsTipoOperacao, ClsDispositivo, ClsTerefa;
+
+type
+  TCodigoOperacao = (cpInventario, cpConferenciEntrada, cpPedidoTransferenciaSaida, cpConferenciaRomaneioSaida, cpDistribuicao);
+
+  TFila = class(TBase)
+  private
+    FHoraFinal: string;
+    FHoraInicial: string;
+    FCodigoDispositivo: string;
+    FDelet: string;
+    FCodigoOperacao: string;
+    FCodigoFilial: string;
+    FIDOperacao: integer;
+    FDataEmissao: string;
+    FStatus: string;
+    FStatusTarefa: string;
+    FRecno: integer;
+    FHoraEmissao: string;
+    FDataFinal: string;
+    FDataInicial: string;
+    FCodigoEmpresa: string;
+    FUsuarioTarefa: string;
+    FFilial: TFilial;
+    FDispositivo: TDispositivo;
+    FTipoOperacao: TTipoOperacao;
+    FListaTarefas: TLista<TTerefa>;
+    FAuxiliar: string;
+    FFamiliaConferir: string;
+    FFabricanteConferir: string;
+    FTipologiaConferir: string;
+    FGrupoConferir: string;
+    FProdutoConferir: string;
+    FSubGrupoConferir: string;
+    FCodigoTarefa: integer;
+
+    procedure SetCodigoDispositivo(const Value: string);
+    procedure SetCodigoEmpresa(const Value: string);
+    procedure SetCodigoFilial(const Value: string);
+    procedure SetCodigoOperacao(const Value: string);
+    procedure SetDataEmissao(const Value: string);
+    procedure SetDataFinal(const Value: string);
+    procedure SetDataInicial(const Value: string);
+    procedure SetDelet(const Value: string);
+    procedure SetHoraEmissao(const Value: string);
+    procedure SetHoraFinal(const Value: string);
+    procedure SetHoraInicial(const Value: string);
+    procedure SetIDOperacao(const Value: integer);
+    procedure SetRecno(const Value: integer);
+    procedure SetStatus(const Value: string);
+    procedure SetStatusTarefa(const Value: string);
+
+    function ObterCodigoTipoOperacao(tipo: TCodigoOperacao): string;
+    function GetDescricaoStatus: string;
+    procedure SetUsuarioTarefa(const Value: string);
+    procedure SetDispositivo(const Value: TDispositivo);
+    procedure SetFilial(const Value: TFilial);
+    procedure SetTipoOperacao(const Value: TTipoOperacao);
+
+    function ObterParametrosTarefa(parametro: TParametro): TParametro;
+    procedure SetAuxiliar(const Value: string);
+    procedure SetFabricanteConferir(const Value: string);
+    procedure SetFamiliaConferir(const Value: string);
+    procedure SetGrupoConferir(const Value: string);
+    procedure SetProdutoConferir(const Value: string);
+    procedure SetTipologiaConferir(const Value: string);
+    procedure SetSubGrupoConferir(const Value: string);
+    procedure SetCodigoTarefa(const Value: integer);
+
+    public
+        ///	<summary>
+        ///	  Metodo que faz a inserção da Fila
+        ///	</summary>
+        function Inserir: integer; override;
+
+        ///	<summary>
+        ///	  Metodo que faz a alteração da Fila
+        ///	</summary>
+        function Alterar: integer; override;
+
+        ///	<summary>
+        ///	  Métido que faz a Deleção da Fila
+        ///	</summary>
+        ///	<param name="ID">
+        ///	  Chave  primária da tabela
+        ///	</param>
+        function Deletar(ID:String): integer; override;
+
+        ///	<summary>
+        ///	  Método que chama a tela de filtro
+        ///	</summary>
+        ///	<param name="tipoOperacao">
+        ///	  Tipo da operação, se é somente filtro, ou seleção de registro
+        ///	</param>
+        function Listar(tipoOperacao: TOparationTypes; multselect: Boolean): TResultFilter; override;
+
+        ///	<summary>
+        ///	  Método que retorna um objeto preenchido
+        ///	</summary>
+        ///	<param name="ID">
+        ///	  Chave primária da tabela
+        ///	</param>
+        function Obter(ID: String): TObject; overload; override;
+
+        ///	<summary>
+        ///	  Método que retorna um objeto preenchido
+        ///	</summary>
+        ///	<param name="parametros">
+        ///	  Parametros para a consulta do objeto a ser preenchido
+        ///	</param>
+        function Obter(parametros:TParametro): TObject; overload;
+
+        ///	<summary>
+        ///	  Método que preenche a instância do Objeto
+        ///	</summary>
+        ///	<param name="Fila">
+        ///	  objeto de parametro para preenchimento da instância
+        ///	</param>
+        procedure PreencherObjeto(Fila: TFila);
+
+        ///	<summary>
+        ///	  Obtem e popular a operacao, por operacao aberta e usuario
+        ///	</summary>
+        function ObterFilaAbertaPorUsuario(operacao:TCodigoOperacao): TFila;
+
+        ///	<summary>
+        ///	  Finaliza contagem. Registra a data em que foi finalizada a contagem e desbloqueia o coletor
+        ///	</summary>
+        procedure FinalizarContagem;
+
+        ///	<summary>
+        ///   Abandona contagem. Registra a data em que foi finalizada a contagem e desbloqueia o coletor
+        ///	</summary>
+        procedure AbandonarContagem;
+
+        ///	<summary>
+        ///	  Salva as informações da terefa, envia as informações de todos os
+        ///	  produtos coletados
+        ///	</summary>
+        procedure EnviarInformacoesDasTarefas;
+
+
+        ///	<summary>
+        ///	  Inicializa a operacao. Registra a data e hora de inicio, bem como bloqueia o usuario
+        ///   e altera o status para Executando
+        ///	</summary>
+        procedure InicializarContagem;
+
+
+        ///	<summary>
+        ///	  Obtem a lista de tarefas de acordo com o IDOperacao da própria
+        ///	  classe
+        ///	</summary>
+        procedure ObterListaTarefas;
+
+
+        ///	<summary>
+        ///	  Retorna uma tarefa atraves do seu Recno
+        ///	</summary>
+        function ObterTarefaPorRecno(recno: Integer): TTerefa;
+
+
+        function ObterTarefaPorCodigoProduto(codigoProduto:string): TTerefa;
+
+        constructor Create;
+        destructor Destroy; override;
+
+        [TPersistable(fgPersistable, 'R_E_C_N_O_')]
+        property Recno: integer read FRecno write SetRecno;
+
+        [TPersistable(fgPersistable, 'FILIAL')]
+        property CodigoFilial: string read FCodigoFilial write SetCodigoFilial;
+
+        property Filial: TFilial read FFilial write SetFilial;
+
+        [TPersistable(fgPersistable, 'OPERACAO')]
+        property CodigoTipoOperacao: string read FCodigoOperacao write SetCodigoOperacao;
+
+        property TipoOperacao: TTipoOperacao read FTipoOperacao write SetTipoOperacao;
+
+        [TPersistable(fgPersistable, 'IDOPER')]
+        property IDOperacao: integer read FIDOperacao write SetIDOperacao;
+
+        [TPersistable(fgPersistable, 'TAREFA')]
+        property CodigoTarefa: integer read FCodigoTarefa write SetCodigoTarefa;
+
+        [TPersistable(fgPersistable, 'STATUS')]
+        property Status: string read FStatus write SetStatus;
+
+        property DescricaoStatus: string read GetDescricaoStatus;
+
+        [TPersistable(fgPersistable, 'STATUSTASK')]
+        property StatusTarefa: string read FStatusTarefa write SetStatusTarefa;
+
+        [TPersistable(fgPersistable, 'EMISSAO')]
+        property DataEmissao  : string read FDataEmissao write SetDataEmissao;
+
+        [TPersistable(fgPersistable, 'HORAEMIS')]
+        property HoraEmissao: string read FHoraEmissao write SetHoraEmissao;
+
+        [TPersistable(fgPersistable, 'DATAI')]
+        property DataInicio : string read FDataInicial write SetDataInicial;
+
+        [TPersistable(fgPersistable, 'HORAI')]
+        property HoraInicio: string read FHoraInicial write SetHoraInicial;
+
+        [TPersistable(fgPersistable, 'DATAF')]
+        property DataFinal: string read FDataFinal write SetDataFinal;
+
+        [TPersistable(fgPersistable, 'HORAF')]
+        property HoraFinal: string read FHoraFinal write SetHoraFinal;
+
+        [TPersistable(fgPersistable, 'DISPOSIT')]
+        property CodigoDispositivo: string read FCodigoDispositivo write SetCodigoDispositivo;
+
+
+       [TPersistable(fgPersistable, 'TXTAUX')]
+        property Auxiliar: string read FAuxiliar write SetAuxiliar;
+
+        property Dispositivo: TDispositivo read FDispositivo write SetDispositivo;
+
+        [TPersistable(fgPersistable, 'D_E_L_E_T_')]
+        property Delet: string read FDelet write SetDelet;
+
+        [TPersistable(fgPersistable, 'EMPRESA')]
+        property CodigoEmpresa: string read FCodigoEmpresa write SetCodigoEmpresa;
+
+        [TPersistable(fgPersistable, 'USERTAREFA')]
+        property UsuarioTarefa: string read FUsuarioTarefa write SetUsuarioTarefa;
+
+
+
+        property ListaTarefas: TLista<TTerefa> read FListaTarefas write FListaTarefas;
+
+
+
+
+        property ProdutoConferir: string read FProdutoConferir write SetProdutoConferir;
+        property FamiliaConferir: string read FFamiliaConferir write SetFamiliaConferir;
+        property GrupoConferir: string read FGrupoConferir write SetGrupoConferir;
+        property SubGrupoConferir: string read FSubGrupoConferir write SetSubGrupoConferir;
+        property TipologiaConferir: string read FTipologiaConferir write SetTipologiaConferir;
+        property FabricanteConferir: string read FFabricanteConferir write SetFabricanteConferir;
+    end;
+
+implementation
+
+
+{ TFila }
+
+uses ClsFilter, ClsFieldFilter, UntPrincipal;
+
+{$REGION 'Métodos CRUD'}
+
+function TFila.Inserir: integer;
+begin
+     //TLib.ExecutaTarefa('InserirFila', 'TFila', TLib.ObjectToParameters(Self,acInsercao));
+    //###Validar retorno da função
+    //result := 0;
+end;
+
+
+function TFila.Alterar: integer;
+begin
+    //TLib.ExecutaTarefa('AlterarFila', 'TFila' , TLib.ObjectToParameters(Self,acAlteracao));
+    //###Validar retorno da função
+    //result := 0;
+end;
+
+
+function TFila.Deletar(ID: string): integer;
+var
+    parametro: TParametro;
+begin
+//    try
+//        parametro := TParametro.Create;
+//        parametro.Add('', 'R_E_C_N_O_', ID);
+//
+//        TLib.ExecutaTarefa('DeletarFila', 'TFila', parametro);
+//
+//        //###Validar retorno da função
+//        result := 0;
+//    finally
+//        parametro.Free;
+//    end;
+end;
+
+
+function TFila.GetDescricaoStatus: string;
+begin
+   if FStatus = 'F' then
+    result := 'FINALIZADO'
+   else
+   if FStatus = 'E' then
+    result := 'EXECUTANDO'
+   else
+   if FStatus = 'C' then
+    result := 'CANCELADO'
+   else
+   if FStatus = 'P' then
+    result := 'PENDENTE';
+end;
+
+function TFila.Listar(tipoOperacao: TOparationTypes; multselect: Boolean): TResultFilter;
+var
+    campoFiltro:TFieldFilter;
+    filtro : TFilter<TFila>;
+    //parametro : TParametro;
+    //lista:TLista<TFila>
+begin
+    inherited;
+    try
+        filtro := TFilter<TFila>.Create;
+        filtro.ScreenName := 'Filtro de Fila';
+        filtro.OperationType := tipoOperacao;
+        filtro.MultiSelect := multselect;
+        filtro.Task := 'ConsultarFila';
+        //###Criar os Índices do filtro
+
+        campoFiltro := TFieldFilter.Create; 
+        campoFiltro.Description := 'Recno'; 
+        campoFiltro.Name := 'Recno'; 
+        campoFiltro.MaskTypes := mtNone; 
+        campoFiltro.GridSize := 100; 
+        campoFiltro.FieldType := fdNormal; 
+        filtro.AddField(campoFiltro); 
+ 
+        campoFiltro := TFieldFilter.Create; 
+        campoFiltro.Description := 'CodigoFilial'; 
+        campoFiltro.Name := 'CodigoFilial'; 
+        campoFiltro.MaskTypes := mtNone; 
+        campoFiltro.GridSize := 100; 
+        campoFiltro.FieldType := fdNormal; 
+        filtro.AddField(campoFiltro); 
+ 
+        campoFiltro := TFieldFilter.Create; 
+        campoFiltro.Description := 'CodigoOperacao'; 
+        campoFiltro.Name := 'CodigoOperacao'; 
+        campoFiltro.MaskTypes := mtNone; 
+        campoFiltro.GridSize := 100; 
+        campoFiltro.FieldType := fdNormal; 
+        filtro.AddField(campoFiltro); 
+ 
+        campoFiltro := TFieldFilter.Create; 
+        campoFiltro.Description := 'IDOperacao'; 
+        campoFiltro.Name := 'IDOperacao'; 
+        campoFiltro.MaskTypes := mtNone; 
+        campoFiltro.GridSize := 100; 
+        campoFiltro.FieldType := fdNormal; 
+        filtro.AddField(campoFiltro); 
+ 
+        campoFiltro := TFieldFilter.Create; 
+        campoFiltro.Description := 'Status'; 
+        campoFiltro.Name := 'Status'; 
+        campoFiltro.MaskTypes := mtNone; 
+        campoFiltro.GridSize := 100; 
+        campoFiltro.FieldType := fdNormal; 
+        filtro.AddField(campoFiltro); 
+ 
+        campoFiltro := TFieldFilter.Create; 
+        campoFiltro.Description := 'StatusTarefa'; 
+        campoFiltro.Name := 'StatusTarefa'; 
+        campoFiltro.MaskTypes := mtNone; 
+        campoFiltro.GridSize := 100; 
+        campoFiltro.FieldType := fdNormal; 
+        filtro.AddField(campoFiltro); 
+ 
+        campoFiltro := TFieldFilter.Create; 
+        campoFiltro.Description := 'DataEmissao  '; 
+        campoFiltro.Name := 'DataEmissao  '; 
+        campoFiltro.MaskTypes := mtNone; 
+        campoFiltro.GridSize := 100; 
+        campoFiltro.FieldType := fdNormal; 
+        filtro.AddField(campoFiltro); 
+ 
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'HoraEmissao';
+        campoFiltro.Name := 'HoraEmissao';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+ 
+        campoFiltro := TFieldFilter.Create; 
+        campoFiltro.Description := 'DataInicial '; 
+        campoFiltro.Name := 'DataInicial '; 
+        campoFiltro.MaskTypes := mtNone; 
+        campoFiltro.GridSize := 100; 
+        campoFiltro.FieldType := fdNormal; 
+        filtro.AddField(campoFiltro); 
+ 
+        campoFiltro := TFieldFilter.Create; 
+        campoFiltro.Description := 'HoraInicial'; 
+        campoFiltro.Name := 'HoraInicial'; 
+        campoFiltro.MaskTypes := mtNone; 
+        campoFiltro.GridSize := 100; 
+        campoFiltro.FieldType := fdNormal; 
+        filtro.AddField(campoFiltro); 
+ 
+        campoFiltro := TFieldFilter.Create; 
+        campoFiltro.Description := 'DataFinal'; 
+        campoFiltro.Name := 'DataFinal'; 
+        campoFiltro.MaskTypes := mtNone; 
+        campoFiltro.GridSize := 100; 
+        campoFiltro.FieldType := fdNormal; 
+        filtro.AddField(campoFiltro); 
+ 
+        campoFiltro := TFieldFilter.Create; 
+        campoFiltro.Description := 'HoraFinal'; 
+        campoFiltro.Name := 'HoraFinal'; 
+        campoFiltro.MaskTypes := mtNone; 
+        campoFiltro.GridSize := 100; 
+        campoFiltro.FieldType := fdNormal; 
+        filtro.AddField(campoFiltro); 
+ 
+        campoFiltro := TFieldFilter.Create; 
+        campoFiltro.Description := 'CodigoDispositivo'; 
+        campoFiltro.Name := 'CodigoDispositivo'; 
+        campoFiltro.MaskTypes := mtNone; 
+        campoFiltro.GridSize := 100; 
+        campoFiltro.FieldType := fdNormal; 
+        filtro.AddField(campoFiltro); 
+ 
+        campoFiltro := TFieldFilter.Create; 
+        campoFiltro.Description := 'Delet'; 
+        campoFiltro.Name := 'Delet'; 
+        campoFiltro.MaskTypes := mtNone; 
+        campoFiltro.GridSize := 100; 
+        campoFiltro.FieldType := fdNormal; 
+        filtro.AddField(campoFiltro); 
+ 
+        campoFiltro := TFieldFilter.Create; 
+        campoFiltro.Description := 'CodigoEmpresa'; 
+        campoFiltro.Name := 'CodigoEmpresa'; 
+        campoFiltro.MaskTypes := mtNone; 
+        campoFiltro.GridSize := 100; 
+        campoFiltro.FieldType := fdNormal; 
+        filtro.AddField(campoFiltro); 
+ 
+
+        result := filtro.Execute(filtro);
+    finally
+        // FreeAndNil(parametro);
+        // lista.Destroy;
+    end;
+end;
+
+function TFila.Obter(parametros: TParametro): TObject;
+var
+  lista: TLista<TFila>;
+begin
+    try
+        lista := BaseLib.XmlToObject<TFila>(BaseLib.ExecutaTarefa('ConsultarFila', 'TFila', parametros));
+
+        if lista.Count = 1 then
+        begin
+           PreencherObjeto(lista[0]);
+           Result := Self;
+        end
+        else
+        begin
+            TLib.MensagemAdvertencia('Nenhum registro encontrado.', 'Aviso');
+            Result := nil;
+        end;
+    finally
+        lista.Destroy;
+    end;
+end;
+
+function TFila.ObterFilaAbertaPorUsuario(operacao: TCodigoOperacao): TFila;
+var
+    lista: TLista<TFila>;
+    parametro:TParametro;
+    codigoOperacao:string;
+    usuario: string;
+begin
+    try
+        parametro := TParametro.Create;
+
+        usuario :=  tlib.ObterVarAmbiente(vaUsuarioWindows);
+
+        if Tlib.SistemaEstaEmModoDebug then
+            usuario := 'tscdmtcoletorteste'; //'tscdmtcoletor09'; //
+
+        //showmessage(usuario);
+
+        parametro.Add('', 'USERTS', usuario);
+
+        codigoOperacao := ObterCodigoTipoOperacao(operacao);
+
+        parametro.Add('', 'OPERACAO', codigoOperacao);
+
+        lista := BaseLib.XmlToObject<TFila>(BaseLib.ExecutaTarefa('ObterFilaAbertaPorUsuario', 'TFila', parametro));
+
+        if lista.Count = 1 then
+        begin
+            PreencherObjeto(lista[0]);
+            result := Self;
+
+            if operacao = cpInventario then
+            begin
+                 ProdutoConferir := tlib.ObterPorParametro(Auxiliar, '1','|');
+                 FamiliaConferir := tlib.ObterPorParametro(Auxiliar, '2','|');
+                 GrupoConferir := tlib.ObterPorParametro(Auxiliar, '3','|');
+                 SubGrupoConferir := tlib.ObterPorParametro(Auxiliar, '4','|');
+                 TipologiaConferir := tlib.ObterPorParametro(Auxiliar, '5','|');
+                 FabricanteConferir := tlib.ObterPorParametro(Auxiliar, '6','|');
+            end;
+
+        end
+        else
+        begin
+            result := nil;
+        end;
+    finally
+        if lista <> nil then
+            lista.Destroy;
+
+        if parametro <> nil then
+        parametro.free;
+    end;
+end;
+
+procedure TFila.ObterListaTarefas;
+var
+  reenvio : string;
+begin
+    if self.Preenchido then
+    begin
+        reenvio := Tlib.IfTernario(Self.DataFinal <> EmptyStr, 'OK', 'NULL');
+        FListaTarefas := TTerefa.ObterListaTarefas(self.IDOperacao, Self.CodigoTipoOperacao, reenvio);
+    end;
+end;
+
+
+function TFila.ObterTarefaPorCodigoProduto(codigoProduto: string): TTerefa;
+var
+  tarefa: TTerefa;
+  param: TParametro;
+begin
+    result := nil;
+    for tarefa in ListaTarefas do
+    begin
+        if (tarefa.produto.preenchido = false)  then
+            tarefa.produto.obter(tarefa.CodigoProduto);
+
+        if tarefa.produto.ChecarCodigoProduto(codigoProduto) then
+        begin
+          // para atualizar o recno
+          if (tarefa.recno = 0) then
+          begin
+            try
+                param := tParametro.Create;
+                param.add('','Z83_IDOPER', inttoStr(tarefa.IDOperacao));
+                param.add('','Z83_PROD', tarefa.CodigoProduto);
+                param.add('','Z83_FILIAL', tarefa.CodigoFilial);
+                tarefa.obter(param);
+            finally
+                if param <> nil then
+                    freeAndNil(param);
+            end;
+          end;
+
+          result := tarefa;
+          break;
+        end;
+    end;
+end;
+
+function TFila.ObterTarefaPorRecno(recno: Integer): TTerefa;
+var
+  tarefa: TTerefa;
+begin
+    for tarefa in ListaTarefas do
+        if tarefa.recno = recno then
+        begin
+          result := tarefa;
+          break;
+        end;
+end;
+
+function TFila.ObterParametrosTarefa(parametro: TParametro): TParametro;
+var
+    i: integer;
+begin
+    for I := 0 to ListaTarefas.count-1 do
+        parametro := TBase(ListaTarefas[I]).ObjetoParaParametros(acAlteracao, parametro, 'Z83', I+1);
+
+    result := parametro;
+end;
+
+function TFila.Obter(ID: string): TObject;
+var
+    parametros: TParametro;
+
+begin
+    try
+        parametros := TParametro.Create;
+        parametros.Add('', 'R_E_C_N_O_', ID);
+        result := Obter(parametros);
+    finally
+        FreeAndNil(parametros);
+    end;
+end;
+
+function TFila.ObterCodigoTipoOperacao(tipo: TCodigoOperacao): string;
+begin
+    case tipo of
+        cpInventario: result := '000001';
+        cpConferenciEntrada: result := '000002';
+        cpDistribuicao: result := '000003';
+        cpPedidoTransferenciaSaida: result := '000017';
+        cpConferenciaRomaneioSaida: result := '000016'
+    end;
+end;
+
+{$ENDREGION}
+
+{$REGION 'Regras de Negócio'}
+
+procedure TFila.PreencherObjeto(Fila: TFila);
+begin
+    Fila.CopiarPara(Self);
+    FPreenchido := true;
+end;
+
+procedure TFila.InicializarContagem;
+var
+    parametro: TParametro;
+begin
+
+        // iniciar apenar uma vez
+        if (self.HoraInicio = EmptyStr) and (self.DataInicio = EmptyStr) then
+        begin
+            try
+              self.DataInicio := Tlib.ObterDataAtual;
+              self.HoraInicio := tlib.ObterHoraAtual;
+              self.Status := 'E';
+              self.StatusTarefa := 'EXECUTANDO';
+              self.UsuarioTarefa := Tlib.UsuarioLogado.Login;
+              parametro := Self.ObjetoParaParametros(acAlteracao);
+              BaseLib.ExecutaTarefa('AlterarFila', 'TFila' , parametro);
+
+            finally
+              if parametro <> nil then
+                  FreeAndNil(parametro);
+            end;
+        end;
+
+end;
+
+procedure TFila.AbandonarContagem;
+var
+    parametro:TParametro;
+begin
+    try
+        // Obtem as informaçoes da Fila
+        self.DataFinal := Tlib.ObterDataAtual;
+        self.HoraFinal := tlib.ObterHoraAtual;
+        self.StatusTarefa := 'ABANDONADO';
+        self.UsuarioTarefa := Tlib.UsuarioLogado.Login;
+        parametro := TParametro.Create;
+        parametro := Self.ObjetoParaParametros(acAlteracao, parametro, 'FILA');
+
+        // desbloqueio o dispositivo
+        Self.Dispositivo.Obter(Self.CodigoDispositivo);
+        self.Dispositivo.Status := 'LIVRE';
+        parametro := Self.Dispositivo.ObjetoParaParametros(acAlteracao, parametro, 'Z15');
+
+        BaseLib.ExecutaTarefa('AbandonarContagem', 'TFila' , parametro);
+    finally
+        FreeAndNil(parametro);
+    end;
+end;
+
+procedure TFila.FinalizarContagem;
+var
+    parametro:TParametro;
+    tarefa: TTerefa;
+begin
+    try
+        // Obtem as informaçoes da Fila
+        self.DataFinal := Tlib.ObterDataAtual;
+        self.HoraFinal := tlib.ObterHoraAtual;
+        self.StatusTarefa := 'FINALIZADO';
+        self.UsuarioTarefa := Tlib.UsuarioLogado.Login;
+        parametro := TParametro.Create;
+        parametro := Self.ObjetoParaParametros(acAlteracao, parametro, 'FILA');
+
+        //Finalizo as tarefas e as obtem como parametros
+        for tarefa in Self.ListaTarefas do
+            tarefa.StatusTarefa := 'F';
+        parametro := ObterParametrosTarefa(parametro);
+
+        //Obtem as informações do dispositivo
+        Self.Dispositivo.Obter(Self.CodigoDispositivo);
+        // desbloqueio o dispositivo
+        self.Dispositivo.Status := 'LIVRE';
+        parametro := Self.Dispositivo.ObjetoParaParametros(acAlteracao, parametro, 'Z15');
+
+
+        BaseLib.ExecutaTarefa('FinalizarContagem', 'TFila' , parametro);
+    finally
+        FreeAndNil(parametro);
+    end;
+end;
+
+constructor TFila.Create;
+begin
+    FDispositivo := TDispositivo.Create;
+    FFilial := TFilial.Create;
+    FTipoOperacao := TTipoOperacao.Create;
+    FListaTarefas := TLista<TTerefa>.Create;
+end;
+
+
+destructor TFila.Destroy;
+begin
+    FreeAndNil(FDispositivo);
+    FreeAndNil(FFilial);
+    FreeAndNil(FTipoOperacao);
+    FreeAndNil(FListaTarefas);
+end;
+
+procedure TFila.EnviarInformacoesDasTarefas;
+var
+    param: Tparametro;
+    tarefa: TTerefa;
+begin
+    try
+        param := TParametro.Create;
+        param := obterParametrosTarefa(param);
+        BaseLib.ExecutaTarefa('ManterListaTarefas', 'TFila' , param);
+
+        for tarefa in ListaTarefas do
+            tarefa.TipoManutencao := Enviado;
+    finally
+        FreeAndNil(param);
+    end;
+end;
+
+
+{$ENDREGION}
+
+{$REGION 'Métodos de Propriedades'}
+
+procedure TFila.SetAuxiliar(const Value: string);
+begin
+  FAuxiliar := Value;
+end;
+
+procedure TFila.SetCodigoDispositivo(const Value: string);
+begin
+  FCodigoDispositivo := Value;
+end;
+
+procedure TFila.SetCodigoEmpresa(const Value: string);
+begin
+  FCodigoEmpresa := Value;
+end;
+
+procedure TFila.SetCodigoFilial(const Value: string);
+begin
+  FCodigoFilial := Value;
+end;
+
+procedure TFila.SetCodigoOperacao(const Value: string);
+begin
+  FCodigoOperacao := Value;
+end;
+
+procedure TFila.SetCodigoTarefa(const Value: integer);
+begin
+  FCodigoTarefa := Value;
+end;
+
+procedure TFila.SetDataEmissao(const Value: string);
+begin
+  FDataEmissao := Value;
+end;
+
+procedure TFila.SetDataFinal(const Value: string);
+begin
+  FDataFinal := Value;
+end;
+
+procedure TFila.SetDataInicial(const Value: string);
+begin
+  FDataInicial := Value;
+end;
+
+procedure TFila.SetDelet(const Value: string);
+begin
+  FDelet := Value;
+end;
+
+procedure TFila.SetDispositivo(const Value: TDispositivo);
+begin
+  FDispositivo := Value;
+end;
+
+procedure TFila.SetFabricanteConferir(const Value: string);
+begin
+  FFabricanteConferir := Value;
+end;
+
+procedure TFila.SetFamiliaConferir(const Value: string);
+begin
+  FFamiliaConferir := Value;
+end;
+
+procedure TFila.SetFilial(const Value: TFilial);
+begin
+  FFilial := Value;
+end;
+
+procedure TFila.SetGrupoConferir(const Value: string);
+begin
+  FGrupoConferir := Value;
+end;
+
+procedure TFila.SetHoraEmissao(const Value: string);
+begin
+  FHoraEmissao := Value;
+end;
+
+procedure TFila.SetHoraFinal(const Value: string);
+begin
+  FHoraFinal := Value;
+end;
+
+procedure TFila.SetHoraInicial(const Value: string);
+begin
+  FHoraInicial := Value;
+end;
+
+procedure TFila.SetIDOperacao(const Value: integer);
+begin
+  FIDOperacao := Value;
+end;
+
+procedure TFila.SetProdutoConferir(const Value: string);
+begin
+  FProdutoConferir := Value;
+end;
+
+procedure TFila.SetRecno(const Value: integer);
+begin
+  FRecno := Value;
+end;
+
+procedure TFila.SetStatus(const Value: string);
+begin
+  FStatus := Value;
+end;
+
+procedure TFila.SetStatusTarefa(const Value: string);
+begin
+  FStatusTarefa := Value;
+end;
+
+
+procedure TFila.SetSubGrupoConferir(const Value: string);
+begin
+  FSubGrupoConferir := Value;
+end;
+
+procedure TFila.SetTipologiaConferir(const Value: string);
+begin
+  FTipologiaConferir := Value;
+end;
+
+procedure TFila.SetTipoOperacao(const Value: TTipoOperacao);
+begin
+  FTipoOperacao := Value;
+end;
+
+procedure TFila.SetUsuarioTarefa(const Value: string);
+begin
+  FUsuarioTarefa := Value;
+end;
+
+{$ENDREGION}
+
+end.
+

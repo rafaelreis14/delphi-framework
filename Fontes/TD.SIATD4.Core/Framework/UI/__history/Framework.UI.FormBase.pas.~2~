@@ -1,0 +1,267 @@
+unit Framework.UI.FormBase;
+
+interface
+
+uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+    System.Classes, Vcl.Graphics, REdit, RComboBox, RSearch, RCheckBox, RCheckListBox,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, DBClient,
+    Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Mask,    Lib.Enumeradores, System.RTTI, Lib.Parametro,
+  UntErrorProvider, Lib.Biblioteca;
+
+type
+    TFrmBase = class(TForm)
+        ErrorProvider1: TErrorProvider;
+        procedure FormKeyPress(Sender: TObject; var Key: Char);
+        procedure FormCreate(Sender: TObject);
+        procedure FormKeyDown(Sender: TObject; var Key: Word;
+          Shift: TShiftState);
+        procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure FormActivate(Sender: TObject);
+    private
+        FTabEnter: boolean;
+        FEsc: boolean;
+        FAcaoJanela: TAcaoJanela;
+        FObjeto: TObject;
+        FRetornoFormulario: TRetornoFormulario;
+        procedure SetEsc(const Value: boolean);
+        procedure SetTabEnter(const Value: boolean);
+        procedure SetAcaoJanela(const Value: TAcaoJanela);
+        procedure SetObjeto(const Value: TObject);
+        procedure SetRetornoFormulario(const Value: TRetornoFormulario);
+
+    protected
+        function ValidaCamposObrigatorios(errorProvider: TErrorProvider; form: TScrollingWinControl): boolean; overload;
+        function ValidaCamposObrigatorios(errorProvider: TErrorProvider ): boolean; overload;
+
+        procedure CarregaComponentes(form: TScrollingWinControl); overload;
+        procedure CarregaComponentes; overload;
+        procedure CarregaObjeto(form: TScrollingWinControl);overload;
+        procedure CarregaObjeto; overload;
+        function VerificarComponentes(componente: Tcomponent): boolean;
+
+
+    public
+        property TabEnter: boolean read FTabEnter write SetTabEnter;
+        property FecharComEsc: boolean read FEsc write SetEsc default true;
+        property AcaoJanela: TAcaoJanela read FAcaoJanela write SetAcaoJanela;
+        property Objeto: TObject read FObjeto write SetObjeto;
+
+        property RetornoFormulario: TRetornoFormulario read FRetornoFormulario write SetRetornoFormulario;
+        const MobileWidth: integer = 258;
+        const MobileHeight: integer = 338;
+    type
+        Parametro = class(TParametro);
+    end;
+
+var
+    FrmBase: TFrmBase;
+
+implementation
+
+{$R *.dfm}
+
+
+
+procedure TFrmBase.FormActivate(Sender: TObject);
+begin
+  self.FormStyle := fsNormal;
+end;
+
+procedure TFrmBase.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+ if RetornoFormulario = null then
+      RetornoFormulario := rfCancelado;
+end;
+
+procedure TFrmBase.FormCreate(Sender: TObject);
+begin
+    self.FTabEnter := true;
+    self.Caption := '[ SIATD 4 - '+Tlib.ObterVersao+' ]';
+end;
+
+procedure TFrmBase.FormKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+    if Key = VK_ESCAPE then
+        if FEsc then
+            close;
+end;
+
+procedure TFrmBase.FormKeyPress(Sender: TObject; var Key: Char);
+begin
+    if ((Key = #13) and (FTabEnter = true)) then
+    begin
+        SelectNext(ActiveControl, true, true);
+        Key := #0;
+    end;
+end;
+
+procedure TFrmBase.SetAcaoJanela(const Value: TAcaoJanela);
+begin
+    FAcaoJanela := Value;
+end;
+
+
+procedure TFrmBase.SetEsc(const Value: boolean);
+begin
+    FEsc := Value;
+end;
+
+procedure TFrmBase.SetObjeto(const Value: TObject);
+begin
+    FObjeto := Value;
+end;
+
+
+procedure TFrmBase.SetRetornoFormulario(const Value: TRetornoFormulario);
+begin
+  FRetornoFormulario := Value;
+end;
+
+
+procedure TFrmBase.SetTabEnter(const Value: boolean);
+begin
+    FTabEnter := Value;
+end;
+
+function TFrmBase.ValidaCamposObrigatorios(errorProvider: TErrorProvider; form: TScrollingWinControl): boolean;
+var
+    componente: Tcomponent;
+    context: TRttiContext;
+    prop, propComp: TRttiProperty;
+begin
+    Result := false;
+    for componente in form do
+    begin
+       if VerificarComponentes(componente) then
+       begin
+            propComp := context.GetType(componente.ClassType).GetProperty('MandatoryField');
+            if propComp.GetValue(componente).ToString = 'True' then
+            begin
+                propComp := context.GetType(componente.ClassType).GetProperty('Value');
+                if trim(propComp.GetValue(componente).ToString) = EmptyStr then
+                begin
+                   ErrorProvider.SetError(TControl(componente),'Campo Obrigatório');
+                   Result := true;
+                end;
+            end;
+       end
+       else
+        begin
+            if (componente is TFrame) then
+                // esta validação é feita pois caso ja exista um item no form principal obrigatorio vazio, e no frame nao tenha, não sobreponha
+                if ValidaCamposObrigatorios(errorProvider, TFrame(componente)) then
+                    Result := true;
+        end;
+
+    end;
+    errorProvider.FFirst := false;
+end;
+
+procedure TFrmBase.CarregaComponentes(form: TScrollingWinControl);
+var
+    context: TRttiContext;
+    prop, propComp: TRttiProperty;
+    Texto : string;
+    I: integer;
+    desabilitaComponente: boolean;
+    val: TValue;
+    componente:TComponent;
+begin
+    for componente in form do
+    begin
+        if VerificarComponentes(componente) then
+        begin
+            try
+                propComp := context.GetType(componente.ClassType).GetProperty('PersistentField');
+                if propComp.GetValue(componente).ToString <> 'True' then Continue;
+
+                propComp := context.GetType(componente.ClassType).GetProperty('FieldName');
+                Texto := propComp.GetValue(componente).ToString;
+                prop := context.GetType(Objeto.ClassType).GetProperty(propComp.GetValue(componente).ToString);
+
+                propComp := context.GetType(componente.ClassType).GetProperty('Value');
+                propComp.SetValue(componente, prop.GetValue(Objeto).ToString);
+
+                propComp := context.GetType(componente.ClassType).GetProperty('Enabled');
+                desabilitaComponente := TLib.IfTernario(AcaoJanela = acVisualizacao,false, true);
+                val := val.From(desabilitaComponente);
+                propComp.SetValue(componente, val);
+            except
+               raise Exception.Create('Erro ao tentar acessar a propriedade do componente '+componente.Name+' - '+Texto+'. Verifique Configuração');
+            end;
+        end
+        else
+        begin
+            if (componente is TFrame) then
+                CarregaComponentes(TFrame(componente));
+
+        end;
+    end;
+end;
+
+procedure TFrmBase.CarregaComponentes;
+begin
+  CarregaComponentes(Self);
+end;
+
+procedure TFrmBase.CarregaObjeto;
+begin
+   CarregaObjeto(Self);
+end;
+
+procedure TFrmBase.CarregaObjeto(form: TScrollingWinControl);
+var
+    context: TRttiContext;
+    prop, propComp: TRttiProperty;
+    Texto, text1: string;
+    I: integer;
+    componente: Tcomponent;
+begin
+    for componente in form do
+    begin
+        if VerificarComponentes(componente) then
+        begin
+            try
+                propComp := context.GetType(componente.ClassType).GetProperty('PersistentField');
+                texto := propComp.GetValue(componente).ToString;
+
+                if propComp.GetValue(componente).ToString <> 'True' then Continue;
+
+                propComp := context.GetType(componente.ClassType).GetProperty('FieldName');
+                Texto := propComp.GetValue(componente).ToString;
+                prop := context.GetType(Objeto.ClassType).GetProperty(propComp.GetValue(componente).ToString);
+
+                propComp := context.GetType(componente.ClassType).GetProperty('Value');
+                Tlib.ConverteEPopularValorPropriedade(prop,Objeto,propComp.GetValue(componente).ToString);
+            except
+               raise Exception.Create('Erro ao tentar acessar a propriedade do campo '+Texto+'. Verifique Configuração');
+            end;
+        end
+        else
+        begin
+            if (componente is TFrame) then
+                CarregaObjeto(TFrame(componente));
+
+        end;
+    end;
+end;
+
+
+
+function TFrmBase.ValidaCamposObrigatorios(errorProvider: TErrorProvider): boolean;
+begin
+    result := ValidaCamposObrigatorios(errorProvider, self)
+end;
+
+function TFrmBase.VerificarComponentes(componente: Tcomponent): boolean;
+begin
+    Result := (componente is TREdit) or
+              (componente is TRComboBox) or
+              (componente is TRSearch)or
+              (componente is TRCheckBox)or
+              (componente is TRCheckListBox);
+end;
+
+end.

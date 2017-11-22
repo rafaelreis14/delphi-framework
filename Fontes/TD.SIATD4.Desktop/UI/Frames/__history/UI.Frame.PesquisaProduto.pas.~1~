@@ -1,0 +1,121 @@
+unit UntPesquisaProduto;
+
+interface
+
+uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
+    Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Buttons,
+    Vcl.Mask, REdit, ClsProduto, ClsEnumeradores;
+
+type
+    TfrmPesquisaProduto = class(TFrame)
+        Label3: TLabel;
+        edCodigoProduto: TREdit;
+        edDescricaoProduto: TREdit;
+        btnConsultaProduto: TBitBtn;
+        procedure edCodigoProdutoExit(Sender: TObject);
+        procedure btnConsultaProdutoClick(Sender: TObject);
+    private
+        FPesquisarPeloCodigoDoProduto: Boolean;
+        procedure PopularProduto;
+        procedure ExecutaPesquisa;
+        procedure SetPesquisarPeloCodigoDoProduto(const Value: Boolean);
+        { Private declarations }
+    public
+        { Public declarations }
+        Produto: TProduto;
+        NovaPesquisaTrouxeResultado: boolean;
+        property PesquisarPeloCodigoDoProduto: Boolean read FPesquisarPeloCodigoDoProduto write SetPesquisarPeloCodigoDoProduto;
+
+
+        procedure Construir;
+        procedure Destruir;
+        procedure LimparCampos;
+    end;
+
+implementation
+
+{$R *.dfm}
+
+uses ClsResultFilter;
+
+procedure TfrmPesquisaProduto.btnConsultaProdutoClick(Sender: TObject);
+begin
+    ExecutaPesquisa;
+end;
+
+procedure TfrmPesquisaProduto.ExecutaPesquisa;
+var
+  result : TResultFilter;
+begin
+    try
+        result := Produto.Listar(otSelect, False);
+        if (result.List <> nil) and (result.List.Count > 0) then
+        begin
+            Produto.PreencherObjeto(result.List[0]);
+            PopularProduto;
+            NovaPesquisaTrouxeResultado := true;
+        end
+        else
+            NovaPesquisaTrouxeResultado := false;
+    finally
+        if result <> nil then
+            FreeAndNil(result);
+    end;
+end;
+
+procedure TfrmPesquisaProduto.Construir;
+begin
+    Produto := TProduto.Create;
+end;
+
+procedure TfrmPesquisaProduto.Destruir;
+begin
+    FreeAndNil(Produto);
+end;
+
+procedure TfrmPesquisaProduto.edCodigoProdutoExit(Sender: TObject);
+begin
+    if edCodigoProduto.Text <> EmptyStr then
+    begin
+        if Produto.Obter(edCodigoProduto.Text) <> nil then
+        begin
+            PopularProduto;
+            NovaPesquisaTrouxeResultado := true;
+        end
+        else
+            ExecutaPesquisa;
+    end
+    else
+       NovaPesquisaTrouxeResultado := false;
+end;
+
+procedure TfrmPesquisaProduto.LimparCampos;
+begin
+    edCodigoProduto.Clear;
+    edDescricaoProduto.Clear;
+end;
+
+procedure TfrmPesquisaProduto.PopularProduto;
+begin
+    edCodigoProduto.Value := Produto.Codigo;
+    edDescricaoProduto.Value := Produto.Descricao;
+end;
+
+procedure TfrmPesquisaProduto.SetPesquisarPeloCodigoDoProduto(const Value: Boolean);
+begin
+  if Value = true then
+  begin
+      edCodigoProduto.Enabled := true
+  end
+  else
+  begin
+      edCodigoProduto.Enabled := false;
+  end;
+
+  FPesquisarPeloCodigoDoProduto := Value;
+end;
+
+end.
+
+

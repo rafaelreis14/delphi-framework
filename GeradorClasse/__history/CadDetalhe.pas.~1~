@@ -1,0 +1,43 @@
+unit CadDetalhe;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Mask, REdit, Vcl.Buttons, Vcl.ComCtrls, Vcl.ExtCtrls;
+
+type
+  TfrmCadastroDetalhe = class(TForm)
+    Panel2: TPanel;
+    lblLetreiro: TLabel;
+    pgcComponentes: TPageControl;
+    tbPrincipal: TTabSheet;
+    Panel3: TPanel;
+    pnlBotoes: TPanel;
+    btnConfirmar: TBitBtn;
+    btnCancelar: TBitBtn;
+    lblModulo: TLabel;
+    edModulo: TREdit;
+    lblDescricao: TLabel;
+    edDescricao: TREdit;
+    Label1: TLabel;
+    REdit1: TREdit;
+    REdit2: TREdit;
+    Label2: TLabel;
+    BitBtn1: TBitBtn;
+    BitBtn2: TBitBtn;
+    ListBox1: TListBox;
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  frmCadastroDetalhe: TfrmCadastroDetalhe;
+
+implementation
+
+{$R *.dfm}
+
+end.

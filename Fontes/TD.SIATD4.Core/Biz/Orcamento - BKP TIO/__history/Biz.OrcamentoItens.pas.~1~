@@ -1,0 +1,1880 @@
+unit ClsOrcamentoItens;
+
+interface
+
+uses
+    Classes, System.SysUtils, Dialogs, ClsBase, ClsParametro, ClsEnumeradores, Vcl.Forms,
+    ClsPersistable, ClsLib, ClsProduto, ClsResultFilter, ClsTipoEntrega, Datasnap.DBClient,
+    ClsMaxLenght, ClsMovimentoCursoSeguro, ClsTabelaComissao, ClsFilial,
+  ClsUsuarioLogado;
+
+type
+
+    TOrcamentoItens = class(TBase)
+    private
+        FValorFrete: double;
+        FQuantidadeEntregue: double;
+        FValorDespesa: double;
+        FValorIcmsRetido: double;
+        FValorIPI: double;
+        FFlegueVendido: string;
+        FFilial: string;
+        FTipoEntrega: string;
+        FDataEntregaPSE: string;
+        FValorDesconto: double;
+        FQuantidadeLiberadaPSE: double;
+        FCampanha: string;
+        FQuantidadeDevolvida: double;
+        FDescricaoProduto: string;
+        FCustoCompra: double;
+        FCodigoProduto: string;
+        FCodigoPDV: string;
+        FValorUnitario: double;
+        FCustoNota: double;
+        FRecnoDelete: integer;
+        FValorIcms: double;
+        FLocalEstoque: string;
+        FPercIcms: double;
+        FCodigoTES: string;
+        FCodigoRegraCA: string;
+        FUnidadeMedida: string;
+        FItemOrigem: string;
+        FValorSeguro: double;
+        FCFOP: string;
+        FNumero: string;
+        FPedidoCompraPSE: string;
+        FDataEmissao: string;
+        FValorTotal: double;
+        FItem: string;
+        FRecno: integer;
+        FBaseIcmsRetido: double;
+        FTipoTributacao: string;
+        FQuantidadePSE: double;
+        FTabelaPremio: string;
+        FPrecoTabela: double;
+        FTabelaPreco: string;
+        FQuantidade: double;
+        FPercComissao: double;
+        FDelete: string;
+        FCustoGerencial: double;
+        FCodigoVendedor: string;
+        FFormulaSelfColor: string;
+        FSerieDocumento: string;
+        FBaseIcms: double;
+        FNumeroDocumento: string;
+        FProduto: TProduto;
+        FTipoEntrega_: TTipoEntrega;
+        FQuantidadeConferida: double;
+        FStatusDevolucao: string;
+        FUsuarioBaixaDeposito: string;
+        FUsuarioSistema: string;
+        FDataEntregaDeposito: string;
+        FImpostoDilma: double;
+        FItemComissaoAplicada: string;
+        FTipoVenda: string;
+        FPesoItem: double;
+        FMovimentoCursoSeguro: TMovimentoCursoSeguro;
+        FPercentualPrecoNegociado: double;
+        FTipoAlternativo: TTipoAlternativo;
+        FProdutoPaiAlternativo: TProduto;
+        FTipoEntregaPaiAlternativo: TTipoEntrega;
+        FLocalEstoquePaiAlternativo: string;
+        FFilial_: TFilial;
+        FPaiAlternativo: Boolean;
+        FGrupoSelfColor: integer;
+        FProdutoSelfColor: integer;
+        FCorSelfColor: integer;
+        FColoranteSelfColor: integer;
+        FEmbalagemSelfColor: integer;
+        FItemPai: String;
+        FBaseSelfColor: integer;
+        procedure SetBaseIcms(const Value: double);
+        procedure SetBaseIcmsRetido(const Value: double);
+        procedure SetCampanha(const Value: string);
+        procedure SetCFOP(const Value: string);
+        procedure SetCodigoPDV(const Value: string);
+        procedure SetCodigoProduto(const Value: string);
+        procedure SetCodigoRegraCA(const Value: string);
+        procedure SetCodigoTES(const Value: string);
+        procedure SetCodigoVendedor(const Value: string);
+        procedure SetCustoCompra(const Value: double);
+        procedure SetCustoGerencial(const Value: double);
+        procedure SetCustoNota(const Value: double);
+        procedure SetDataEmissao(const Value: string);
+        procedure SetDataEntregaPSE(const Value: string);
+        procedure SetDelete(const Value: string);
+        procedure SetDescricaoProduto(const Value: string);
+        procedure SetFilial(const Value: string);
+        procedure SetFlegueVendido(const Value: string);
+        procedure SetFormulaSelfColor(const Value: string);
+        procedure SetItem(const Value: string);
+        procedure SetItemOrigem(const Value: string);
+        procedure SetLocalEstoque(const Value: string);
+        procedure SetNumero(const Value: string);
+        procedure SetNumeroDocumento(const Value: string);
+        procedure SetPedidoCompraPSE(const Value: string);
+        procedure SetPercComissao(const Value: double);
+        procedure SetPercIcms(const Value: double);
+        procedure SetPrecoTabela(const Value: double);
+        procedure SetQuantidade(const Value: double);
+        procedure SetQuantidadeDevolvida(const Value: double);
+        procedure SetQuantidadeEntregue(const Value: double);
+        procedure SetQuantidadeLiberadaPSE(const Value: double);
+        procedure SetQuantidadePSE(const Value: double);
+        procedure SetRecno(const Value: integer);
+        procedure SetRecnoDelete(const Value: integer);
+        procedure SetSerieDocumento(const Value: string);
+        procedure SetTabelaPreco(const Value: string);
+        procedure SetTabelaPremio(const Value: string);
+        procedure SetTipoEntrega(const Value: string);
+        procedure SetTipoTributacao(const Value: string);
+        procedure SetUnidadeMedida(const Value: string);
+        procedure SetValorDesconto(const Value: double);
+        procedure SetValorDespesa(const Value: double);
+        procedure SetValorFrete(const Value: double);
+        procedure SetValorIcms(const Value: double);
+        procedure SetValorIcmsRetido(const Value: double);
+        procedure SetValorIPI(const Value: double);
+        procedure SetValorSeguro(const Value: double);
+        procedure SetValorTotal(const Value: double);
+        procedure SetValorUnitario(const Value: double);
+        procedure SetPercentualPrecoNegociado(const Value: double);
+        procedure SetProduto(const Value: TProduto);
+        procedure SetTipoEntrega_(const Value: TTipoEntrega);
+        procedure SetQuantidadeConferida(const Value: double);
+        procedure SetStatusDevolucao(const Value: string);
+        procedure SetUsuarioBaixaDeposito(const Value: string);
+        procedure SetUsuarioSistema(const Value: string);
+        procedure SetDataEntregaDeposito(const Value: string);
+        procedure SetImpostoDilma(const Value: double);
+        procedure SetItemComissaoAplicada(const Value: string);
+        procedure SetTipoVenda(const Value: string);
+
+        function GetLocalEstoque: string;
+        function GetStatusConferecia: string;
+        function GetConferido: Boolean;
+        function GetRemanescenteConferencia: double;
+        function GetTabelaPreco: string;
+        function GetCustoGerencial: double;
+        function GetImpostoDilma: double;
+        function GetCustoCompra: double;
+        function GetCustoNota: double;
+        procedure SetPesoItem(const Value: double);
+        procedure SetMovimentoCursoSeguro(const Value: TMovimentoCursoSeguro);
+        function GetEmCampanha: Boolean;
+        function GetEmPromocao: Boolean;
+        function GetForaDeLinha: Boolean;
+
+        function GetSobEncomenda: Boolean;
+        procedure SetTipoAlternativo(const Value: TTipoAlternativo);
+        procedure SetLocalEstoquePaiAlternativo(const Value: string);
+        procedure SetProdutoPaiAlternativo(const Value: TProduto);
+        procedure SetTipoEntregaPaiAlternativo(const Value: TTipoEntrega);
+        procedure SetFilial_(const Value: TFilial);
+        procedure SetPaiAlternativo(const Value: Boolean);
+        function GetValorComissao: double;
+        procedure SetBaseSelfColor(const Value: integer);
+        procedure SetColoranteSelfColor(const Value: integer);
+        procedure SetCorSelfColor(const Value: integer);
+        procedure SetEmbalagemSelfColor(const Value: integer);
+        procedure SetGrupoSelfColor(const Value: integer);
+        procedure SetItemPai(const Value: String);
+        procedure SetProdutoSelfColor(const Value: integer);
+
+    public
+        function Listar(tipoOperacao: TOparationTypes): TResultFilter; override;
+        function Obter(ID: string): TObject; overload; override;
+        function Obter(parametros: TParametro): TObject; overload;
+        procedure PopularObjeto(OrcamentoItens: TOrcamentoItens);
+
+        /// <summary>
+        /// Faz o cálculo de impostos e preenche as infomações
+        /// [ TES, CFOP, PercICMS, BaseICMS, ValorICMS,BaseSubs, ValorSubst, percIPI, baseIPI, valorIPI ]
+        /// </summary>
+        procedure CalcularImposto(ufCliente, tipoCliente, tipoPessoa, tipoVenda, tipoNotaCumpom: String);
+
+        /// <summary>
+        /// Calcula comissão aplicada e preenche as informações:
+        /// PercentualComissao, RegraComissaoAplicada e ItemComissaoAplicada
+        /// </summary>
+        procedure CalcularComissaoAplicada(prazoMedioCondicaoPagamento: double);
+
+        /// <summary>
+        /// sobrescrita do método da classe base que copia as instancia da
+        /// classe (herdada da classe base) bem como as demais propriedades
+        /// agregadadas (lista de itens do orcamento, lista de forma de
+        /// pagamento, etc).
+        /// </summary>
+        procedure CopiarPara(objeto: TObject); override;
+
+        procedure CalcularPrecoEmTabela(tabelaComissao: TTabelaComissao; quantidadeParcelas: integer; totalPrecoEmTabela, valorEntrada: Currency);
+        function CalcularPMT(qtParcelas, taxaDeJuros, vrLiquido: Real): Currency;
+
+        procedure CalcularValorTotal;
+
+{$REGION 'SZ6 - Itens do Orcamento'}
+        [TPersistable(fgPersistable, 'Z6_NUM')]
+        property Numero: string read FNumero write SetNumero;
+
+        [TPersistable(fgPersistable, 'Z6_PRODUTO')]
+        property CodigoProduto: string read FCodigoProduto write SetCodigoProduto;
+
+        [TPersistable(fgPersistable, 'Z6_DESCRI')]
+        [TMaxLenght(36)]
+        property DescricaoProduto: string read FDescricaoProduto write SetDescricaoProduto;
+
+        [TPersistable(fgPersistable, 'Z6_QUANT')]
+        property Quantidade: double read FQuantidade write SetQuantidade;
+
+        [TPersistable(fgPersistable, 'Z6_TDVUNIT')]
+        property ValorUnitario: double read FValorUnitario write SetValorUnitario;
+
+        [TPersistable(fgPersistable, 'Z6_TDVITEM')]
+        property ValorTotal: double read FValorTotal write SetValorTotal;
+
+        /// <summary>
+        /// Campo valida armazem do microsiga, e será usado futuramente
+        /// quando estiver integrado, atualmente guardada-se valor "01" para
+        /// este campo (segundo o Marcio André)
+        /// </summary>
+        [TPersistable(fgPersistable, 'Z6_LOCAL')]
+        property LocalEstoque: string read GetLocalEstoque write SetLocalEstoque;
+
+        [TPersistable(fgPersistable, 'Z6_UM')]
+        property UnidadeMedida: string read FUnidadeMedida write SetUnidadeMedida;
+
+        [TPersistable(fgPersistable, 'Z6_DESCPRO')]
+        property ValorDesconto: double read FValorDesconto write SetValorDesconto;
+
+        [TPersistable(fgPersistable, 'Z6_TIPTRIB')]
+        property TipoTributacao: string read FTipoTributacao write SetTipoTributacao;
+
+        [TPersistable(fgPersistable, 'Z6_TES')]
+        property CodigoTES: string read FCodigoTES write SetCodigoTES;
+
+        [TPersistable(fgPersistable, 'Z6_CF')]
+        property CFOP: string read FCFOP write SetCFOP;
+
+        [TPersistable(fgPersistable, 'Z6_VENDIDO')]
+        property Vendido: string read FFlegueVendido write SetFlegueVendido;
+
+        [TPersistable(fgPersistable, 'Z6_DOCTD')]
+        property NumeroDocumento: string read FNumeroDocumento write SetNumeroDocumento;
+
+        [TPersistable(fgPersistable, 'Z6_SERTD')]
+        property SerieDocumento: string read FSerieDocumento write SetSerieDocumento;
+
+        [TPersistable(fgPersistable, 'Z6_PDV')]
+        property CodigoPDV: string read FCodigoPDV write SetCodigoPDV;
+
+        [TPersistable(fgPersistable, 'Z6_VALIPI')]
+        property ValorIPI: double read FValorIPI write SetValorIPI;
+
+        [TPersistable(fgPersistable, 'Z6_VALICM')]
+        property ValorIcms: double read FValorIcms write SetValorIcms;
+
+        [TPersistable(fgPersistable, 'Z6_BASEICM')]
+        property BaseIcms: double read FBaseIcms write SetBaseIcms;
+
+        /// <summary>
+        /// propriedade que guarda '1' para preço normal e '2' para preço em
+        /// promoção
+        /// </summary>
+        [TPersistable(fgPersistable, 'Z6_TABELA')]
+        property TabelaPreco: string read GetTabelaPreco write SetTabelaPreco;
+
+        [TPersistable(fgPersistable, 'Z6_EMISSAO')]
+        property DataEmissao: string read FDataEmissao write SetDataEmissao;
+
+        [TPersistable(fgPersistable, 'Z6_PRCTAB')]
+        property PrecoTabela: double read FPrecoTabela write SetPrecoTabela;
+
+        [TPersistable(fgPersistable, 'Z6_FILIAL')]
+        property Filial: string read FFilial write SetFilial;
+        property Filial_: TFilial read FFilial_ write SetFilial_;
+
+        [TPersistable(fgPersistable, 'Z6_VEND')]
+        property CodigoVendedor: string read FCodigoVendedor write SetCodigoVendedor;
+
+        [TPersistable(fgPersistable, 'Z6_FORMSEL')]
+        property FormulaSelfColor: string read FFormulaSelfColor write SetFormulaSelfColor;
+
+        [TPersistable(fgPersistable, 'Z6_ITEM')]
+        property Item: string read FItem write SetItem;
+
+        [TPersistable(fgPersistable, 'Z6_ICMSRET')]
+        property ValorIcmsRetido: double read FValorIcmsRetido write SetValorIcmsRetido;
+
+        [TPersistable(fgPersistable, 'Z6_VALFRE')]
+        property ValorFrete: double read FValorFrete write SetValorFrete;
+
+        [TPersistable(fgPersistable, 'Z6_SEGURO')]
+        property ValorSeguro: double read FValorSeguro write SetValorSeguro;
+
+        [TPersistable(fgPersistable, 'Z6_DESPESA')]
+        property ValorDespesa: double read FValorDespesa write SetValorDespesa;
+
+        [TPersistable(fgPersistable, 'Z6_QENT')]
+        property QuantidadeEntregue: double read FQuantidadeEntregue write SetQuantidadeEntregue;
+
+        [TPersistable(fgPersistable, 'Z6_PICM')]
+        property PercIcms: double read FPercIcms write SetPercIcms;
+
+        [TPersistable(fgPersistable, 'Z6_QDEV')]
+        property QuantidadeDevolvida: double read FQuantidadeDevolvida write SetQuantidadeDevolvida;
+
+        [TPersistable(fgPersistable, 'Z6_COMIS')]
+        property PercentualComissao: double read FPercComissao write SetPercComissao;
+
+        [TPersistable(fgPersistable, 'Z6_TDREGRA')]
+        property RegraComissaoAplicada: string read FCodigoRegraCA write SetCodigoRegraCA;
+
+        [TPersistable(fgPersistable, 'Z6_TDITEM')]
+        property ItemComissaoAplicada: string read FItemComissaoAplicada write SetItemComissaoAplicada;
+
+        [TPersistable(fgPersistable, 'Z6_BASERET')]
+        property BaseIcmsRetido: double read FBaseIcmsRetido write SetBaseIcmsRetido;
+
+        [TPersistable(fgPersistable, 'Z6_CAMPANH')]
+        property Campanha: string read FCampanha write SetCampanha;
+        { Estas propridades foram criadas pois existe a necessidade de recuparar os status dos produtos, quando foram gravados, pois podem estar diferentes do cadastro atual }
+        property EmPromocao: Boolean read GetEmPromocao;
+        property EmCampanha: Boolean read GetEmCampanha;
+        property ForaDeLinha: Boolean read GetForaDeLinha;
+        property SobEncomenda: Boolean read GetSobEncomenda;
+
+        [TPersistable(fgPersistable, 'Z6_T')]
+        property Tabela: string read FTabelaPremio write SetTabelaPremio;
+
+        [TPersistable(fgPersistable, 'Z6_TDITORI')]
+        property ItemOrigem: string read FItemOrigem write SetItemOrigem;
+
+        [TPersistable(fgPersistable, 'D_E_L_E_T_')]
+        property Delete: string read FDelete write SetDelete;
+
+        [TPersistable(fgPersistable, 'R_E_C_N_O_')]
+        property Recno: integer read FRecno write SetRecno;
+
+        [TPersistable(fgPersistable, 'R_E_C_D_E_L_')]
+        property RecnoDelete: integer read FRecnoDelete write SetRecnoDelete;
+
+        [TPersistable(fgPersistable, 'Z6_TPENT')]
+        property TipoEntrega: string read FTipoEntrega write SetTipoEntrega;
+
+        property TipoEntrega_: TTipoEntrega read FTipoEntrega_ write SetTipoEntrega_;
+
+        [TPersistable(fgPersistable, 'Z6_CGER')]
+        property CustoGerencial: double read GetCustoGerencial write SetCustoGerencial;
+
+        [TPersistable(fgPersistable, 'Z6_DTPSETD')]
+        property DataEntregaPSE: string read FDataEntregaPSE write SetDataEntregaPSE;
+
+        [TPersistable(fgPersistable, 'Z6_QTPSETD')]
+        property QuantidadePSE: double read FQuantidadePSE write SetQuantidadePSE;
+
+        [TPersistable(fgPersistable, 'Z6_QTLIBAR')]
+        property QuantidadeLiberadaPSE: double read FQuantidadeLiberadaPSE write SetQuantidadeLiberadaPSE;
+
+        [TPersistable(fgPersistable, 'Z6_PCPSETD')]
+        property PedidoCompraPSE: string read FPedidoCompraPSE write SetPedidoCompraPSE;
+
+        [TPersistable(fgPersistable, 'Z6_CCOMPR')]
+        property CustoCompra: double read GetCustoCompra write SetCustoCompra;
+
+        [TPersistable(fgPersistable, 'Z6_CNFE')]
+        property CustoNota: double read GetCustoNota write SetCustoNota;
+
+        [TPersistable(fgPersistable, 'Z6_STATUS')]
+        property StatusDevolucao: string read FStatusDevolucao write SetStatusDevolucao;
+
+        [TPersistable(fgPersistable, 'Z6_NOMPRO')]
+        property UsuarioBaixaDeposito: string read FUsuarioBaixaDeposito write SetUsuarioBaixaDeposito;
+
+        [TPersistable(fgPersistable, 'Z6_USERID')]
+        property UsuarioSistema: string read FUsuarioSistema write SetUsuarioSistema;
+
+        [TPersistable(fgPersistable, 'Z6_FDTENTR')]
+        property DataEntregaDeposito: string read FDataEntregaDeposito write SetDataEntregaDeposito;
+
+        [TPersistable(fgPersistable, 'Z6_TOTIMP')]
+        property ImpostoDilma: double read GetImpostoDilma write SetImpostoDilma;
+
+        [TPersistable(fgPersistable, 'Z6_ITEMPAI')]
+        property ItemPai: String read FItemPai write SetItemPai;
+
+        [TPersistable(fgPersistable, 'Z6_GRPSELF')]
+        property GrupoSelfColor: integer read FGrupoSelfColor write SetGrupoSelfColor;
+
+        [TPersistable(fgPersistable, 'Z6_PRDSELF')]
+        property ProdutoSelfColor: integer read FProdutoSelfColor write SetProdutoSelfColor;
+
+        [TPersistable(fgPersistable, 'Z6_BSESELF')]
+        property BaseSelfColor: integer read FBaseSelfColor write SetBaseSelfColor;
+
+        [TPersistable(fgPersistable, 'Z6_EMBSELF')]
+        property EmbalagemSelfColor: integer read FEmbalagemSelfColor write SetEmbalagemSelfColor;
+
+        [TPersistable(fgPersistable, 'Z6_CORSELF')]
+        property CorSelfColor: integer read FCorSelfColor write SetCorSelfColor;
+
+        [TPersistable(fgPersistable, 'Z6_COLSELF')]
+        property ColoranteSelfColor: integer read FColoranteSelfColor write SetColoranteSelfColor;
+
+        property QuantidadeConferida: double read FQuantidadeConferida write SetQuantidadeConferida;
+
+        property RemanescenteConferencia: double read GetRemanescenteConferencia;
+
+        property StatusConferencia: string read GetStatusConferecia;
+
+        property Conferido: Boolean read GetConferido;
+
+        property PercentualPrecoNegociado: double read FPercentualPrecoNegociado write SetPercentualPrecoNegociado;
+
+        property TipoAlternativo: TTipoAlternativo read FTipoAlternativo write SetTipoAlternativo;
+
+        property LocalEstoquePaiAlternativo: string read FLocalEstoquePaiAlternativo write SetLocalEstoquePaiAlternativo;
+        property TipoEntregaPaiAlternativo: TTipoEntrega read FTipoEntregaPaiAlternativo write SetTipoEntregaPaiAlternativo;
+        property ProdutoPaiAlternativo: TProduto read FProdutoPaiAlternativo write SetProdutoPaiAlternativo;
+        property PaiAlternativo: Boolean read FPaiAlternativo write SetPaiAlternativo;
+
+        // CAMPOS CRIADOS PARA MELHORAR PERFORMACE NA FINALIZAÇÃO DA VENDA
+        [TPersistable(fgReadOnly, 'Z3_TIPOVEN')]
+        property tipoVenda: string read FTipoVenda write SetTipoVenda;
+
+        [TPersistable(fgReadOnly, 'B1_PESO')]
+        property PesoItem: double read FPesoItem write SetPesoItem;
+
+        property ValorComissao: double read GetValorComissao;
+
+{$ENDREGION}
+{$REGION 'Produto'}
+        property Produto: TProduto read FProduto write SetProduto;
+{$ENDREGION}
+{$REGION 'Movimento Curso Seguro'}
+        property MovimentoCursoSeguro: TMovimentoCursoSeguro read FMovimentoCursoSeguro write SetMovimentoCursoSeguro;
+
+        /// <summary>
+        /// Método que encapsula o método de obter do movimento passando os parametros corretos
+        /// </summary>
+        procedure ObterMovimentoCursoSeguro;
+{$ENDREGION}
+        constructor Create;
+        destructor Destroy;
+
+    end;
+
+implementation
+
+{ TOrcamentoItens }
+
+{$REGION 'Métodos CRUD'}
+
+uses ClsFilter, ClsLista, ClsFieldFilter, System.Math, System.Types;
+
+procedure TOrcamentoItens.CalcularComissaoAplicada(prazoMedioCondicaoPagamento: double);
+var
+    param: TParametro;
+    dataset: TClientDataSet;
+begin
+    try
+        param := TParametro.Create;
+
+        param.Add('', 'CODIGOPRODUTO', Self.CodigoProduto);
+        param.Add('', 'PRAZOMEDIO', FloatToStr(prazoMedioCondicaoPagamento));
+        param.Add('', 'VALPRODUTO', FloatToStr(Self.ValorTotal));
+        param.Add('', 'VALDESCONTO', FloatToStr(Self.ValorDesconto));
+        param.Add('', 'QUANTIDADE', FloatToStr(Self.Quantidade));
+        param.Add('', 'VALTABELA', FloatToStr(Self.PrecoTabela));
+
+        dataset := BaseLib.XmlToDataset(BaseLib.ExecutaTarefa('CalcularComissaoAplicada', 'TOrcamentoItens', param));
+
+        if not dataset.IsEmpty then
+        begin
+            Self.PercentualComissao := dataset.FieldByName('PERCENTUAL').AsFloat;
+            Self.RegraComissaoAplicada := dataset.FieldByName('CODIGOCOMISSAO').AsString;
+            Self.ItemComissaoAplicada := dataset.FieldByName('ITEM').AsString;
+        end;
+    finally
+        if param <> nil then
+            FreeAndNil(param);
+
+        if dataset <> nil then
+            FreeAndNil(dataset);
+
+    end;
+
+end;
+
+procedure TOrcamentoItens.CalcularImposto(ufCliente, tipoCliente, tipoPessoa, tipoVenda, tipoNotaCumpom: String);
+var
+    param: TParametro;
+    dataset: TClientDataSet;
+begin
+    try
+        param := TParametro.Create;
+
+        param.Add('', 'UFCLIENTE', ufCliente);
+        param.Add('', 'TIPOCLIENTE', tipoCliente);
+        param.Add('', 'PESSOACLIENTE', tipoPessoa);
+        param.Add('', 'UFFILIAL', TUsuarioLogado.ObterInstancia.Filial.UF);
+        param.Add('', 'FILIAL', TUsuarioLogado.ObterInstancia.Filial.Filial);
+        param.Add('', 'TIPOVENDA', tipoVenda);
+        param.Add('', 'NOTACUPOM', tipoNotaCumpom);
+        param.Add('', 'PRODUTO', CodigoProduto);
+        param.Add('', 'VALORTOTAL', FloatToStr(ValorTotal));
+        param.Add('', 'VALORDESPESA', FloatToStr(ValorDespesa));
+        param.Add('', 'VALORFRETE', FloatToStr(ValorFrete));
+        param.Add('', 'VALORSEGURO', FloatToStr(ValorSeguro));
+        param.Add('', 'VALORDESCONTO', FloatToStr(ValorDesconto));
+
+        dataset := BaseLib.XmlToDataset(BaseLib.ExecutaTarefa('CalcularImposto', 'TOrcamentoItens', param));
+
+        if dataset.IsEmpty then
+        begin
+            raise Exception.Create('Este produto ' + Self.DescricaoProduto +
+                ' está com a tributação errada para este tipo de venda, favor comunicar o Departamento de Compras.');
+        end;
+
+        Self.CodigoTES := dataset.FieldByName('TES').AsString;
+        Self.CFOP := dataset.FieldByName('CFOP').AsString;
+        Self.TipoTributacao := dataset.FieldByName('TIPOTRIBUTACAO').AsString;
+
+        Self.PercIcms := dataset.FieldByName('PERCICMS').AsFloat;
+        Self.BaseIcms := dataset.FieldByName('BASEICMS').AsFloat;
+        Self.ValorIcms := dataset.FieldByName('VALORICMS').AsFloat;
+
+        Self.BaseIcmsRetido := dataset.FieldByName('BASESUB').AsFloat;
+        Self.ValorIcmsRetido := dataset.FieldByName('VALORSUB').AsFloat;
+
+        // Esses dois campos ainda nao existem na classe - verificar com o marcio
+        // self.PercIPI := dataset.FieldByName('PERCICMS').AsFloat;
+        // self.BaseIPI := dataset.FieldByName('BASEICMS').AsFloat;
+        Self.ValorIPI := dataset.FieldByName('VALORIPI').AsFloat;
+
+    finally
+        if param <> nil then
+            FreeAndNil(param);
+
+        if dataset <> nil then
+            FreeAndNil(dataset);
+
+    end;
+
+end;
+
+function TOrcamentoItens.CalcularPMT(qtParcelas, taxaDeJuros, vrLiquido: Real): Currency;
+begin
+    result := ((-vrLiquido * taxaDeJuros / 100.0 / (1.0 - exp(-qtParcelas * ln(1.0 + taxaDeJuros / 100.0)))) * -1);
+end;
+
+procedure TOrcamentoItens.CalcularPrecoEmTabela(tabelaComissao: TTabelaComissao; quantidadeParcelas: integer;
+    totalPrecoEmTabela, valorEntrada: Currency);
+var
+    valor, coeficiente, vrEntrada, vrLiquido, vrNegociado, prazoMedio: Currency;
+    juros: Real;
+begin
+    try
+        valor := 0;
+        coeficiente := 0;
+        if (Self.TipoEntrega <> 'CS') and (Self.Produto.ProdutoEmPromocao = False) and (tabelaComissao.CodigoTabela <> 'T1') then
+        begin
+            if tabelaComissao.Indice = 0 then
+            begin
+                if totalPrecoEmTabela <> 0 then
+                    valor := totalPrecoEmTabela
+                else
+                    valor := Self.PrecoTabela;
+
+                if valor > 0 then
+                    if valorEntrada > 0 then
+                        coeficiente := (valorEntrada / valor);
+
+                { Pega o valor unitário da entrada }
+                vrEntrada := (Self.PrecoTabela * coeficiente);
+                { Pega o valor liquido para calculo do preco }
+                vrLiquido := (Self.PrecoTabela - vrEntrada);
+                { Calcula prece em tabela }
+                vrNegociado := (CalcularPMT(quantidadeParcelas, (tabelaComissao.taxaDeJuros), vrLiquido));
+                vrNegociado := vrNegociado * quantidadeParcelas;
+                vrNegociado := vrNegociado + vrEntrada;
+
+                if vrNegociado < Self.PrecoTabela then
+                    vrNegociado := Self.PrecoTabela;
+            end
+            else
+            begin
+                // cAux := inttostr(nParc);
+                // if Length(cAux) < 10 then
+                // cAux := '0' + cAux + 'x'
+                // else
+                // cAux := cAux + 'x';
+
+                if (tabelaComissao.Indice <> 0) then // and (Self.TabelaComissaoQuantidadeParcelas = cAux) then
+                begin
+                    vrNegociado := (Self.PrecoTabela * tabelaComissao.Indice);
+                end
+                else
+                begin
+                    prazoMedio := (quantidadeParcelas - 1) / 2;
+                    juros := Power((1 + (tabelaComissao.taxaDeJuros / 100)), prazoMedio);
+                    vrNegociado := (Self.PrecoTabela / quantidadeParcelas) * juros;
+                    vrNegociado := vrNegociado * quantidadeParcelas;
+                end
+            end;
+        end
+        else
+        begin
+            vrNegociado := Self.PrecoTabela;
+        end;
+
+        Self.ValorUnitario := Tlib.ArredondarNumero(vrNegociado);
+
+    except
+        on e: Exception do
+        begin
+            raise Exception.Create('Erro ao calcular preço em tabela '#13 + e.Message);
+        end;
+    end;
+end;
+
+procedure TOrcamentoItens.CopiarPara(objeto: TObject);
+
+begin
+    inherited;
+    if FProduto.Preenchido then
+        FProduto.CopiarPara(TOrcamentoItens(objeto).Produto);
+
+    if (FTipoEntrega_ <> nil) and (FTipoEntrega_.Preenchido) then
+        FTipoEntrega_.CopiarPara(TOrcamentoItens(objeto).TipoEntrega_);
+end;
+
+constructor TOrcamentoItens.Create;
+begin
+    FProduto := TProduto.Create;
+    FMovimentoCursoSeguro := TMovimentoCursoSeguro.Create;
+    FTipoEntrega_ := TTipoEntrega.Create;
+end;
+
+destructor TOrcamentoItens.Destroy;
+begin
+    if FProduto <> nil then
+        FreeAndNil(FProduto);
+
+    if FMovimentoCursoSeguro <> nil then
+        FreeAndNil(FMovimentoCursoSeguro);
+
+    if FTipoEntrega_ <> nil then
+        FreeAndNil(FTipoEntrega_);
+
+end;
+
+function TOrcamentoItens.GetSobEncomenda: Boolean;
+begin
+    if Pos('E/', FCampanha) > 0 then
+        result := True
+    else
+        result := False;
+end;
+
+function TOrcamentoItens.GetStatusConferecia: string;
+begin
+    result := Tlib.IfTernario(Self.Conferido, 'CONFERIDO', ' - ');
+end;
+
+function TOrcamentoItens.GetTabelaPreco: string;
+begin
+    if (FTabelaPreco = EmptyStr) then
+    begin
+        if not Self.Produto.Preenchido then
+            Self.Produto.Obter(Self.CodigoProduto);
+
+        if Self.Produto.ProdutoEmPromocao then
+            FTabelaPreco := '2'
+        else
+            FTabelaPreco := '1';
+    end;
+
+    result := FTabelaPreco;
+end;
+
+function TOrcamentoItens.GetValorComissao: double;
+begin
+    result := (((ValorTotal - ValorDesconto) + ValorDespesa) * PercentualComissao) / 100;
+end;
+
+function TOrcamentoItens.GetConferido: Boolean;
+begin
+    // result := tlib.IfTernario(Quantidade = QuantidadeConferida, true, false);
+    result := Tlib.IfTernario(CompareValue(Quantidade, QuantidadeConferida) = EqualsValue, True, False);
+end;
+
+function TOrcamentoItens.GetCustoCompra: double;
+var
+    parametros: TParametro;
+    dataset: TClientDataSet;
+begin
+    if FCustoCompra = 0 then
+    begin
+        if (tipoVenda = 'VR') then
+        begin
+            try
+                try
+                    parametros := TParametro.Create;
+                    parametros.Add('', 'CODIGOPRODUTO', Self.CodigoProduto);
+                    dataset := BaseLib.XmlToDataset(BaseLib.ExecutaTarefa('ObterCustoDeCompra', 'TOrcamentoItens', parametros));
+                    FCustoCompra := dataset.FieldByName('CUSTOCOMPRA').AsFloat;
+                except
+                    raise;
+                end;
+            finally
+                if parametros <> nil then
+                    FreeAndNil(parametros);
+
+                if dataset <> nil then
+                    FreeAndNil(dataset);
+
+            end;
+        end;
+        // else
+        // raise Exception.Create('Campo "Custo de Compra" está com problema, contatar a central de serviço.');
+
+    end;
+    result := FCustoCompra;
+end;
+
+function TOrcamentoItens.GetCustoGerencial: double;
+begin
+    if FCustoGerencial = 0 then
+    begin
+        if (tipoVenda = 'VR') then
+        begin
+            if not Self.Produto.Preenchido then
+                Self.Produto.Obter(Self.CodigoProduto);
+
+            Self.FCustoGerencial := Self.Produto.CustoGerencial;
+
+        end;
+        // else
+        // raise Exception.Create('Campo "Custo Gerencial" está com problema, contatar a central de serviço.');
+    end;
+
+    result := Self.FCustoGerencial;
+end;
+
+function TOrcamentoItens.GetCustoNota: double;
+var
+    parametros: TParametro;
+    dataset: TClientDataSet;
+begin
+    if FCustoNota = 0 then
+    begin
+        if tipoVenda = 'VR' then
+        begin
+            try
+                parametros := TParametro.Create;
+                parametros.Add('', 'CODIGOPRODUTO', Self.CodigoProduto);
+                dataset := BaseLib.XmlToDataset(BaseLib.ExecutaTarefa('ObterCustoDaNota', 'TOrcamentoItens', parametros));
+                FCustoNota := dataset.FieldByName('CUSTONOTA').AsFloat;
+            finally
+                if parametros <> nil then
+                    FreeAndNil(parametros);
+
+                if dataset <> nil then
+                    FreeAndNil(dataset);
+            end;
+        end;
+        // else
+        // raise Exception.Create('Campo "Custo Nota" está com problema, contatar a central de serviço.');
+    end;
+    result := FCustoNota;
+end;
+
+function TOrcamentoItens.GetEmCampanha: Boolean;
+begin
+    if ((Pos('P/', FCampanha) > 0) and (TUsuarioLogado.ObterInstancia.Filial.UF = 'MT')) or ((Pos('R/', FCampanha) > 0) and (TUsuarioLogado.ObterInstancia.Filial.UF = 'PR'))
+    then
+        result := True
+    else
+        result := False;
+end;
+
+function TOrcamentoItens.GetEmPromocao: Boolean;
+begin
+    if Pos('X/', FCampanha) > 0 then
+        result := True
+    else
+        result := False;
+end;
+
+function TOrcamentoItens.GetForaDeLinha: Boolean;
+begin
+    if Pos('F/', FCampanha) > 0 then
+        result := True
+    else
+        result := False;
+end;
+
+function TOrcamentoItens.GetImpostoDilma: double;
+var
+    valor: double;
+begin
+    if FImpostoDilma = 0 then
+    begin
+        if (tipoVenda = 'VR') then
+        begin
+            if not Self.Produto.Preenchido then
+                Self.Produto.Obter(Self.CodigoProduto);
+
+            valor := RoundTo(((Self.ValorTotal - Self.ValorDesconto) * Self.Produto.PercentualImpostoDilma) / 100, -2);
+
+            Self.FImpostoDilma := valor;
+        end;
+        // else
+        // raise Exception.Create('Campo "Imposto Dilma" está com problema, contatar a central de serviço.');
+
+    end;
+    result := Self.FImpostoDilma;
+end;
+
+function TOrcamentoItens.GetLocalEstoque: string;
+begin
+    result := '01'
+end;
+
+function TOrcamentoItens.GetRemanescenteConferencia: double;
+begin
+    result := Quantidade - QuantidadeConferida;
+end;
+
+function TOrcamentoItens.Listar(tipoOperacao: TOparationTypes): TResultFilter;
+var
+    campoFiltro: TFieldFilter;
+    filtro: TFilter<TOrcamentoItens>;
+    // parametro : TParametro;
+    // lista:TLista<TOrcamentoItens>
+begin
+    inherited;
+    try
+        filtro := TFilter<TOrcamentoItens>.Create;
+        filtro.ScreenName := 'Filtro de OrcamentoItens';
+        filtro.OperationType := tipoOperacao;
+        filtro.MultiSelect := True;
+        filtro.Task := 'ConsultarOrcamentoItens';
+        // ###Criar os Índices do filtro
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Numero';
+        campoFiltro.Name := 'Numero';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'CodigoProduto';
+        campoFiltro.Name := 'CodigoProduto';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'DescricaoProduto';
+        campoFiltro.Name := 'DescricaoProduto';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Quantidade';
+        campoFiltro.Name := 'Quantidade';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'ValorUnitario';
+        campoFiltro.Name := 'ValorUnitario';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'ValorTotal ';
+        campoFiltro.Name := 'ValorTotal ';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'LocalEstoque';
+        campoFiltro.Name := 'LocalEstoque';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'UnidadeMedida';
+        campoFiltro.Name := 'UnidadeMedida';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'PercDesconto  ';
+        campoFiltro.Name := 'PercDesconto  ';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'ValorDesconto';
+        campoFiltro.Name := 'ValorDesconto';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'TipoTributacao';
+        campoFiltro.Name := 'TipoTributacao';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'CodigoTES';
+        campoFiltro.Name := 'CodigoTES';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'CFOP';
+        campoFiltro.Name := 'CFOP';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'FlegueVendido';
+        campoFiltro.Name := 'FlegueVendido';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'NumeroDocumento';
+        campoFiltro.Name := 'NumeroDocumento';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'SerieDocumento';
+        campoFiltro.Name := 'SerieDocumento';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'CodigoPDV';
+        campoFiltro.Name := 'CodigoPDV';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'ValorIPI';
+        campoFiltro.Name := 'ValorIPI';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'ValorIcms';
+        campoFiltro.Name := 'ValorIcms';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'BaseIcms';
+        campoFiltro.Name := 'BaseIcms';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'TabelaPreco';
+        campoFiltro.Name := 'TabelaPreco';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'DataEmissao';
+        campoFiltro.Name := 'DataEmissao';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'ValorDescontoProduto';
+        campoFiltro.Name := 'ValorDescontoProduto';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'CustoProduto';
+        campoFiltro.Name := 'CustoProduto';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'PrecoTabela';
+        campoFiltro.Name := 'PrecoTabela';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Filial';
+        campoFiltro.Name := 'Filial';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'CodigoVendedor';
+        campoFiltro.Name := 'CodigoVendedor';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'FormulaSelfColor';
+        campoFiltro.Name := 'FormulaSelfColor';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Item';
+        campoFiltro.Name := 'Item';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'PrecoTabela';
+        campoFiltro.Name := 'PrecoTabela';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'ValorIcmsRetido';
+        campoFiltro.Name := 'ValorIcmsRetido';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'ValorFrete';
+        campoFiltro.Name := 'ValorFrete';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'ValorSeguro';
+        campoFiltro.Name := 'ValorSeguro';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'ValorDespesa';
+        campoFiltro.Name := 'ValorDespesa';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'QuantidadeEntregue';
+        campoFiltro.Name := 'QuantidadeEntregue';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'PercIcms';
+        campoFiltro.Name := 'PercIcms';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'QuantidadeDevolvida';
+        campoFiltro.Name := 'QuantidadeDevolvida';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'PercComissao';
+        campoFiltro.Name := 'PercComissao';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'BaseIcmsRetido';
+        campoFiltro.Name := 'BaseIcmsRetido';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Campanha';
+        campoFiltro.Name := 'Campanha';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'BaseIcmsRetido';
+        campoFiltro.Name := 'BaseIcmsRetido';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'TabelaPremio';
+        campoFiltro.Name := 'TabelaPremio';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'ValorFrete';
+        campoFiltro.Name := 'ValorFrete';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'SegundaUnidadeMedida';
+        campoFiltro.Name := 'SegundaUnidadeMedida';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := ' ItemOrigem';
+        campoFiltro.Name := ' ItemOrigem';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'CodigoRegraCA';
+        campoFiltro.Name := 'CodigoRegraCA';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Delete';
+        campoFiltro.Name := 'Delete';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Recno';
+        campoFiltro.Name := 'Recno';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'RecnoDelete';
+        campoFiltro.Name := 'RecnoDelete';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'TipoEntrega';
+        campoFiltro.Name := 'TipoEntrega';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'CustoGerencial';
+        campoFiltro.Name := 'CustoGerencial';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'DataEntregaPSE';
+        campoFiltro.Name := 'DataEntregaPSE';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'QuantidadePSE';
+        campoFiltro.Name := 'QuantidadePSE';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'QuantidadeLiberadaPSE ';
+        campoFiltro.Name := 'QuantidadeLiberadaPSE ';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'PedidoCompraPSE';
+        campoFiltro.Name := 'PedidoCompraPSE';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'CustoCompra';
+        campoFiltro.Name := 'CustoCompra';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'CustoNota';
+        campoFiltro.Name := 'CustoNota';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := '';
+        campoFiltro.Name := '';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        result := filtro.Execute;
+    finally
+        // FreeAndNil(parametro);
+        // lista.Destroy;
+    end;
+end;
+
+function TOrcamentoItens.Obter(parametros: TParametro): TObject;
+var
+    lista: TLista<TOrcamentoItens>;
+begin
+    try
+        lista := BaseLib.XmlToObject<TOrcamentoItens>(BaseLib.ExecutaTarefa('ConsultaOrcamentoItens', 'TOrcamentoItens', parametros));
+
+        if lista.Count = 1 then
+        begin
+            PopularObjeto(lista[0]);
+            result := Self;
+        end
+        else
+        begin
+            MessageDlg('Nenhum registro encontrado.', mtError, [mbOk], 0);
+            result := nil;
+        end;
+    finally
+        lista.Destroy;
+    end;
+end;
+
+procedure TOrcamentoItens.ObterMovimentoCursoSeguro;
+var
+    param: TParametro;
+begin
+    try
+        param := TParametro.Create;
+        param.Add('', 'ZJA_ORCMAE', Self.Numero);
+        param.Add('', 'ZJA_ITEM', Self.Item);
+        param.Add('', 'ZJA_PROD', Self.CodigoProduto);
+        Self.MovimentoCursoSeguro.Obter(param);
+    finally
+        if param <> nil then
+            FreeAndNil(param);
+    end;
+end;
+
+function TOrcamentoItens.Obter(ID: string): TObject;
+var
+    parametros: TParametro;
+
+begin
+    try
+        parametros := TParametro.Create;
+        parametros.Add('', 'COLOCAR_CAMPO_ID_AQUI', ID);
+        result := Obter(parametros);
+    finally
+        FreeAndNil(parametros);
+    end;
+end;
+
+{$ENDREGION}
+{$REGION 'Regras de Negócio'}
+
+procedure TOrcamentoItens.PopularObjeto(OrcamentoItens: TOrcamentoItens);
+begin
+    OrcamentoItens.CopiarPara(Self);
+    FPreenchido := True;
+end;
+
+procedure TOrcamentoItens.SetBaseIcms(const Value: double);
+begin
+    FBaseIcms := Value;
+end;
+
+procedure TOrcamentoItens.SetBaseIcmsRetido(const Value: double);
+begin
+    FBaseIcmsRetido := Value;
+end;
+
+procedure TOrcamentoItens.SetBaseSelfColor(const Value: integer);
+begin
+    FBaseSelfColor := Value;
+end;
+
+procedure TOrcamentoItens.CalcularValorTotal;
+begin
+    FValorTotal := Tlib.ArredondarNumero((Self.Quantidade * Self.ValorUnitario));
+end;
+
+procedure TOrcamentoItens.SetCampanha(const Value: string);
+begin
+    FCampanha := Value;
+end;
+
+procedure TOrcamentoItens.SetCFOP(const Value: string);
+begin
+    FCFOP := Value;
+end;
+
+procedure TOrcamentoItens.SetCodigoPDV(const Value: string);
+begin
+    FCodigoPDV := Value;
+end;
+
+procedure TOrcamentoItens.SetCodigoProduto(const Value: string);
+begin
+    FCodigoProduto := Value;
+end;
+
+procedure TOrcamentoItens.SetCodigoRegraCA(const Value: string);
+begin
+    FCodigoRegraCA := Value;
+end;
+
+procedure TOrcamentoItens.SetCodigoTES(const Value: string);
+begin
+    FCodigoTES := Value;
+end;
+
+procedure TOrcamentoItens.SetCodigoVendedor(const Value: string);
+begin
+    FCodigoVendedor := Value;
+end;
+
+procedure TOrcamentoItens.SetColoranteSelfColor(const Value: integer);
+begin
+    FColoranteSelfColor := Value;
+end;
+
+procedure TOrcamentoItens.SetCorSelfColor(const Value: integer);
+begin
+    FCorSelfColor := Value;
+end;
+
+procedure TOrcamentoItens.SetCustoCompra(const Value: double);
+begin
+    FCustoCompra := Value;
+end;
+
+procedure TOrcamentoItens.SetCustoGerencial(const Value: double);
+begin
+    FCustoGerencial := Value;
+end;
+
+procedure TOrcamentoItens.SetCustoNota(const Value: double);
+begin
+    FCustoNota := Value;
+end;
+
+procedure TOrcamentoItens.SetDataEmissao(const Value: string);
+begin
+    FDataEmissao := Value;
+end;
+
+procedure TOrcamentoItens.SetDataEntregaDeposito(const Value: string);
+begin
+    FDataEntregaDeposito := Value;
+end;
+
+procedure TOrcamentoItens.SetDataEntregaPSE(const Value: string);
+begin
+    FDataEntregaPSE := Value;
+end;
+
+procedure TOrcamentoItens.SetDelete(const Value: string);
+begin
+    FDelete := Value;
+end;
+
+procedure TOrcamentoItens.SetDescricaoProduto(const Value: string);
+begin
+    FDescricaoProduto := Value;
+end;
+
+procedure TOrcamentoItens.SetEmbalagemSelfColor(const Value: integer);
+begin
+    FEmbalagemSelfColor := Value;
+end;
+
+procedure TOrcamentoItens.SetFilial(const Value: string);
+begin
+    FFilial := Value;
+end;
+
+procedure TOrcamentoItens.SetFilial_(const Value: TFilial);
+begin
+    FFilial_ := Value;
+end;
+
+procedure TOrcamentoItens.SetFlegueVendido(const Value: string);
+begin
+    FFlegueVendido := Value;
+end;
+
+procedure TOrcamentoItens.SetFormulaSelfColor(const Value: string);
+begin
+    FFormulaSelfColor := Value;
+end;
+
+procedure TOrcamentoItens.SetGrupoSelfColor(const Value: integer);
+begin
+    FGrupoSelfColor := Value;
+end;
+
+procedure TOrcamentoItens.SetImpostoDilma(const Value: double);
+begin
+    FImpostoDilma := Value;
+end;
+
+procedure TOrcamentoItens.SetItem(const Value: string);
+begin
+    FItem := Value;
+end;
+
+procedure TOrcamentoItens.SetItemComissaoAplicada(const Value: string);
+begin
+    FItemComissaoAplicada := Value;
+end;
+
+procedure TOrcamentoItens.SetItemOrigem(const Value: string);
+begin
+    FItemOrigem := Value;
+end;
+
+procedure TOrcamentoItens.SetItemPai(const Value: String);
+begin
+    FItemPai := Value;
+end;
+
+procedure TOrcamentoItens.SetLocalEstoque(const Value: string);
+begin
+    FLocalEstoque := Value;
+end;
+
+procedure TOrcamentoItens.SetLocalEstoquePaiAlternativo(const Value: string);
+begin
+    FLocalEstoquePaiAlternativo := Value;
+end;
+
+procedure TOrcamentoItens.SetMovimentoCursoSeguro(const Value: TMovimentoCursoSeguro);
+begin
+    FMovimentoCursoSeguro := Value;
+end;
+
+procedure TOrcamentoItens.SetNumero(const Value: string);
+begin
+    FNumero := Value;
+end;
+
+procedure TOrcamentoItens.SetNumeroDocumento(const Value: string);
+begin
+    FNumeroDocumento := Value;
+end;
+
+procedure TOrcamentoItens.SetPaiAlternativo(const Value: Boolean);
+begin
+    FPaiAlternativo := Value;
+end;
+
+procedure TOrcamentoItens.SetPedidoCompraPSE(const Value: string);
+begin
+    FPedidoCompraPSE := Value;
+end;
+
+procedure TOrcamentoItens.SetPercComissao(const Value: double);
+begin
+    FPercComissao := Value;
+end;
+
+procedure TOrcamentoItens.SetPercentualPrecoNegociado(const Value: double);
+//var
+//    valorCalculado: double;
+begin
+//    if Value <> 0 then
+//    begin
+//        valorCalculado := RoundTo(PrecoTabela - ((PrecoTabela * Value) / 100), -2);
+//
+//        ValorUnitario := valorCalculado;
+//    end
+//    else
+//    begin
+//        ValorUnitario := PrecoTabela;
+//    end;
+
+    FPercentualPrecoNegociado := Value;
+
+    CalcularValorTotal;
+end;
+
+procedure TOrcamentoItens.SetPercIcms(const Value: double);
+begin
+    FPercIcms := Value;
+end;
+
+procedure TOrcamentoItens.SetPesoItem(const Value: double);
+begin
+    FPesoItem := Value;
+end;
+
+procedure TOrcamentoItens.SetPrecoTabela(const Value: double);
+begin
+    FPrecoTabela := Value;
+end;
+
+procedure TOrcamentoItens.SetProduto(const Value: TProduto);
+begin
+    FProduto := Value;
+end;
+
+procedure TOrcamentoItens.SetProdutoPaiAlternativo(const Value: TProduto);
+begin
+    FProdutoPaiAlternativo := Value;
+end;
+
+procedure TOrcamentoItens.SetProdutoSelfColor(const Value: integer);
+begin
+    FProdutoSelfColor := Value;
+end;
+
+procedure TOrcamentoItens.SetQuantidade(const Value: double);
+begin
+//    if Value <= 0 then
+//    begin
+//        raise Exception.Create('Quantidade não pode ser menor ou igual a zero!!!');
+//    end;
+//
+//    if not Produto.Preenchido then
+//        Produto.Obter(CodigoProduto);
+//
+//    if not Produto.ValidarQuantidadeMultipla(Value) then
+//        Exit;
+//
+//    if (Produto.ProdutoSelfColor) or (Produto.ProdutoHidrometro) then
+//    begin
+//        if (FQuantidade > 0) and (FQuantidade <> Value) then
+//        begin
+//            raise Exception.Create('Quantidade do produto..: ' + Trim(DescricaoProduto) + '  não pode ser alterada...');
+//        end;
+//    end;
+//
+//    if TipoEntrega = 'CS' then
+//    begin
+//        if Value <> 1 then
+//        begin
+//            FQuantidade := 1;
+//        end;
+//    end
+//    else
+//        FQuantidade := Value;
+//
+//    Self.CalcularValorTotal;
+
+
+    FQuantidade := Value;
+    Self.CalcularValorTotal;
+end;
+
+procedure TOrcamentoItens.SetQuantidadeConferida(const Value: double);
+begin
+    FQuantidadeConferida := Value;
+end;
+
+procedure TOrcamentoItens.SetQuantidadeDevolvida(const Value: double);
+begin
+    FQuantidadeDevolvida := Value;
+end;
+
+procedure TOrcamentoItens.SetQuantidadeEntregue(const Value: double);
+begin
+    FQuantidadeEntregue := Value;
+end;
+
+procedure TOrcamentoItens.SetQuantidadeLiberadaPSE(const Value: double);
+begin
+    FQuantidadeLiberadaPSE := Value;
+end;
+
+procedure TOrcamentoItens.SetQuantidadePSE(const Value: double);
+begin
+    FQuantidadePSE := Value;
+end;
+
+procedure TOrcamentoItens.SetRecno(const Value: integer);
+begin
+    FRecno := Value;
+end;
+
+procedure TOrcamentoItens.SetRecnoDelete(const Value: integer);
+begin
+    FRecnoDelete := Value;
+end;
+
+procedure TOrcamentoItens.SetSerieDocumento(const Value: string);
+begin
+    FSerieDocumento := Value;
+end;
+
+procedure TOrcamentoItens.SetStatusDevolucao(const Value: string);
+begin
+    FStatusDevolucao := Value;
+end;
+
+procedure TOrcamentoItens.SetTabelaPreco(const Value: string);
+begin
+    FTabelaPreco := Value;
+end;
+
+procedure TOrcamentoItens.SetTabelaPremio(const Value: string);
+begin
+    FTabelaPremio := Value;
+end;
+
+procedure TOrcamentoItens.SetTipoAlternativo(const Value: TTipoAlternativo);
+begin
+    FTipoAlternativo := Value;
+end;
+
+procedure TOrcamentoItens.SetTipoEntrega(const Value: string);
+begin
+    FTipoEntrega := Value;
+
+    if Self.Filial_ <> nil then
+        FTipoEntrega_ := Self.Filial_.ObterTipoEntrega(Value);
+
+end;
+
+procedure TOrcamentoItens.SetTipoEntregaPaiAlternativo(const Value: TTipoEntrega);
+begin
+    FTipoEntregaPaiAlternativo := Value;
+end;
+
+procedure TOrcamentoItens.SetTipoEntrega_(const Value: TTipoEntrega);
+begin
+    FTipoEntrega_ := Value;
+end;
+
+procedure TOrcamentoItens.SetTipoTributacao(const Value: string);
+begin
+    FTipoTributacao := Value;
+end;
+
+procedure TOrcamentoItens.SetTipoVenda(const Value: string);
+begin
+    FTipoVenda := Value;
+end;
+
+procedure TOrcamentoItens.SetUnidadeMedida(const Value: string);
+begin
+    FUnidadeMedida := Value;
+end;
+
+procedure TOrcamentoItens.SetUsuarioBaixaDeposito(const Value: string);
+begin
+    FUsuarioBaixaDeposito := Value;
+end;
+
+procedure TOrcamentoItens.SetUsuarioSistema(const Value: string);
+begin
+    FUsuarioSistema := Value;
+end;
+
+procedure TOrcamentoItens.SetValorDesconto(const Value: double);
+begin
+    FValorDesconto := Value;
+end;
+
+procedure TOrcamentoItens.SetValorDespesa(const Value: double);
+begin
+    FValorDespesa := Value;
+end;
+
+procedure TOrcamentoItens.SetValorFrete(const Value: double);
+begin
+    FValorFrete := Value;
+end;
+
+procedure TOrcamentoItens.SetValorIcms(const Value: double);
+begin
+    FValorIcms := Value;
+end;
+
+procedure TOrcamentoItens.SetValorIcmsRetido(const Value: double);
+begin
+    FValorIcmsRetido := Value;
+end;
+
+procedure TOrcamentoItens.SetValorIPI(const Value: double);
+begin
+    FValorIPI := Value;
+end;
+
+procedure TOrcamentoItens.SetValorSeguro(const Value: double);
+begin
+    FValorSeguro := Value;
+end;
+
+procedure TOrcamentoItens.SetValorTotal(const Value: double);
+begin
+    FValorTotal := StrToFloat(FormatFloat('0.00', Value));
+end;
+
+procedure TOrcamentoItens.SetValorUnitario(const Value: double);
+begin
+    {if ((TipoEntrega <> '') and (TipoEntrega <> 'CS')) and (PrecoTabela <> Value) and (PrecoTabela > 0) then
+    begin
+        if Value <= 0 then
+            raise Exception.Create('O valor negociado não pode ser menor ou igual a zero!!!');
+
+        if (Tabela = 'T1') then
+        begin
+            if (PrecoTabela > Value) and (Tlib.UsuarioLogado.Filial.PermiteNegociarPrecoParaMenor = False) then
+                raise Exception.Create('Não é permitido negocioar preço menor que o preço de tabela:'#13 + 'Preço Tabela:    ' + FormatFloat('##0.00',
+                    PrecoTabela) + ' ' + #13 + 'Preço Negociado: ' + FormatFloat('##0.00', Value));
+
+            if (PrecoTabela < Value) and (Tlib.UsuarioLogado.Filial.PermiteNegociarPrecoParaMaior = False) then
+                raise Exception.Create('Não é permitido negocioar preço maior que o preço de tabela:'#13 + 'Preço Tabela:    ' + FormatFloat('##0.00',
+                    PrecoTabela) + ' ' + #13 + 'Preço Negociado: ' + FormatFloat('##0.00', Value));
+        end;
+
+        if (Tabela <> 'T1') or (Tlib.UsuarioLogado.ChecarPermissaoNaRotina('FRMCONORCAMENTO', 'LIBORC', True, 'Preço negociado')) then
+        begin
+            FValorUnitario := Value;
+
+            FPercentualPrecoNegociado := RoundTo(100 - (ValorUnitario * 100) / PrecoTabela, -2);
+
+            Campanha := StringReplace(Campanha, 'X/', '', [rfReplaceAll]);
+        end
+        else
+            raise Exception.Create('Sem permissão para alterar preço');
+    end
+    else
+    begin
+        FValorUnitario := Value;
+
+        FPercentualPrecoNegociado := 0;
+
+        if not Produto.Preenchido then
+            Produto.Obter(CodigoProduto);
+
+        if Produto.ProdutoEmPromocao then
+            Campanha := Campanha + 'X/';
+    end;
+    Self.CalcularValorTotal;}
+
+    FValorUnitario := Value;
+    Self.CalcularValorTotal;
+end;
+
+{$ENDREGION}
+{$REGION 'Métodos de Propriedades'}
+{$ENDREGION}
+
+end.

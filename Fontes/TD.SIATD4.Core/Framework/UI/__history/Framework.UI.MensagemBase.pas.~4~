@@ -1,0 +1,81 @@
+unit Framework.UI.MensagemBase;
+
+interface
+
+uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Framework.UI.FormBase, UntErrorProvider,
+    Lib.Enumeradores;
+
+type
+    TFrmMensagemBase = class(TFrmBase)
+    private
+        FErro: string;
+        FTitulo: string;
+        FTipoMsg: TipoMensagem;
+        FDescricao: string;
+        FFocoBotao: boolean;
+        FTipoMascara: TMaskTypes;
+        procedure SetDescricao(const Value: string);
+        procedure SetErro(const Value: string);
+        procedure SetFocoBotao(const Value: boolean);
+        procedure SetTipoMascara(const Value: TMaskTypes);
+        procedure SetTipoMsg(const Value: TipoMensagem);
+        procedure SetTitulo(const Value: string);
+
+    public
+        property Titulo: string read FTitulo write SetTitulo;
+        property Descricao: string read FDescricao write SetDescricao;
+        property Erro: string read FErro write SetErro;
+        property TipoMsg: TipoMensagem read FTipoMsg write SetTipoMsg;
+        property TipoMascara: TMaskTypes read FTipoMascara write SetTipoMascara;
+        property FocoBotao: boolean read FFocoBotao write SetFocoBotao;
+        constructor Create(Titulo, Descricao, Erro: String; TipoMsg: TipoMensagem; TipoMascara: TMaskTypes = mtString; focoBotaoSim: boolean = true); reintroduce; Overload;
+        procedure ConfigurarTela; virtual; abstract;
+
+    end;
+
+var
+    frmMensagemBase: TFrmMensagemBase;
+
+implementation
+
+{$R *.dfm}
+{ TFrmMensagemBase }
+
+constructor TFrmMensagemBase.Create(Titulo, Descricao, Erro: String; TipoMsg: TipoMensagem; TipoMascara: TMaskTypes; focoBotaoSim: boolean);
+begin
+
+end;
+
+procedure TFrmMensagemBase.SetDescricao(const Value: string);
+begin
+    FDescricao := Value;
+end;
+
+procedure TFrmMensagemBase.SetErro(const Value: string);
+begin
+    FErro := Value;
+end;
+
+procedure TFrmMensagemBase.SetFocoBotao(const Value: boolean);
+begin
+    FFocoBotao := Value;
+end;
+
+procedure TFrmMensagemBase.SetTipoMascara(const Value: TMaskTypes);
+begin
+    FTipoMascara := Value;
+end;
+
+procedure TFrmMensagemBase.SetTipoMsg(const Value: TipoMensagem);
+begin
+    FTipoMsg := Value;
+end;
+
+procedure TFrmMensagemBase.SetTitulo(const Value: string);
+begin
+    FTitulo := Value;
+end;
+
+end.

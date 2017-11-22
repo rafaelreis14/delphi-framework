@@ -1,0 +1,389 @@
+{ *Created by @ReisCodeGenerator* }
+unit Biz.ModuloRotina;
+
+interface
+
+uses
+    Classes, System.SysUtils, Dialogs, Lib.Base, Lib.Parametro, Lib.Enumeradores,
+    Lib.Persistable, Lib.ResultFilter, Lib.Lista, Dal.ControleDados, Dal.CondicaoConsulta,
+    Framework.Interfaces.CRUD, Dal.FabricaSQL, Biz.PermissaoRotina, Biz.Acesso;
+
+type
+
+    [TReferenceTable('SIATD_S09_01')]
+    TModuloRotina = class(TBase, ICRUD<TModuloRotina>)
+    private
+        FRotina: string;
+        FDelet: string;
+        FRecno: integer;
+        FModulo: string;
+        FPermissoesRotina: TLista<TPermissaoRotina>;
+        FAcessosRotina: TLista<TAcesso>;
+        procedure SetDelet(const Value: string);
+        procedure SetModulo(const Value: string);
+        procedure SetRecno(const Value: integer);
+        procedure SetRotina(const Value: string);
+        procedure SetPermissoesRotina(const Value: TLista<TPermissaoRotina>);
+        procedure SetAcessosRotina(const Value: TLista<TAcesso>);
+
+        class var dao: TControleDados<TLista<TModuloRotina>, TListaDAO<TModuloRotina>>;
+    public
+        /// <summary>
+        /// Metodo que faz a inserção da ModuloRotina
+        /// </summary>
+        function Inserir: boolean;
+        /// <summary>
+        /// Metodo que faz a alteração da ModuloRotina
+        /// </summary>
+        function Alterar: boolean;
+
+        /// <summary>
+        /// Métido que faz a Deleção da ModuloRotina
+        /// </summary>
+        function Excluir: boolean;
+
+        function ExcluirPorRotina(rotina: string):boolean;
+
+        /// <summary>
+        /// Método que chama a tela de filtro
+        /// </summary>
+        /// <param name="tipoOperacao">
+        /// Tipo da operação, se é somente filtro, ou seleção de registro
+        /// </param>
+        function Listar(tipoOperacao: TOparationTypes; multselect: boolean): TResultFilter;
+
+        /// <summary>
+        /// Método que retorna um objeto preenchido
+        /// </summary>
+        /// <param name="ID">
+        /// Chave primária da tabela
+        /// </param>
+        function Obter(ID: string): TModuloRotina; overload;
+
+        /// <summary>
+        /// Método que retorna um objeto preenchido
+        /// </summary>
+        /// <param name="parametros">
+        /// Parametros para a consulta do objeto a ser preenchido
+        /// </param>
+        function Obter(parametros: TParametro): TModuloRotina; overload;
+
+        /// <summary>
+        /// Método que retonar uma lista com varios objetos de acordo com parametro passado
+        /// </summary>
+        /// <param name="parametros">
+        /// Parametros para a consulta do objeto a ser preenchido
+        /// </param>
+        function Consultar(parametros: TParametro): TLista<TModuloRotina>;
+
+        /// <summary>
+        /// Método que preenche a instância do Objeto
+        /// </summary>
+        /// <param name="ModuloRotina">
+        /// objeto de parametro para preenchimento da instância
+        /// </param>
+        procedure PreencherObjeto(ModuloRotina: TModuloRotina);
+
+
+        procedure CarregarPermissoesRotina;
+
+        [TPersistable(fgPersistable, 'S09_S05_ROTINA')]
+        [TMaxLenght(30)]
+        property Rotina: string read FRotina write SetRotina;
+
+        [TPersistable(fgPersistable, 'S09_S08_MODULO')]
+        [TMaxLenght(20)]
+        property Modulo: string read FModulo write SetModulo;
+
+        [TPersistable(fgPersistable, 'D_E_L_E_T_')]
+        [TMaxLenght(1)]
+        property Delet: string read FDelet write SetDelet;
+
+        [TPersistable(fgUpdateable, 'R_E_C_N_O_')]
+        property Recno: integer read FRecno write SetRecno;
+
+        property PermissoesRotina:TLista<TPermissaoRotina> read FPermissoesRotina write SetPermissoesRotina;
+
+
+
+        constructor Create;
+        destructor Destroy; override;
+
+
+
+    end;
+
+implementation
+
+{ TModuloRotina }
+
+uses Lib.Filter, Lib.Biblioteca, Biz.UsuarioLogado;
+
+{$REGION 'Métodos CRUD'}
+
+function TModuloRotina.Inserir: boolean;
+var
+    fabrica: TFabricaSQL;
+    sql: WideString;
+    Parametro: TParametro;
+begin
+    fabrica := TFabricaSQL.Create(Self);
+    try
+        try
+            sql := fabrica.GerarSqlInsercao;
+            Parametro := Self.ObjetoParaParametros(Insercao);
+            result := dao.Inserir(sql, Parametro);
+        except
+            on e: exception do
+                raise exception.Create('Erro ao inserir ModuloRotina' + '#13' + e.Message);
+        end;
+    finally
+        if Parametro <> nil then
+            FreeAndNil(Parametro);
+    end;
+end;
+
+function TModuloRotina.Alterar: boolean;
+var
+    fabrica: TFabricaSQL;
+    sql: WideString;
+    Parametro: TParametro;
+begin
+    fabrica := TFabricaSQL.Create(Self);
+    try
+        try
+            sql := fabrica.GerarSqlAlteracao;
+            Parametro := Self.ObjetoParaParametros(Alteracao);
+            result := dao.Alterar(sql, Parametro);
+        except
+            on e: exception do
+                raise exception.Create('Erro ao alterar ModuloRotina' + #13 + e.Message);
+        end;
+    finally
+        if Parametro <> nil then
+            FreeAndNil(Parametro);
+    end;
+end;
+
+function TModuloRotina.Excluir: boolean;
+var
+    fabrica: TFabricaSQL;
+    sql: WideString;
+    Parametro: TParametro;
+begin
+    fabrica := TFabricaSQL.Create(Self);
+    try
+        try
+            sql := fabrica.GerarSqlExclusao;
+            Parametro := Self.ObjetoParaParametros(Exclusao);
+            result := dao.Excluir(sql, Parametro);
+        except
+            on e: exception do
+                raise exception.Create('Erro ao excluir ModuloRotina' + #13 + e.Message);
+        end;
+    finally
+        if Parametro <> nil then
+            FreeAndNil(Parametro);
+    end;
+
+end;
+
+function TModuloRotina.ExcluirPorRotina(rotina: string): boolean;
+var
+    Parametro: TParametro;
+    query: string;
+begin
+    Parametro := TParametro.Create;
+    try
+        try
+            Parametro.Add('', 'S09_S05_ROTINA', rotina);
+
+            query := 'DELETE FROM SIATD_S09_01 WHERE S09_S05_ROTINA = :S09_S05_ROTINA';
+
+            dao.Excluir(query, Parametro);
+        except
+            on e: exception do
+                raise exception.Create('Erro ao excluir Modulo da Rotina ' + #13 + e.Message);
+        end;
+    finally
+        FreeAndNil(Parametro);
+    end;
+end;
+
+
+procedure TModuloRotina.CarregarPermissoesRotina;
+var
+    parametro: TParametro;
+    permissaoRotina: TPermissaoRotina;
+begin
+    try
+        parametro := TParametro.Create;
+        permissaoRotina := TPermissaoRotina.Create;
+        parametro.Add('','S19_S05_ROTINA', Self.Rotina);
+        FPermissoesRotina := permissaoRotina.Consultar(parametro);
+    finally
+        if parametro <> nil then
+            FreeAndNil(parametro);
+
+        if permissaoRotina <> nil then
+            FreeAndNil(permissaoRotina);
+    end;
+
+end;
+
+function TModuloRotina.Consultar(parametros: TParametro): TLista<TModuloRotina>;
+var
+    query: string;
+    condicao: TCondicaoConsulta;
+begin
+    try
+        condicao := TCondicaoConsulta.Create(parametros);
+        condicao.Adiciona('S09_S05_ROTINA', ccIgual, lgAnd);
+        condicao.Adiciona('S09_S08_MODULO', ccIgual, lgAnd);
+        condicao.Adiciona('D_E_L_E_T_', ccIgual, lgAnd);
+        condicao.Adiciona('R_E_C_N_O_', ccIgual, lgAnd);
+
+        query := 'SELECT ' + Self.ObterCamposSeparadosPorVirgula(Consulta, []) + ' FROM ' + Self.TabelaReferencia + ' WHERE D_E_L_E_T_ = '''' ' +
+          condicao.ToString(true);
+
+        result := dao.Consultar(query, parametros);
+    finally
+        condicao.Free;
+    end;
+end;
+
+constructor TModuloRotina.Create;
+begin
+    FPermissoesRotina := TLista<TPermissaoRotina>.Create;
+end;
+
+destructor TModuloRotina.Destroy;
+begin
+    if FPermissoesRotina <> nil then
+        FreeAndNil(FPermissoesRotina);
+
+    inherited;
+end;
+
+function TModuloRotina.Listar(tipoOperacao: TOparationTypes; multselect: boolean): TResultFilter;
+var
+    campoFiltro: TFieldFilter;
+    filtro: TFilter<TModuloRotina>;
+    // parametro : TParametro;
+    // lista:TLista<TModuloRotina>
+begin
+    try
+        filtro := TFilter<TModuloRotina>.Create;
+        filtro.ScreenName := 'Filtro de ModuloRotina';
+        filtro.OperationType := tipoOperacao;
+        filtro.MultiSelect := multselect;
+        filtro.AddIndex(1, 'Rotina=S09_S05_ROTINA', 'Rotina');
+        filtro.AddIndex(2, 'Modulo=S09_S08_MODULO', 'Modulo');
+        // ###Criar os Índices do filtro
+        // filtro.AddIndex(99, 'Empresa=S01_EMP, Filial=S01_FILIAL, Descricao=S01_DESC', 'Empresa + Filial + Descrição');
+
+{$REGION 'Campo Filtro'}
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Rotina';
+        campoFiltro.Name := 'Rotina';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Modulo';
+        campoFiltro.Name := 'Modulo';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+{$ENDREGION}
+        result := filtro.Execute;
+    finally
+        // FreeAndNil(parametro);
+        // FreeAndNil(lista);
+    end;
+end;
+
+function TModuloRotina.Obter(parametros: TParametro): TModuloRotina;
+var
+    Lista: TLista<TModuloRotina>;
+begin
+    try
+        Lista := Self.Consultar(parametros);
+
+        if Lista.Count = 1 then
+        begin
+            PreencherObjeto(Lista[0]);
+            result := Self;
+        end
+        else
+        begin
+            TLib.MensagemAdvertencia('Nenhum registro encontrado.', 'Aviso');
+            result := nil;
+        end;
+    finally
+        Lista.Destroy;
+    end;
+end;
+
+function TModuloRotina.Obter(ID: string): TModuloRotina;
+var
+    parametros: TParametro;
+
+begin
+    try
+        parametros := TParametro.Create;
+        parametros.Add('', 'R_E_C_N_O_', ID);
+        result := Obter(parametros);
+    finally
+        FreeAndNil(parametros);
+    end;
+end;
+
+{$ENDREGION}
+{$REGION 'Regras de Negócio'}
+
+procedure TModuloRotina.PreencherObjeto(ModuloRotina: TModuloRotina);
+begin
+    ModuloRotina.CopiarPara(Self);
+    FPreenchido := true;
+end;
+
+
+procedure TModuloRotina.SetAcessosRotina(const Value: TLista<TAcesso>);
+begin
+  FAcessosRotina := Value;
+end;
+
+procedure TModuloRotina.SetDelet(const Value: string);
+begin
+    FDelet := Value;
+end;
+
+procedure TModuloRotina.SetModulo(const Value: string);
+begin
+    FModulo := Value;
+end;
+
+procedure TModuloRotina.SetPermissoesRotina(const Value: TLista<TPermissaoRotina>);
+begin
+  FPermissoesRotina := Value;
+end;
+
+procedure TModuloRotina.SetRecno(const Value: integer);
+begin
+    FRecno := Value;
+end;
+
+procedure TModuloRotina.SetRotina(const Value: string);
+begin
+    FRotina := Value;
+end;
+
+{$ENDREGION}
+{$REGION 'Métodos de Propriedades'}
+{$ENDREGION}
+
+end.

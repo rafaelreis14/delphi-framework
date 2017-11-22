@@ -1,0 +1,127 @@
+unit UI.Sistema.MensagemMobile;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,Lib.Biblioteca, Vcl.Buttons,
+  Vcl.ExtCtrls, Lib.Enumeradores, Framework.UI.MensagemBase,
+  Framework.UI.FormBase;
+
+type
+
+
+  TFrmMensagemMobile = class(TFrmMensagemBase)
+    BtBtnSim: TBitBtn;
+    BtBtnNao: TBitBtn;
+    BtBtnOK: TBitBtn;
+    Label1: TLabel;
+    Panel1: TPanel;
+    lblDescricao: TLabel;
+    pnMensagemErro: TPanel;
+    mmErro: TMemo;
+    btnErro: TButton;
+    procedure BtBtnSimClick(Sender: TObject);
+    procedure BtBtnOKClick(Sender: TObject);
+    procedure BtBtnNaoClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure btnErroClick(Sender: TObject);
+  protected
+    procedure CreateParams(var Params: TCreateParams); override;
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+        constructor Create(AOwner: TComponent; Titulo,Descricao, Erro : String; TipoMSG : TipoMensagem );
+     reintroduce;Overload;
+
+  end;
+
+var
+  FrmMensagemMobile: TFrmMensagemMobile;
+
+implementation
+
+{$R *.dfm}
+
+{ TFrmMensagemMobile }
+
+procedure TFrmMensagemMobile.BtBtnNaoClick(Sender: TObject);
+begin
+     Self.ModalResult := mrNo;
+end;
+
+procedure TFrmMensagemMobile.BtBtnOKClick(Sender: TObject);
+begin
+    ModalResult:= mrOk;
+end;
+
+procedure TFrmMensagemMobile.BtBtnSimClick(Sender: TObject);
+begin
+   ModalResult := mrYes;
+end;
+
+procedure TFrmMensagemMobile.btnErroClick(Sender: TObject);
+begin
+   if pnMensagemErro.Top <> lblDescricao.Top then
+  begin
+    pnMensagemErro.BiDiMode := bdLeftToRight;
+    pnMensagemErro.Align := alClient;
+    mmErro.Align := alClient;
+  end
+  else
+  begin
+    pnMensagemErro.BiDiMode := bdRightToLeft;
+    pnMensagemErro.Align := alBottom;
+    pnMensagemErro.Height := 29;
+  end;
+end;
+
+constructor TFrmMensagemMobile.Create(AOwner: TComponent; Titulo,
+  Descricao, Erro: String; TipoMSG: TipoMensagem);
+begin
+    inherited Create(AOwner);
+     Self.lblDescricao.Caption := Descricao;
+     case TipoMSG of
+          MSGErro: begin
+                        Self.Caption := 'Erro';
+                        BtBtnOK.Visible := true;
+                        pnMensagemErro.Visible := true;
+                        mmErro.Lines.Add(Erro);
+                   end;
+          MSGInformacao: begin
+                              Self.Caption := 'Informação';
+                              BtBtnOK.Visible := true;
+                         end;
+          MSGAdvertencia: begin
+                               Self.Caption := 'Aviso';
+                               BtBtnOK.Visible := true;
+                          end;
+          MSGPergunta: begin
+                            Self.Caption := 'Pergunta';
+                            BtBtnSim.Left := BtBtnNao.Left;
+                            BtBtnNao.Left := BtBtnOK.Left;
+                            BtBtnSim.Visible := true;
+                            BtBtnNao.Visible := true;
+                       end;
+     end;
+end;
+
+procedure TFrmMensagemMobile.CreateParams(var Params: TCreateParams);
+begin
+  inherited;
+  if Assigned(Owner) and (Owner is TWincontrol) then
+      Params.WndParent := TWinControl(Owner).handle
+  else if Assigned(Screen.Activeform) then
+      Params.WndParent := Screen.Activeform.Handle;
+end;
+
+procedure TFrmMensagemMobile.FormShow(Sender: TObject);
+begin
+  inherited;
+  self.Width := MobileWidth;
+  self.Height := MobileHeight;
+
+end;
+
+end.

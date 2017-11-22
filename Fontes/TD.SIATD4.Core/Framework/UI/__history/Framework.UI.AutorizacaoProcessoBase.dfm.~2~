@@ -1,0 +1,52 @@
+object frmAutorizacaoProcessoBase: TfrmAutorizacaoProcessoBase
+  Left = 0
+  Top = 0
+  Caption = 'frmAutorizacaoProcessoBase'
+  ClientHeight = 257
+  ClientWidth = 266
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  PixelsPerInch = 96
+  TextHeight = 13
+  object lblTiTuloAutorizacao: TLabel
+    Left = 149
+    Top = 5
+    Width = 101
+    Height = 13
+    Alignment = taRightJustify
+    Caption = 'T'#237'tulo da Autoriza'#231#227'o'
+  end
+  object edLogin: TREdit
+    Left = 37
+    Top = 40
+    Width = 213
+    Height = 21
+    CharCase = ecUpperCase
+    TabOrder = 0
+    Text = ''
+    MaskType = mtNone
+    MandatoryField = False
+    PersistentField = False
+    SaveLiteralCharacters = False
+    DecimalPlaces = 2
+  end
+  object edSenha: TREdit
+    Left = 37
+    Top = 75
+    Width = 213
+    Height = 21
+    PasswordChar = '*'
+    TabOrder = 1
+    Text = ''
+    MaskType = mtNone
+    MandatoryField = False
+    PersistentField = False
+    SaveLiteralCharacters = False
+    DecimalPlaces = 2
+  end
+end

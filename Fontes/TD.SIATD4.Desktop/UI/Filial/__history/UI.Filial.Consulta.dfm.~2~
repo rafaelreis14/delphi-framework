@@ -1,0 +1,14 @@
+inherited frmConFilial: TfrmConFilial
+  Caption = 'frmConFilial'
+  ExplicitWidth = 320
+  ExplicitHeight = 240
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited pnlApresentacao: TPanel
+    inherited Label1: TLabel
+      Width = 162
+      Caption = 'Consulta de Filial'
+      ExplicitWidth = 162
+    end
+  end
+end

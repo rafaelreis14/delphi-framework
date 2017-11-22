@@ -1,0 +1,36 @@
+unit Framework.UI.MensagemBase;
+
+interface
+
+uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Framework.UI.FormBase, UntErrorProvider,
+    Lib.Enumeradores;
+
+type
+    TFrmMensagemBase = class(TFrmBase)
+    procedure FormCreate(Sender: TObject);
+    private
+
+    public
+        procedure ConfigurarTela(titulo, descricao, erro: String; tipoMsg: TipoMensagem; tipoMascara: TMaskTypes = mtString; fococBotaoSim: boolean = true); virtual; abstract;
+
+    end;
+
+var
+    frmMensagemBase: TFrmMensagemBase;
+
+implementation
+
+{$R *.dfm}
+{ TFrmMensagemBase }
+
+
+procedure TFrmMensagemBase.FormCreate(Sender: TObject);
+begin
+  inherited;
+  Self.FormStyle := fsStayOnTop;
+end;
+
+
+end.

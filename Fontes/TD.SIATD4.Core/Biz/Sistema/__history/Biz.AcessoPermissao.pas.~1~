@@ -1,0 +1,336 @@
+{*Created by @ReisCodeGenerator*}
+unit Biz.AcessoPermissao;
+
+interface
+
+uses
+    Classes, System.SysUtils, Dialogs, Lib.Base, Lib.Parametro, Lib.Enumeradores,
+    Lib.Persistable, Lib.ResultFilter, Lib.Lista, Dal.ControleDados, Dal.CondicaoConsulta, 
+	Framework.Interfaces.CRUD, Dal.FabricaSQL;
+
+type
+    [TReferenceTable('SIATD_S24_01')]
+	TAcessoPermissao = class(TBase, ICRUD<TAcessoPermissao>)
+	private
+	
+		class var dao: TControleDados<TLista<TAcessoPermissao>,TListaDAO<TAcessoPermissao>>;
+    public
+        ///	<summary>
+        ///	  Metodo que faz a inserção da AcessoPermissao
+        ///	</summary>
+        function Inserir: boolean; 
+        ///	<summary>
+        ///	  Metodo que faz a alteração da AcessoPermissao
+        ///	</summary>
+        function Alterar: boolean;
+
+        ///	<summary>
+        ///	  Métido que faz a Deleção da AcessoPermissao
+        ///	</summary>
+        function Excluir: boolean;
+
+        ///	<summary>
+        ///	  Método que chama a tela de filtro
+        ///	</summary>
+        ///	<param name="tipoOperacao">
+        ///	  Tipo da operação, se é somente filtro, ou seleção de registro
+        ///	</param>
+        function Listar(tipoOperacao: TOparationTypes; multselect: Boolean): TResultFilter; 
+
+
+        ///	<summary>
+        ///	  Método que retorna um objeto preenchido
+        ///	</summary>
+        ///	<param name="ID">
+        ///	  Chave primária da tabela
+        ///	</param>
+        function Obter(ID: string): TAcessoPermissao; overload; 
+
+        ///	<summary>
+        ///	  Método que retorna um objeto preenchido
+        ///	</summary>
+        ///	<param name="parametros">
+        ///	  Parametros para a consulta do objeto a ser preenchido
+        ///	</param>
+        function Obter(parametros:TParametro): TAcessoPermissao; overload;
+
+
+        ///	<summary>
+        ///	  Método que retonar uma lista com varios objetos de acordo com parametro passado
+        ///	</summary>
+        ///	<param name="parametros">
+        ///	  Parametros para a consulta do objeto a ser preenchido
+        ///	</param>
+        function Consultar(parametros:TParametro): TLista<TAcessoPermissao>; 
+
+
+        ///	<summary>
+        ///	  Método que preenche a instância do Objeto
+        ///	</summary>
+        ///	<param name="AcessoPermissao">
+        ///	  objeto de parametro para preenchimento da instância
+        ///	</param>
+        procedure PreencherObjeto(AcessoPermissao: TAcessoPermissao);
+
+        [TPersistable(fgPersistable, 'S24_S20_S02_GRUPO')]
+        [TMaxLenght(30)]
+        property Grupo: string;
+
+        [TPersistable(fgPersistable, 'S24_S20_S09_S08_MODULO')]
+        [TMaxLenght(30)]
+        property Modulo: string;
+
+        [TPersistable(fgPersistable, 'S24_S20_S09_S05_ROTINA')]
+        [TMaxLenght(30)]
+        property Rotina: string;
+
+        [TPersistable(fgPersistable, 'S24_S19_S06_PERMISSAO')]
+        [TMaxLenght(10)]
+        property Permissao: string;
+
+        [TPersistable(fgPersistable, 'R_E_C_N_O_')]
+        property Recno: integer;
+
+        [TPersistable(fgPersistable, 'D_E_L_E_T_')]
+        [TMaxLenght(1)]
+        property Delet: string;
+
+    end;
+
+implementation
+
+
+{ TAcessoPermissao }
+
+uses Lib.Filter, Lib.Biblioteca, Biz.UsuarioLogado;
+
+{$REGION 'Métodos CRUD'}
+
+function TAcessoPermissao.Inserir: boolean;
+var
+    fabrica: TFabricaSQL;
+    sql: WideString;
+    parametro: TParametro;
+begin
+    fabrica := TFabricaSQL.Create(Self);
+    try
+        try
+            sql := fabrica.GerarSqlInsercao;
+            parametro := Self.ObjetoParaParametros(Insercao);
+            result := dao.Inserir(sql, parametro);
+        except
+          on e: exception do
+              raise Exception.Create('Erro ao inserir AcessoPermissao'+'#13'+ e.Message);
+        end;
+    finally
+        if parametro <> nil then
+            FreeAndNil(parametro);
+    end;
+end;
+
+function TAcessoPermissao.Alterar: boolean;
+var
+    fabrica: TFabricaSQL;
+    sql: WideString;
+    parametro: TParametro;
+begin
+    fabrica := TFabricaSQL.Create(Self);
+    try
+        try
+            sql := fabrica.GerarSqlAlteracao;
+            parametro := Self.ObjetoParaParametros(Alteracao);
+            result := dao.Alterar(sql, parametro);
+        except
+          on e: exception do
+              raise Exception.Create('Erro ao alterar AcessoPermissao'+'#13'+ e.Message);
+        end;
+    finally
+        if parametro <> nil then
+            FreeAndNil(parametro);
+    end;
+end;
+
+
+function TAcessoPermissao.Excluir: boolean;
+var
+    fabrica: TFabricaSQL;
+    sql: WideString;
+    parametro: TParametro;
+begin
+    fabrica := TFabricaSQL.Create(Self);
+    try
+        try
+            sql := fabrica.GerarSqlExclusao;
+            parametro := Self.ObjetoParaParametros(Exclusao);
+            result := dao.Excluir(sql, parametro);
+        except
+          on e: exception do
+              raise Exception.Create('Erro ao excluir AcessoPermissao'+'#13'+ e.Message);
+        end;
+    finally
+        if parametro <> nil then
+            FreeAndNil(parametro);
+    end;
+
+end;
+
+function TAcessoPermissao.Consultar(parametros: TParametro): Tlista<TAcessoPermissao>;
+var
+    query: string;
+    condicao: TCondicaoConsulta;
+begin
+    try
+        condicao := TCondicaoConsulta.Create(parametros);
+        condicao.Adiciona('S24_S20_S02_GRUPO',ccIgual, lgAnd); 
+        condicao.Adiciona('S24_S20_S09_S08_MODULO',ccIgual, lgAND); 
+        condicao.Adiciona('S24_S20_S09_S05_ROTINA',ccIgual, lgAND); 
+        condicao.Adiciona('S24_S19_S06_PERMISSAO',ccIgual, lgAND); 
+        condicao.Adiciona('R_E_C_N_O_',ccIgual, lgAND); 
+        condicao.Adiciona('D_E_L_E_T_',ccIgual, lgAND); 
+
+        query := 'SELECT '+Self.ObterCamposSeparadosPorVirgula(Consulta,[]) + ' FROM ' + Self.TabelaReferencia + ' WHERE D_E_L_E_T_ = '''' ' + condicao.ToString(true);
+
+        Result := dao.Consultar(query,parametros);
+    finally
+        condicao.Free;
+    end;
+end;
+
+function TAcessoPermissao.Listar(tipoOperacao: TOparationTypes; multselect: Boolean): TResultFilter;
+var
+    campoFiltro:TFieldFilter;
+    filtro : TFilter<TAcessoPermissao>;
+    //parametro : TParametro;
+    //lista:TLista<TAcessoPermissao>
+begin
+    try
+        filtro := TFilter<TAcessoPermissao>.Create;
+        filtro.ScreenName := 'Filtro de AcessoPermissao';
+        filtro.OperationType := tipoOperacao;
+        filtro.MultiSelect := multselect;
+        filtro.AddIndex(1, 'Grupo=S24_S20_S02_GRUPO', 'Grupo'); 
+        filtro.AddIndex(2, 'Modulo=S24_S20_S09_S08_MODULO', 'Modulo'); 
+        filtro.AddIndex(3, 'Rotina=S24_S20_S09_S05_ROTINA', 'Rotina'); 
+        filtro.AddIndex(4, 'Permissao=S24_S19_S06_PERMISSAO', 'Permissao'); 
+        filtro.AddIndex(5, 'Recno=R_E_C_N_O_', 'Recno'); 
+        filtro.AddIndex(6, 'Delet=D_E_L_E_T_', 'Delet'); 
+        //###Criar os Índices do filtro
+		// filtro.AddIndex(99, 'Empresa=S01_EMP, Filial=S01_FILIAL, Descricao=S01_DESC', 'Empresa + Filial + Descrição');
+
+        {$REGION 'Campo Filtro'}
+
+        campoFiltro := TFieldFilter.Create; 
+        campoFiltro.Description := 'Grupo'; 
+        campoFiltro.Name := 'Grupo'; 
+        campoFiltro.MaskTypes := mtNone; 
+        campoFiltro.GridSize := 100; 
+        campoFiltro.FieldType := fdNormal; 
+        filtro.AddField(campoFiltro); 
+ 
+        campoFiltro := TFieldFilter.Create; 
+        campoFiltro.Description := 'Modulo'; 
+        campoFiltro.Name := 'Modulo'; 
+        campoFiltro.MaskTypes := mtNone; 
+        campoFiltro.GridSize := 100; 
+        campoFiltro.FieldType := fdNormal; 
+        filtro.AddField(campoFiltro); 
+ 
+        campoFiltro := TFieldFilter.Create; 
+        campoFiltro.Description := 'Rotina'; 
+        campoFiltro.Name := 'Rotina'; 
+        campoFiltro.MaskTypes := mtNone; 
+        campoFiltro.GridSize := 100; 
+        campoFiltro.FieldType := fdNormal; 
+        filtro.AddField(campoFiltro); 
+ 
+        campoFiltro := TFieldFilter.Create; 
+        campoFiltro.Description := 'Permissao'; 
+        campoFiltro.Name := 'Permissao'; 
+        campoFiltro.MaskTypes := mtNone; 
+        campoFiltro.GridSize := 100; 
+        campoFiltro.FieldType := fdNormal; 
+        filtro.AddField(campoFiltro); 
+ 
+        campoFiltro := TFieldFilter.Create; 
+        campoFiltro.Description := 'Recno'; 
+        campoFiltro.Name := 'Recno'; 
+        campoFiltro.MaskTypes := mtNone; 
+        campoFiltro.GridSize := 100; 
+        campoFiltro.FieldType := fdNormal; 
+        filtro.AddField(campoFiltro); 
+ 
+        campoFiltro := TFieldFilter.Create; 
+        campoFiltro.Description := 'Delet'; 
+        campoFiltro.Name := 'Delet'; 
+        campoFiltro.MaskTypes := mtNone; 
+        campoFiltro.GridSize := 100; 
+        campoFiltro.FieldType := fdNormal; 
+        filtro.AddField(campoFiltro); 
+ 
+
+        {$ENDREGION}
+
+        result := filtro.Execute;
+    finally
+        // FreeAndNil(parametro);
+        // FreeAndNil(lista);
+    end;
+end;
+
+function TAcessoPermissao.Obter(parametros: TParametro): TAcessoPermissao;
+var
+  lista: TLista<TAcessoPermissao>;
+begin
+    try
+        lista := Self.Consultar(parametros);
+
+        if lista.Count = 1 then
+        begin
+           PreencherObjeto(lista[0]);
+           Result := Self;
+        end
+        else
+        begin
+            TLib.MensagemAdvertencia('Nenhum registro encontrado.', 'Aviso');
+            Result := nil;
+        end;
+    finally
+        lista.Destroy;
+    end;
+end;
+
+function TAcessoPermissao.Obter(ID: string): TAcessoPermissao;
+var
+    parametros: TParametro;
+
+begin
+    try
+        parametros := TParametro.Create;
+        parametros.Add('', 'R_E_C_N_O_', ID);
+        result := Obter(parametros);
+    finally
+        FreeAndNil(parametros);
+    end;
+end;
+
+
+{$ENDREGION}
+
+{$REGION 'Regras de Negócio'}
+
+procedure TAcessoPermissao.PreencherObjeto(AcessoPermissao: TAcessoPermissao);
+begin
+    AcessoPermissao.CopiarPara(Self);
+    FPreenchido := true;
+end;
+
+
+{$ENDREGION}
+
+{$REGION 'Métodos de Propriedades'}
+
+
+{$ENDREGION}
+
+end.
+

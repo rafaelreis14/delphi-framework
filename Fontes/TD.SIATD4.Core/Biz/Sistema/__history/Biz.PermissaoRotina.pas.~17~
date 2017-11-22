@@ -1,0 +1,369 @@
+{ *Created by @ReisCodeGenerator* }
+unit Biz.PermissaoRotina;
+
+interface
+
+uses
+    Classes, System.SysUtils, Dialogs, Lib.ClasseBase, Lib.Parametro, Lib.Enumeradores,
+    Lib.Persistable, Lib.ResultFilter, Lib.Lista, Dal.ControleDados, Dal.CondicaoConsulta,
+    Framework.Interfaces.CRUD, Dal.FabricaSQL, Biz.Permissao;
+
+type
+
+    [TReferenceTable('SIATD_S19_01')]
+    TPermissaoRotina = class(TClasseBase, ICRUD<TPermissaoRotina>)
+    private
+
+        FPermissao: string;
+        FRotina: string;
+        FDelet: string;
+        FRecno: integer;
+        FPermissao_: TPermissao;
+        procedure SetDelet(const Value: string);
+        procedure SetPermissao(const Value: string);
+        procedure SetRecno(const Value: integer);
+        procedure SetRotina(const Value: string);
+        procedure SetPermissao_(const Value: TPermissao);
+    public
+        class var dao: TControleDados<TLista<TPermissaoRotina>,TListaDAO<TPermissaoRotina>>;
+
+        /// <summary>
+        /// Metodo que faz a inserção da PermissaoRotina
+        /// </summary>
+        function Inserir: boolean;
+        /// <summary>
+        /// Metodo que faz a alteração da PermissaoRotina
+        /// </summary>
+        function Alterar: boolean;
+
+        /// <summary>
+        /// Métido que faz a Deleção da PermissaoRotina
+        /// </summary>
+        function Excluir: boolean;
+
+        /// <summary>
+        /// Método que chama a tela de filtro
+        /// </summary>
+        /// <param name="tipoOperacao">
+        /// Tipo da operação, se é somente filtro, ou seleção de registro
+        /// </param>
+        function Listar(tipoOperacao: TOparationTypes; multselect: boolean): TResultFilter;
+
+        /// <summary>
+        /// Método que retorna um objeto preenchido
+        /// </summary>
+        /// <param name="ID">
+        /// Chave primária da tabela
+        /// </param>
+        function Obter(ID: string): TPermissaoRotina; overload;
+
+        /// <summary>
+        /// Método que retorna um objeto preenchido
+        /// </summary>
+        /// <param name="parametros">
+        /// Parametros para a consulta do objeto a ser preenchido
+        /// </param>
+        function Obter(parametros: TParametro): TPermissaoRotina; overload;
+
+        /// <summary>
+        /// Método que retonar uma lista com varios objetos de acordo com parametro passado
+        /// </summary>
+        /// <param name="parametros">
+        /// Parametros para a consulta do objeto a ser preenchido
+        /// </param>
+        function Consultar(parametros: TParametro): TLista<TPermissaoRotina>;
+
+        /// <summary>
+        /// Método que preenche a instância do Objeto
+        /// </summary>
+        /// <param name="PermissaoRotina">
+        /// objeto de parametro para preenchimento da instância
+        /// </param>
+        procedure PreencherObjeto(PermissaoRotina: TPermissaoRotina);
+
+
+        function ExcluirPorRotina(rotina: string): boolean;
+
+
+
+
+        [TPersistable(fgPersistable, 'S19_S05_ROTINA')]
+        [TMaxLenght(30)]
+        property Rotina: string read FRotina write SetRotina;
+
+        [TPersistable(fgPersistable, 'D_E_L_E_T_')]
+        [TMaxLenght(1)]
+        property Delet: string read FDelet write SetDelet;
+
+        [TPersistable(fgUpdateable, 'R_E_C_N_O_')]
+        property Recno: integer read FRecno write SetRecno;
+
+        [TPersistable(fgPersistable, 'S19_S06_PERMISSAO')]
+        [TMaxLenght(10)]
+        property Permissao: string read FPermissao write SetPermissao;
+
+
+        property Permissao_: TPermissao read FPermissao_ write SetPermissao_;
+
+        constructor Create;
+        destructor Destroy; override;
+
+
+
+
+    end;
+
+implementation
+
+{ TPermissaoRotina }
+
+uses Lib.Filter, Lib.Biblioteca, Biz.UsuarioLogado;
+
+{$REGION 'Métodos CRUD'}
+
+function TPermissaoRotina.Inserir: boolean;
+var
+    Parametro: TParametro;
+begin
+    try
+        try
+            result := dao.Inserir(Self);
+        except
+            on e: exception do
+                raise exception.Create('Erro ao inserir PermissaoRotina' + #13 + e.Message);
+        end;
+    finally
+        if Parametro <> nil then
+            FreeAndNil(Parametro);
+    end;
+end;
+
+function TPermissaoRotina.Alterar: boolean;
+begin
+    try
+        try
+            result := dao.Alterar(Self);
+        except
+            on e: exception do
+                raise exception.Create('Erro ao alterar PermissaoRotina' + #13 + e.Message);
+        end;
+    finally
+    end;
+end;
+
+function TPermissaoRotina.Excluir: boolean;
+var
+    fabrica: TFabricaSQL;
+    sql: WideString;
+    Parametro: TParametro;
+begin
+    fabrica := TFabricaSQL.Create(Self);
+    try
+        try
+            fabrica.GerarSqlExclusao(sql, parametro);
+            result := dao.Excluir(sql, Parametro);
+        except
+            on e: exception do
+                raise exception.Create('Erro ao excluir PermissaoRotina' + #13 + e.Message);
+        end;
+    finally
+        if Parametro <> nil then
+            FreeAndNil(Parametro);
+    end;
+
+end;
+
+function TPermissaoRotina.Consultar(parametros: TParametro): TLista<TPermissaoRotina>;
+var
+    query: string;
+    condicao: TCondicaoConsulta;
+begin
+    try
+        condicao := TCondicaoConsulta.Create(parametros);
+        condicao.Adiciona('S19_S05_ROTINA', ccIgual, lgAnd);
+        condicao.Adiciona('D_E_L_E_T_', ccIgual, lgAnd);
+        condicao.Adiciona('R_E_C_N_O_', ccIgual, lgAnd);
+        condicao.Adiciona('S19_S06_PERMISSAO', ccIgual, lgAnd);
+
+        query := 'SELECT ' + Self.ObterCamposSeparadosPorVirgula(Consulta, []) + ' FROM ' + Self.TabelaReferencia + ' WHERE D_E_L_E_T_ = '''' ' +
+          condicao.ToString(true);
+
+        result := dao.Consultar(query, parametros);
+    finally
+        condicao.Free;
+    end;
+end;
+
+constructor TPermissaoRotina.Create;
+begin
+    inherited;
+    FPermissao_ := TPermissao.Create;
+end;
+
+destructor TPermissaoRotina.Destroy;
+begin
+    FreeAndNil(FPermissao_);
+
+  inherited;
+end;
+
+function TPermissaoRotina.Listar(tipoOperacao: TOparationTypes; multselect: boolean): TResultFilter;
+var
+    campoFiltro: TFieldFilter;
+    filtro: TFilter<TPermissaoRotina>;
+    // parametro : TParametro;
+    // lista:TLista<TPermissaoRotina>
+begin
+    try
+        filtro := TFilter<TPermissaoRotina>.Create;
+        filtro.ScreenName := 'Filtro de PermissaoRotina';
+        filtro.OperationType := tipoOperacao;
+        filtro.MultiSelect := multselect;
+        filtro.AddIndex(1, 'Rotina=S19_S05_ROTINA', 'Rotina');
+        filtro.AddIndex(4, 'Permissao=S19_S06_PERMISSAO', 'Permissao');
+        // ###Criar os Índices do filtro
+        // filtro.AddIndex(99, 'Empresa=S01_EMP, Filial=S01_FILIAL, Descricao=S01_DESC', 'Empresa + Filial + Descrição');
+
+{$REGION 'Campo Filtro'}
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Rotina';
+        campoFiltro.Name := 'Rotina';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Delet';
+        campoFiltro.Name := 'Delet';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Recno';
+        campoFiltro.Name := 'Recno';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Permissao';
+        campoFiltro.Name := 'Permissao';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+{$ENDREGION}
+        result := filtro.Execute;
+    finally
+        // FreeAndNil(parametro);
+        // FreeAndNil(lista);
+    end;
+end;
+
+function TPermissaoRotina.Obter(parametros: TParametro): TPermissaoRotina;
+var
+    Lista: TLista<TPermissaoRotina>;
+begin
+    try
+        Lista := Self.Consultar(parametros);
+
+        if Lista.Count = 1 then
+        begin
+            PreencherObjeto(Lista[0]);
+            result := Self;
+        end
+        else
+        begin
+            TLib.MensagemAdvertencia('Nenhum registro encontrado.', 'Aviso');
+            result := nil;
+        end;
+    finally
+        Lista.Destroy;
+    end;
+end;
+
+function TPermissaoRotina.Obter(ID: string): TPermissaoRotina;
+var
+    parametros: TParametro;
+
+begin
+    try
+        parametros := TParametro.Create;
+        parametros.Add('', 'R_E_C_N_O_', ID);
+        result := Obter(parametros);
+    finally
+        FreeAndNil(parametros);
+    end;
+end;
+
+
+
+
+
+function TPermissaoRotina.ExcluirPorRotina(rotina: string): boolean;
+var
+    Parametro: TParametro;
+    query: string;
+begin
+    Parametro := TParametro.Create;
+    try
+        try
+            Parametro.Add('', 'S19_S05_ROTINA', rotina);
+
+            query := 'DELETE FROM '+Self.TabelaReferencia+' WHERE S19_S05_ROTINA = :S19_S05_ROTINA';
+
+            dao.Excluir(query, Parametro);
+        except
+            on e: exception do
+                raise exception.Create('Erro ao excluir Permissões da Rotina ' + #13 + e.Message);
+        end;
+    finally
+        FreeAndNil(Parametro);
+    end;
+end;
+
+
+{$ENDREGION}
+{$REGION 'Regras de Negócio'}
+
+procedure TPermissaoRotina.PreencherObjeto(PermissaoRotina: TPermissaoRotina);
+begin
+    PermissaoRotina.CopiarPara(Self);
+    FPreenchido := true;
+end;
+
+procedure TPermissaoRotina.SetDelet(const Value: string);
+begin
+    FDelet := Value;
+end;
+
+procedure TPermissaoRotina.SetPermissao(const Value: string);
+begin
+    FPermissao := Value;
+end;
+
+procedure TPermissaoRotina.SetPermissao_(const Value: TPermissao);
+begin
+  FPermissao_ := Value;
+end;
+
+procedure TPermissaoRotina.SetRecno(const Value: integer);
+begin
+    FRecno := Value;
+end;
+
+procedure TPermissaoRotina.SetRotina(const Value: string);
+begin
+    FRotina := Value;
+end;
+
+{$ENDREGION}
+{$REGION 'Métodos de Propriedades'}
+{$ENDREGION}
+
+end.

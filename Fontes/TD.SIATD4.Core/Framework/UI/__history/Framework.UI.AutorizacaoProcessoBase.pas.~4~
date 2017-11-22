@@ -1,0 +1,27 @@
+unit Framework.UI.AutorizacaoProcessoBase;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Framework.UI.FormBase, REdit;
+
+type
+  TfrmAutorizacaoProcessoBase = class(TFrmBase)
+    lblTiTuloAutorizacao: TLabel;
+    edLogin: TREdit;
+    edSenha: TREdit;
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  frmAutorizacaoProcessoBase: TfrmAutorizacaoProcessoBase;
+
+implementation
+
+{$R *.dfm}
+
+end.

@@ -1,0 +1,568 @@
+object frmGeradorClasse: TfrmGeradorClasse
+  Left = 195
+  Top = 55
+  Caption = 'Gerador de Classes'
+  ClientHeight = 523
+  ClientWidth = 978
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poDesigned
+  OnShow = FormShow
+  PixelsPerInch = 96
+  TextHeight = 13
+  object Label2: TLabel
+    Left = 8
+    Top = 8
+    Width = 77
+    Height = 13
+    Caption = 'Nome da Tabela'
+  end
+  object Label1: TLabel
+    Left = 9
+    Top = 479
+    Width = 76
+    Height = 13
+    Caption = 'Nome da Classe'
+  end
+  object Label7: TLabel
+    Left = 102
+    Top = 9
+    Width = 52
+    Height = 13
+    Caption = 'Nome Alias'
+  end
+  object Label9: TLabel
+    Left = 243
+    Top = 11
+    Width = 63
+    Height = 13
+    Caption = 'Nome Campo'
+  end
+  object edTabela: TEdit
+    Left = 8
+    Top = 24
+    Width = 89
+    Height = 21
+    CharCase = ecUpperCase
+    TabOrder = 0
+    OnExit = edTabelaExit
+  end
+  object btnAbrirTabela: TButton
+    Left = 160
+    Top = 22
+    Width = 75
+    Height = 25
+    Caption = 'Abrir Tabela'
+    TabOrder = 2
+    OnClick = btnAbrirTabelaClick
+  end
+  object RGrid1: TRGrid
+    Left = 8
+    Top = 53
+    Width = 393
+    Height = 156
+    ColCount = 2
+    DefaultRowHeight = 18
+    DrawingStyle = gdsClassic
+    RowCount = 2
+    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goRowSelect]
+    TabOrder = 3
+    MultiSelect = True
+    MasterDetailType = mdMaster
+    ColWidths = (
+      15
+      64)
+    RowHeights = (
+      18
+      18)
+  end
+  object edClasse: TEdit
+    Left = 9
+    Top = 495
+    Width = 121
+    Height = 21
+    TabOrder = 4
+  end
+  object btnVisualizar: TButton
+    Left = 136
+    Top = 493
+    Width = 121
+    Height = 25
+    Caption = 'Visualizar'
+    TabOrder = 5
+    OnClick = btnVisualizarClick
+  end
+  object btnGerarClasse: TButton
+    Left = 264
+    Top = 493
+    Width = 121
+    Height = 25
+    Caption = 'Gerar Classe'
+    TabOrder = 6
+    OnClick = btnGerarClasseClick
+  end
+  object pgcComponentes: TPageControl
+    Left = 403
+    Top = 8
+    Width = 567
+    Height = 514
+    ActivePage = TabSheet2
+    TabOrder = 7
+    object TabSheet2: TTabSheet
+      Caption = 'Classe'
+      ImageIndex = 2
+      object mmClasse: TMemo
+        Left = 3
+        Top = 3
+        Width = 550
+        Height = 480
+        ScrollBars = ssBoth
+        TabOrder = 0
+      end
+    end
+    object tbPrincipal: TTabSheet
+      Caption = 'Tela de Consulta'
+      object mmConsultaPAS: TMemo
+        Left = 3
+        Top = 3
+        Width = 553
+        Height = 236
+        ScrollBars = ssBoth
+        TabOrder = 0
+      end
+      object mmConsultaDFM: TMemo
+        Left = 3
+        Top = 246
+        Width = 553
+        Height = 236
+        ScrollBars = ssBoth
+        TabOrder = 1
+      end
+    end
+    object TabSheet1: TTabSheet
+      Caption = 'Tela de Cadastro '
+      ImageIndex = 1
+      object mmCadastroPAS: TMemo
+        Left = 3
+        Top = 4
+        Width = 553
+        Height = 236
+        ScrollBars = ssBoth
+        TabOrder = 0
+      end
+      object mmCadastroDFM: TMemo
+        Left = 3
+        Top = 246
+        Width = 553
+        Height = 236
+        ScrollBars = ssBoth
+        TabOrder = 1
+      end
+    end
+  end
+  object GroupBox1: TGroupBox
+    Left = 3
+    Top = 408
+    Width = 398
+    Height = 65
+    Caption = 'Classes'
+    Color = clBtnFace
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentBackground = False
+    ParentColor = False
+    ParentFont = False
+    TabOrder = 8
+    object Label3: TLabel
+      Left = 10
+      Top = 18
+      Width = 163
+      Height = 13
+      Caption = 'Diret'#243'rio onde ser'#225' salva a Classe'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+    end
+    object edDiretorio: TEdit
+      Left = 9
+      Top = 33
+      Width = 328
+      Height = 21
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+      TabOrder = 0
+    end
+    object btnDiretorio: TButton
+      Left = 339
+      Top = 31
+      Width = 46
+      Height = 25
+      Caption = 'Dir...'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+      TabOrder = 1
+      OnClick = btnDiretorioClick
+    end
+  end
+  object GroupBox2: TGroupBox
+    Left = 3
+    Top = 214
+    Width = 395
+    Height = 80
+    Caption = 'Vis'#245'es'
+    Color = clBtnFace
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentBackground = False
+    ParentColor = False
+    ParentFont = False
+    TabOrder = 9
+    object Label8: TLabel
+      Left = 10
+      Top = 37
+      Width = 167
+      Height = 13
+      Caption = 'Diret'#243'rio onde ser'#225' salva as vis'#245'es'
+      Enabled = False
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+    end
+    object edDiretorioVisoes: TEdit
+      Left = 9
+      Top = 52
+      Width = 328
+      Height = 21
+      Enabled = False
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+      TabOrder = 0
+    end
+    object btnVisoes: TButton
+      Left = 339
+      Top = 49
+      Width = 46
+      Height = 25
+      Caption = 'Dir...'
+      Enabled = False
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+      TabOrder = 1
+      OnClick = btnVisoesClick
+    end
+    object ckConsulta: TCheckBox
+      Left = 10
+      Top = 18
+      Width = 97
+      Height = 17
+      Caption = 'Consulta'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+      TabOrder = 2
+      OnClick = ckConsultaClick
+    end
+    object ckCadastro: TCheckBox
+      Left = 90
+      Top = 18
+      Width = 97
+      Height = 17
+      Caption = 'Cadastro'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+      TabOrder = 3
+      OnClick = ckConsultaClick
+    end
+  end
+  object edAlias: TEdit
+    Left = 98
+    Top = 24
+    Width = 56
+    Height = 21
+    CharCase = ecUpperCase
+    TabOrder = 1
+  end
+  object edNomeCampo: TEdit
+    Left = 242
+    Top = 25
+    Width = 78
+    Height = 21
+    CharCase = ecUpperCase
+    TabOrder = 10
+  end
+  object btnPesquisar: TButton
+    Left = 324
+    Top = 24
+    Width = 75
+    Height = 24
+    Caption = 'Pesquisar'
+    TabOrder = 11
+    OnClick = btnPesquisarClick
+  end
+  object GroupBox3: TGroupBox
+    Left = 2
+    Top = 296
+    Width = 395
+    Height = 109
+    Caption = 'Menu'
+    Color = clBtnFace
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentBackground = False
+    ParentColor = False
+    ParentFont = False
+    TabOrder = 12
+    object Label4: TLabel
+      Left = 141
+      Top = 22
+      Width = 34
+      Height = 13
+      Caption = 'Modulo'
+      Enabled = False
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+    end
+    object Label6: TLabel
+      Left = 13
+      Top = 86
+      Width = 360
+      Height = 13
+      Caption = 
+        #201' necess'#225'rio fazer o check in no formul'#225'rio Principal para fazer' +
+        ' a altera'#231#227'o.'
+      Color = clRed
+      Enabled = False
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clRed
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentColor = False
+      ParentFont = False
+    end
+    object Label5: TLabel
+      Left = 13
+      Top = 45
+      Width = 248
+      Height = 13
+      Caption = 'Diret'#243'rio onde esta salva o UI.Sistema.Principal.pas'
+      Enabled = False
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+    end
+    object Button1: TButton
+      Left = 338
+      Top = 59
+      Width = 46
+      Height = 25
+      Caption = 'Dir...'
+      Enabled = False
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+      TabOrder = 0
+      OnClick = Button1Click
+    end
+    object ckAdicionaMenu: TCheckBox
+      Left = 12
+      Top = 21
+      Width = 111
+      Height = 17
+      Caption = 'Adicionar no menu'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+      TabOrder = 1
+      OnClick = ckAdicionaMenuClick
+    end
+    object edPrincipal: TEdit
+      Left = 13
+      Top = 61
+      Width = 320
+      Height = 21
+      Enabled = False
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+      TabOrder = 2
+      Text = 'C:\SIATD4\Fontes\TD.SIATD4.Desktop\UI\Sistema'
+    end
+    object cbModulo: TRComboBox
+      Left = 177
+      Top = 17
+      Width = 201
+      Height = 22
+      Style = csOwnerDrawFixed
+      Enabled = False
+      TabOrder = 3
+      MandatoryField = False
+      PersistentField = False
+      BlankField = False
+      ListValue.Strings = (
+        'VENDAS=VENDAS'
+        'SEGURANCA=SEGURANCA'
+        'LOGISTICA=LOGISTICA'
+        'CONFIGURADOR=CONFIGURADOR')
+    end
+  end
+  object ConexaoPrincipal: TADOConnection
+    ConnectionString = 
+      'Provider=SQLOLEDB.1;Integrated Security=SSPI;Persist Security In' +
+      'fo=False;Initial Catalog=P11TESTE_1;Data Source=192.168.240.38;U' +
+      'se Procedure for Prepare=1;Auto Translate=True;Packet Size=4096;' +
+      'Workstation ID=MATTI21;Use Encryption for Data=False;Tag with co' +
+      'lumn collation when possible=False'
+    LoginPrompt = False
+    Provider = 'SQLOLEDB.1'
+    Left = 632
+    Top = 24
+  end
+  object sqlTableInfo: TADOQuery
+    Connection = ConexaoPrincipal
+    CursorType = ctStatic
+    Parameters = <
+      item
+        Name = 'Table'
+        DataType = ftWideString
+        NumericScale = 255
+        Precision = 255
+        Size = 128
+        Value = Null
+      end>
+    SQL.Strings = (
+      'select   '
+      '    col.column_name, '
+      '    col.data_type,'
+      ' col.character_maximum_length,'
+      '    prop.value as property'
+      'FROM sys.objects o  '
+      'INNER JOIN INFORMATION_SCHEMA.COLUMNS col '
+      '    ON col.table_name = o.name'
+      'LEFT JOIN sys.extended_properties prop '
+      '    ON prop.major_id = o.object_id'
+      '    and prop.minor_id = col.ORDINAL_POSITION'
+      'WHERE o.name = :Table')
+    Left = 632
+    Top = 88
+    object sqlTableInfocolumn_name: TWideStringField
+      FieldName = 'column_name'
+      Size = 128
+    end
+    object sqlTableInfodata_type: TWideStringField
+      FieldName = 'data_type'
+      ReadOnly = True
+      Size = 128
+    end
+    object sqlTableInfocharacter_maximum_length: TIntegerField
+      FieldName = 'character_maximum_length'
+      ReadOnly = True
+    end
+    object sqlTableInfoproperty: TVariantField
+      FieldName = 'property'
+    end
+  end
+  object ADOQuery1: TADOQuery
+    Connection = ConexaoPrincipal
+    CursorType = ctStatic
+    Parameters = <
+      item
+        Name = 'Table'
+        DataType = ftWideString
+        NumericScale = 255
+        Precision = 255
+        Size = 128
+        Value = Null
+      end>
+    SQL.Strings = (
+      'select   '
+      '    col.column_name, '
+      '    col.data_type,'
+      ' col.character_maximum_length,'
+      '    prop.value as property'
+      'FROM sys.objects o  '
+      'INNER JOIN INFORMATION_SCHEMA.COLUMNS col '
+      '    ON col.table_name = o.name'
+      'LEFT JOIN sys.extended_properties prop '
+      '    ON prop.major_id = o.object_id'
+      '    and prop.minor_id = col.ORDINAL_POSITION'
+      'WHERE o.name = :Table')
+    Left = 720
+    Top = 96
+    object WideStringField1: TWideStringField
+      FieldName = 'column_name'
+      Size = 128
+    end
+    object WideStringField2: TWideStringField
+      FieldName = 'data_type'
+      ReadOnly = True
+      Size = 128
+    end
+    object IntegerField1: TIntegerField
+      FieldName = 'character_maximum_length'
+      ReadOnly = True
+    end
+    object VariantField1: TVariantField
+      FieldName = 'property'
+    end
+  end
+end

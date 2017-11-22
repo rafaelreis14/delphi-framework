@@ -1,0 +1,173 @@
+unit UI.Base.Consulta;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, UI.Base.FormBase, UntErrorProvider, Lib.CRUD,
+  Lib.CRUDFactory, Lib.Enumeradores, Lib.Biblioteca, Lib.Base, Lib.ResultFilter;
+
+type
+  TFrmConsulta = class(TFrmBase)
+    procedure FormShow(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+  private
+    FFormularioCadastro: TFormClass;
+    FClasse: string;
+    FID: String;
+    FIDName: string;
+    procedure SetClasse(const Value: string);
+    procedure SetFormularioCadastro(const Value: TFormClass);
+    procedure SetID(const Value: String);
+    procedure SetIDName(const Value: string);
+
+  public
+    function ValidarInsercao: boolean; virtual;
+    function Inserir: boolean; virtual;
+    function ValidarAlteracao: boolean; virtual;
+    function Alterar: boolean; virtual;
+    function ValidarExclusao: boolean; virtual;
+    function Excluir: boolean; virtual;
+    function ValidarVisualizacao: boolean; Virtual;
+    function Visualizar: boolean; virtual;
+    procedure Pesquisar; virtual;
+
+    property FormularioCadastro:TFormClass read FFormularioCadastro write SetFormularioCadastro;
+    property Classe: string read FClasse write SetClasse;
+    property NomeID:string read FIDName write SetIDName;
+  protected
+    ResultFilter: TResultFilter;
+    property ID:String read FID write SetID;
+
+  end;
+
+var
+  FrmConsulta: TFrmConsulta;
+
+implementation
+
+{$R *.dfm}
+
+
+{ TFrmConsulta }
+
+{$REGION 'Funções de CRUD da consulta'}
+
+
+function TFrmConsulta.ValidarAlteracao: boolean;
+begin
+    result := true;
+end;
+
+function TFrmConsulta.Alterar: boolean;
+begin
+    if not ValidarAlteracao then Exit;
+    result := TLib.AbrirFormulario(FormularioCadastro,acAlteracao,objeto) = rfOK;
+end;
+
+function TFrmConsulta.ValidarExclusao: boolean;
+begin
+    result := true;
+end;
+
+function TFrmConsulta.Excluir: boolean;
+begin
+    result := true;
+    if Tlib.MensagemPergunta('Deseja realmente excluir?','Exclusão') = mrYes then
+    begin
+        if not ValidarExclusao then Exit;
+        try
+            Tbase(Objeto).Deletar(ID);
+        except on E: Exception do
+           begin
+               result := false;
+               Tlib.MensagemErro('Erro ao excluir o registro',e.Message,'Erro');
+           end;
+        end;
+    end
+    else
+        result := false;
+end;
+
+function TFrmConsulta.ValidarInsercao: boolean;
+begin
+    result := true;
+end;
+
+function TFrmConsulta.Inserir: boolean;
+begin
+    if not ValidarInsercao then Exit;
+    result := TLib.AbrirFormulario(FormularioCadastro,acInsercao,objeto) = rfOK;
+    Objeto.Destroy;
+    Objeto := TCRUDFactory.Factory(Classe);
+end;
+
+procedure TFrmConsulta.Pesquisar;
+begin
+
+end;
+
+function TFrmConsulta.ValidarVisualizacao: boolean;
+begin
+    result := true;
+end;
+
+function TFrmConsulta.Visualizar: boolean;
+begin
+    if not ValidarVisualizacao then exit;
+    result := TLib.AbrirFormulario(FormularioCadastro,acVisualizacao,Objeto) = rfOK;
+end;
+
+
+
+{$ENDREGION}
+
+{$REGION 'Métodos de propriedades'}
+
+
+procedure TFrmConsulta.SetClasse(const Value: string);
+begin
+    FClasse := Value;
+end;
+
+procedure TFrmConsulta.SetFormularioCadastro(const Value: TFormClass);
+begin
+    FFormularioCadastro := Value;
+end;
+
+
+procedure TFrmConsulta.SetID(const Value: String);
+begin
+  FID := Value;
+end;
+
+procedure TFrmConsulta.SetIDName(const Value: string);
+begin
+  FIDName := Value;
+end;
+
+
+{$ENDREGION}
+
+procedure TFrmConsulta.FormCreate(Sender: TObject);
+begin
+  FecharComEsc := true;
+  inherited;
+
+end;
+
+procedure TFrmConsulta.FormDestroy(Sender: TObject);
+begin
+  inherited;
+  FreeAndNil(ResultFilter);
+end;
+
+procedure TFrmConsulta.FormShow(Sender: TObject);
+begin
+  inherited;
+  if classe <> EmptyStr then
+      Objeto :=  TCRUDFactory.Factory(Classe);
+end;
+
+end.

@@ -1,0 +1,9 @@
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\TestWebService\bin\Config.ini
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\TestWebService\bin\TestWebService.dll.config
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\TestWebService\bin\TestWebService.dll
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\TestWebService\bin\TestWebService.pdb
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\TestWebService\bin\DBConnect.dll
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\TestWebService\bin\DBConnect.pdb
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\TestWebService\obj\Debug\TestWebService.csprojResolveAssemblyReference.cache
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\TestWebService\obj\Debug\TestWebService.dll
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\TestWebService\obj\Debug\TestWebService.pdb

@@ -1,0 +1,304 @@
+unit Biz.Funcionario;
+
+interface
+
+uses
+    Classes, System.SysUtils, Dialogs, Lib.Parametro, Lib.Enumeradores,
+    Lib.Persistable, Lib.Lista, Lib.ResultFilter, Lib.ClasseBase, Dal.ControleDados,
+    Framework.Interfaces.Consultavel, Framework.Interfaces.CRUD;
+
+type
+    [TReferenceTable('SRA010')]
+    TFuncionario = class(TClasseBase, ICRUD<TFuncionario>)
+    private
+        FFilial: string;
+        FDelet: string;
+        FCPF: string;
+        FRecno: integer;
+        FNome: string;
+        FMatricula: string;
+        FSituacaoFolha: string;
+
+        class var dao: TControleDados<TLista<TFuncionario>,TListaDAO<TFuncionario>>;
+
+        procedure SetCPF(const Value: string);
+        procedure SetDelet(const Value: string);
+        procedure SetFilial(const Value: string);
+        procedure SetMatricula(const Value: string);
+        procedure SetNome(const Value: string);
+        procedure SetRecno(const Value: integer);
+        procedure SetSituacaoFolha(const Value: string);
+    public
+        function Inserir: boolean;
+        function Alterar: boolean;
+        function Excluir: boolean;
+
+        /// <summary>
+        /// Método que chama a tela de filtro
+        /// </summary>
+        /// <param name="tipoOperacao">
+        /// Tipo da operação, se é somente filtro, ou seleção de registro
+        /// </param>
+        function Listar(tipoOperacao: TOparationTypes; multselect: Boolean): TResultFilter;
+
+        /// <summary>
+        /// Métodos que retorna uma lista  de objetos de uma consulta
+        /// pré-definida pelos parâmentros passados.
+        /// </summary>
+        function Consultar(parametros: TParametro): TLista<TFuncionario>;
+
+        /// <summary>
+        /// Método que retorna um objeto preenchido
+        /// </summary>
+        /// <param name="ID">
+        /// Chave primária da tabela
+        /// </param>
+        function Obter(ID: string): TFuncionario; overload;
+
+        /// <summary>
+        /// Método que retorna um objeto preenchido
+        /// </summary>
+        /// <param name="parametros">
+        /// Parametros para a consulta do objeto a ser preenchido
+        /// </param>
+        function Obter(parametros: TParametro): TFuncionario; overload;
+
+        /// <summary>
+        /// Método que preenche a instância do Objeto
+        /// </summary>
+        /// <param name="Funcionario">
+        /// objeto de parametro para preenchimento da instância
+        /// </param>
+        procedure PreencherObjeto(Funcionario: TFuncionario);
+
+        [TPersistable(fgPersistable, 'RA_FILIAL')]
+        property Filial: string read FFilial write SetFilial;
+
+        [TPersistable(fgPersistable, 'RA_MAT')]
+        property Matricula: string read FMatricula write SetMatricula;
+
+        [TPersistable(fgPersistable, 'RA_NOME')]
+        property Nome: string read FNome write SetNome;
+
+        [TPersistable(fgPersistable, 'RA_CIC')]
+        property CPF: string read FCPF write SetCPF;
+
+        [TPersistable(fgPersistable, 'D_E_L_E_T_')]
+        property Delet: string read FDelet write SetDelet;
+
+        [TPersistable(fgPersistable, 'R_E_C_N_O_')]
+        property Recno: integer read FRecno write SetRecno;
+
+        [TPersistable(fgPersistable, 'RA_SITFOLH')]
+        property SituacaoFolha: string read FSituacaoFolha write SetSituacaoFolha;
+    end;
+
+implementation
+
+{ TFuncionario }
+
+uses Lib.Filter, Lib.Biblioteca, Dal.CondicaoConsulta;
+
+{$REGION 'Métodos CRUD'}
+
+
+function TFuncionario.Alterar: boolean;
+begin
+
+end;
+
+function TFuncionario.Consultar(parametros: TParametro): TLista<TFuncionario>;
+var
+    query: TStringBuilder;
+    condicao: TCondicaoConsulta;
+begin
+    try
+        condicao := TCondicaoConsulta.Create(parametros);
+        condicao.Adiciona('RA_FILIAL',ccIgual, lgNenhuma);
+        condicao.Adiciona('RA_MAT',ccIgual, lgAND);
+        condicao.Adiciona('RA_NOME',ccLike, lgAND);
+        condicao.Adiciona('RA_CIC',ccIgual, lgAND);
+        condicao.Adiciona('D_E_L_E_T_',ccIgual, lgAND);
+        condicao.Adiciona('R_E_C_N_O_',ccIgual, lgAND);
+        condicao.Adiciona('RA_SITFOLH',ccIgual, lgAND);
+
+
+
+        query := TStringBuilder.Create;
+        query.Append('SELECT ');
+        query.Append(Self.ObterCamposSeparadosPorVirgula(Consulta,[]));
+        query.Append(' FROM ').Append(Self.TabelaReferencia);
+        query.Append(' WHERE D_E_L_E_T_ = '''' ');
+        query.Append(condicao.ToString(True));
+
+        Result := dao.Consultar(query.ToString, parametros);
+
+    finally
+        if query <> nil then
+            FreeAndNil(query);
+        if condicao <> nil then
+            FreeAndNil(condicao);
+    end;
+end;
+
+
+
+function TFuncionario.Excluir: boolean;
+begin
+
+end;
+
+function TFuncionario.Inserir: boolean;
+begin
+
+end;
+
+function TFuncionario.Listar(tipoOperacao: TOparationTypes; multselect: Boolean): TResultFilter;
+var
+    campoFiltro: TFieldFilter;
+    filtro: TFilter<TFuncionario>;
+    // parametro : TParametro;
+    // lista:TLista<TFuncionario>
+begin
+    try
+        filtro := TFilter<TFuncionario>.Create;
+        filtro.ScreenName := 'Filtro de Funcionario';
+        filtro.OperationType := tipoOperacao;
+        filtro.MultiSelect := multselect;
+        filtro.AddIndex(1, 'Nome=RA_NOME', 'Nome');
+        filtro.AddIndex(2, 'CPF=RA_CIC', 'CPF');
+        filtro.Task := 'ConsultarFuncionario';
+
+{$REGION 'Campo Filtro'}
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Filial';
+        campoFiltro.Name := 'Filial';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Matricula';
+        campoFiltro.Name := 'Matricula';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Nome';
+        campoFiltro.Name := 'Nome';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 250;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'CPF';
+        campoFiltro.Name := 'CPF';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Situação Folha';
+        campoFiltro.Name := 'SituacaoFolha';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+{$ENDREGION}
+        result := filtro.Execute;
+    finally
+        // FreeAndNil(parametro);
+        // FreeAndNil(lista.Destroy);
+    end;
+end;
+
+function TFuncionario.Obter(parametros: TParametro): TFuncionario;
+var
+    Lista: TLista<TFuncionario>;
+begin
+    try
+        Lista := Self.Consultar(parametros);
+
+        if Lista.Count = 1 then
+        begin
+            PreencherObjeto(Lista[0]);
+            result := Self;
+        end
+        else
+        begin
+            TLib.MensagemAdvertencia('Nenhum registro encontrado.', 'Aviso');
+            result := nil;
+        end;
+    finally
+        Lista.Destroy;
+    end;
+end;
+
+function TFuncionario.Obter(ID: string): TFuncionario;
+var
+    parametros: TParametro;
+begin
+    try
+        parametros := TParametro.Create;
+        parametros.Add('', 'R_E_C_N_O_', ID);
+        result := Obter(parametros);
+    finally
+        FreeAndNil(parametros);
+    end;
+end;
+
+{$ENDREGION}
+{$REGION 'Regras de Negócio'}
+
+procedure TFuncionario.PreencherObjeto(Funcionario: TFuncionario);
+begin
+    Funcionario.CopiarPara(Self);
+    FPreenchido := true;
+end;
+
+procedure TFuncionario.SetCPF(const Value: string);
+begin
+    FCPF := Value;
+end;
+
+procedure TFuncionario.SetDelet(const Value: string);
+begin
+    FDelet := Value;
+end;
+
+procedure TFuncionario.SetFilial(const Value: string);
+begin
+    FFilial := Value;
+end;
+
+procedure TFuncionario.SetMatricula(const Value: string);
+begin
+    FMatricula := Value;
+end;
+
+procedure TFuncionario.SetNome(const Value: string);
+begin
+    FNome := Value;
+end;
+
+procedure TFuncionario.SetRecno(const Value: integer);
+begin
+    FRecno := Value;
+end;
+
+procedure TFuncionario.SetSituacaoFolha(const Value: string);
+begin
+    FSituacaoFolha := Value;
+end;
+
+{$ENDREGION}
+{$REGION 'Métodos de Propriedades'}
+{$ENDREGION}
+
+end.

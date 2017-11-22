@@ -1,0 +1,327 @@
+unit Biz.TabelaComissao;
+
+interface
+
+uses
+    Classes, System.SysUtils, Dialogs, Lib.ClasseBase, Lib.Parametro, Lib.Enumeradores,
+    Lib.Persistable, Lib.MaxLenght, Lib.Lista, Lib.ResultFilter,
+    Dal.ControleDados;
+
+type
+    [TReferenceTable('Z20010')]
+    TTabelaComissao = class(TClasseBase)
+    private
+        FIndice: double;
+        FFormasDePagamentoAutorizada: string;
+        FTaxaDeJuros: double;
+        FQuantidadeParcelas: integer;
+        FPercentualMaximoEntrada: double;
+        FRecno: integer;
+        FCodigoTabela: string;
+
+        class var dao: TControleDados<TLista<TTabelaComissao>,TListaDAO<TTabelaComissao>>;
+
+        procedure SetCodigoTabela(const Value: string);
+        procedure SetFormasDePagamentoAutorizada(const Value: string);
+        procedure SetIndice(const Value: double);
+        procedure SetPercentualMaximoEntrada(const Value: double);
+        procedure SetQuantidadeParcelas(const Value: integer);
+        procedure SetRecno(const Value: integer);
+        procedure SetTaxaDeJuros(const Value: double);
+
+    public
+
+        /// <summary>
+        /// Método que chama a tela de filtro
+        /// </summary>
+        /// <param name="tipoOperacao">
+        /// Tipo da operação, se é somente filtro, ou seleção de registro
+        /// </param>
+        function Listar(tipoOperacao: TOparationTypes; multselect: Boolean): TResultFilter;
+
+        /// <summary>
+        /// Método que retorna um objeto preenchido
+        /// </summary>
+        /// <param name="ID">
+        /// Chave primária da tabela
+        /// </param>
+        function Obter(ID: string): TTabelaComissao; overload;
+
+        /// <summary>
+        /// Método que retorna um objeto preenchido
+        /// </summary>
+        /// <param name="parametros">
+        /// Parametros para a consulta do objeto a ser preenchido
+        /// </param>
+        function Obter(parametros: TParametro): TTabelaComissao; overload;
+
+        class function ObterTabelasComissao: TLista<TTabelaComissao>; static;
+
+        /// <summary>
+        /// Método que retonar uma lista com varios objetos de acordo com parametro passado
+        /// </summary>
+        /// <param name="parametros">
+        /// Parametros para a consulta do objeto a ser preenchido
+        /// </param>
+        function Consultar(parametros: TParametro): TLista<TTabelaComissao>;
+
+        /// <summary>
+        /// Método que preenche a instância do Objeto
+        /// </summary>
+        /// <param name="TabelaComissao">
+        /// objeto de parametro para preenchimento da instância
+        /// </param>
+        procedure PopularObjeto(TabelaComissao: TTabelaComissao);
+
+        [TPersistable(fgPersistable, 'Z20_RECNO')]
+        property Recno: integer read FRecno write SetRecno;
+
+        [TPersistable(fgPersistable, 'Z20_TABELA')]
+        [TMaxLenght(2)]
+        property CodigoTabela: string read FCodigoTabela write SetCodigoTabela;
+
+        [TPersistable(fgPersistable, 'Z20_PARCEL')]
+        property QuantidadeParcelas: integer read FQuantidadeParcelas write SetQuantidadeParcelas;
+
+        [TPersistable(fgPersistable, 'Z20_INDICE')]
+        property Indice: double read FIndice write SetIndice;
+
+        [TPersistable(fgPersistable, 'Z20_JUROS')]
+        property TaxaDeJuros: double read FTaxaDeJuros write SetTaxaDeJuros;
+
+        [TPersistable(fgPersistable, 'Z20_ENTRAD')]
+        property PercentualMaximoEntrada: double read FPercentualMaximoEntrada write SetPercentualMaximoEntrada;
+
+        [TPersistable(fgPersistable, 'Z20_CONDPG')]
+        [TMaxLenght(50)]
+        property FormasDePagamentoAutorizada: string read FFormasDePagamentoAutorizada write SetFormasDePagamentoAutorizada;
+
+    end;
+
+implementation
+
+{ TTabelaComissao }
+
+uses Lib.Filter, Lib.Biblioteca, Dal.CondicaoConsulta;
+
+{$REGION 'Métodos CRUD'}
+
+
+function TTabelaComissao.Consultar(parametros: TParametro): TLista<TTabelaComissao>;
+var
+    query: TStringBuilder;
+    campos: TStringList;
+    condicaoConsulta: TCondicaoConsulta;
+begin
+    try
+        condicaoConsulta := TCondicaoConsulta.Create(parametros);
+        condicaoConsulta.Adiciona('Z20_RECNO',ccIgual, lgAnd);
+        condicaoConsulta.Adiciona('Z20_TABELA',ccIgual, lgAND);
+        condicaoConsulta.Adiciona('Z20_PARCEL',ccIgual, lgAND);
+        condicaoConsulta.Adiciona('Z20_INDICE',ccIgual, lgAND);
+        condicaoConsulta.Adiciona('Z20_JUROS',ccIgual, lgAND);
+        condicaoConsulta.Adiciona('Z20_ENTRAD',ccIgual, lgAND);
+        condicaoConsulta.Adiciona('Z20_CONDPG',ccIgual, lgAND);
+
+        campos := Self.ObterListaDeCampos(Consulta,[]);
+
+        query := TStringBuilder.Create;
+        query.Append('SELECT ');
+        query.Append(campos.CommaText);
+        query.Append(' FROM ').Append(Self.TabelaReferencia);
+        query.Append(' WHERE D_E_L_E_T_ = '''' ');
+        query.Append(' AND Z20_TABELA IN (''T1'',''T4'',''T6'') ');
+        query.Append(' ORDER BY Z20_TABELA ');
+        query.Append(condicaoConsulta.ToString(true));
+
+        result := dao.Consultar(query.ToString, parametros);
+    finally
+        if condicaoConsulta <> nil then
+            FreeAndNil(condicaoConsulta);
+
+        if campos <> nil then
+            FreeAndNil(campos);
+
+        if query <> nil then
+            FreeAndNil(query);
+    end;
+end;
+
+
+function TTabelaComissao.Listar(tipoOperacao: TOparationTypes; multselect: Boolean): TResultFilter;
+var
+    campoFiltro: TFieldFilter;
+    filtro: TFilter<TTabelaComissao>;
+    // parametro : TParametro;
+    // lista:TLista<TTabelaComissao>
+begin
+    try
+        filtro := TFilter<TTabelaComissao>.Create;
+        filtro.ScreenName := 'Filtro de TabelaComissao';
+        filtro.OperationType := tipoOperacao;
+        filtro.MultiSelect := multselect;
+        filtro.Task := 'ConsultarTabelaComissao';
+        // ###Criar os Índices do filtro
+
+{$REGION 'Campo Filtro'}
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Recno';
+        campoFiltro.Name := 'Recno';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'CodigoTabela';
+        campoFiltro.Name := 'CodigoTabela';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'QuantidadeParcelas';
+        campoFiltro.Name := 'QuantidadeParcelas';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Indice';
+        campoFiltro.Name := 'Indice';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'TaxaDeJuros';
+        campoFiltro.Name := 'TaxaDeJuros';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'PercentualMaximoEntrada';
+        campoFiltro.Name := 'PercentualMaximoEntrada';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'FormasDePagamentoAutorizada';
+        campoFiltro.Name := 'FormasDePagamentoAutorizada';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+{$ENDREGION}
+        Result := filtro.Execute;
+    finally
+        // FreeAndNil(parametro);
+        // FreeAndNil(lista.Destroy);
+    end;
+end;
+
+function TTabelaComissao.Obter(parametros: TParametro): TTabelaComissao;
+var
+    lista: TLista<TTabelaComissao>;
+    query: string;
+begin
+    try
+        lista := nil;
+        lista := Self.Consultar(parametros);
+
+        if Lista.Count = 1 then
+        begin
+            PopularObjeto(Lista[0]);
+            result := Self;
+        end
+        else
+        begin
+            MessageDlg('Nenhum registro encontrado.', mtError, [mbOk], 0);
+            result := nil;
+        end;
+    finally
+        FreeAndNil(Lista);
+    end;
+
+end;
+
+class function TTabelaComissao.ObterTabelasComissao: TLista<TTabelaComissao>;
+begin
+    try
+//        result := Self.Consultar(nil);
+    finally
+
+    end;
+end;
+
+function TTabelaComissao.Obter(ID: string): TTabelaComissao;
+var
+    parametros: TParametro;
+
+begin
+    try
+        parametros := TParametro.Create;
+        parametros.Add('', 'R_E_C_N_O_', ID);
+        Result := Obter(parametros);
+    finally
+        FreeAndNil(parametros);
+    end;
+end;
+
+{$ENDREGION}
+{$REGION 'Regras de Negócio'}
+
+procedure TTabelaComissao.PopularObjeto(TabelaComissao: TTabelaComissao);
+begin
+    TabelaComissao.CopiarPara(Self);
+    FPreenchido := true;
+end;
+
+procedure TTabelaComissao.SetCodigoTabela(const Value: string);
+begin
+    FCodigoTabela := Value;
+end;
+
+procedure TTabelaComissao.SetFormasDePagamentoAutorizada(const Value: string);
+begin
+    FFormasDePagamentoAutorizada := Value;
+end;
+
+procedure TTabelaComissao.SetIndice(const Value: double);
+begin
+    FIndice := Value;
+end;
+
+procedure TTabelaComissao.SetPercentualMaximoEntrada(const Value: double);
+begin
+    FPercentualMaximoEntrada := Value;
+end;
+
+procedure TTabelaComissao.SetQuantidadeParcelas(const Value: integer);
+begin
+    FQuantidadeParcelas := Value;
+end;
+
+procedure TTabelaComissao.SetRecno(const Value: integer);
+begin
+    FRecno := Value;
+end;
+
+procedure TTabelaComissao.SetTaxaDeJuros(const Value: double);
+begin
+    FTaxaDeJuros := Value;
+end;
+
+{$ENDREGION}
+{$REGION 'Métodos de Propriedades'}
+{$ENDREGION}
+
+end.

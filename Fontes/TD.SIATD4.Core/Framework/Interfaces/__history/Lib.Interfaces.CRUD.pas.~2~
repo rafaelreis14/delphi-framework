@@ -1,0 +1,19 @@
+unit Lib.Interfaces.CRUD;
+
+interface
+
+uses
+    Classes, Lib.Enumeradores, Lib.Parametro, Lib.ResultFilter, Lib.Lista;
+
+type
+    ICRUD<T: class> = interface
+        function Inserir: integer;
+        function Alterar: integer;
+        function Deletar(id: string): integer;
+        function Consultar(parametros:TParametro): TLista<T> overload;
+        function Obter(id: string): T;
+    end;
+
+implementation
+
+end.

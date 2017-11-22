@@ -1,0 +1,359 @@
+unit Biz.Endereco;
+
+interface
+
+uses
+    Classes, System.SysUtils, Dialogs, Lib.Base, Lib.Parametro, Lib.Enumeradores,
+    Lib.Persistable, Lib.MaxLenght, Lib.Lista, Lib.ResultFilter,
+    Framework.Interfaces.CRUD;
+
+type
+    TEndereco = class(TBase, ICRUD<TEndereco>)
+  private
+    FLogradouro: string;
+    FBairro: string;
+    FCodigoCidade: string;
+    FUF: string;
+    FDelet: string;
+    FCodigoLogradouro: string;
+    FCodigoIBGE: string;
+    FCEP: string;
+    FCodigoBairro: string;
+    FRecno: integer;
+    FCidade: string;
+    procedure SetBairro(const Value: string);
+    procedure SetCEP(const Value: string);
+    procedure SetCidade(const Value: string);
+    procedure SetCodigoBairro(const Value: string);
+    procedure SetCodigoCidade(const Value: string);
+    procedure SetCodigoIBGE(const Value: string);
+    procedure SetCodigoLogradouro(const Value: string);
+    procedure SetDelet(const Value: string);
+    procedure SetLogradouro(const Value: string);
+    procedure SetRecno(const Value: integer);
+    procedure SetUF(const Value: string);
+    public
+        ///	<summary>
+        ///	  Metodo que faz a inserção da Endereco
+        ///	</summary>
+        function Inserir: integer;
+        ///	<summary>
+        ///	  Metodo que faz a alteração da Endereco
+        ///	</summary>
+        function Alterar: integer;
+
+        ///	<summary>
+        ///	  Métido que faz a Deleção da Endereco
+        ///	</summary>
+        ///	<param name="ID">
+        ///	  Chave  primária da tabela
+        ///	</param>
+        function Excluir: integer;
+
+        ///	<summary>
+        ///	  Método que chama a tela de filtro
+        ///	</summary>
+        ///	<param name="tipoOperacao">
+        ///	  Tipo da operação, se é somente filtro, ou seleção de registro
+        ///	</param>
+        function Listar(tipoOperacao: TOparationTypes; multselect: Boolean): TResultFilter;
+
+
+        ///	<summary>
+        ///	  Método que retorna um objeto preenchido
+        ///	</summary>
+        ///	<param name="ID">
+        ///	  Chave primária da tabela
+        ///	</param>
+        function Obter(ID: string): TEndereco; overload;
+
+        ///	<summary>
+        ///	  Método que retorna um objeto preenchido
+        ///	</summary>
+        ///	<param name="parametros">
+        ///	  Parametros para a consulta do objeto a ser preenchido
+        ///	</param>
+        function Obter(parametros:TParametro): TEndereco; overload;
+
+
+        ///	<summary>
+        ///	  Método que retonar uma lista com varios objetos de acordo com parametro passado
+        ///	</summary>
+        ///	<param name="parametros">
+        ///	  Parametros para a consulta do objeto a ser preenchido
+        ///	</param>
+        function Consultar(parametros:TParametro): TLista<TEndereco>;
+
+
+        ///	<summary>
+        ///	  Método que preenche a instância do Objeto
+        ///	</summary>
+        ///	<param name="Endereco">
+        ///	  objeto de parametro para preenchimento da instância
+        ///	</param>
+        procedure PreencherObjeto(Endereco: TEndereco);
+
+        [TPersistable(fgPersistable, 'ZT_RECNO')]
+        property Recno: integer read FRecno write SetRecno;
+
+        [TPersistable(fgPersistable, 'ZT_UF')]
+        [TMaxLenght(2)]
+        property UF: string read FUF write SetUF;
+
+        [TPersistable(fgPersistable, 'ZT_CODCID')]
+        [TMaxLenght(17)]
+        property CodigoCidade: string read FCodigoCidade write SetCodigoCidade;
+
+        [TPersistable(fgPersistable, 'ZT_CODIBGE')]
+        [TMaxLenght(7)]
+        property CodigoIBGE: string read FCodigoIBGE write SetCodigoIBGE;
+
+        [TPersistable(fgPersistable, 'ZT_CIDADE')]
+        [TMaxLenght(60)]
+        property Cidade: string read FCidade write SetCidade;
+
+        [TPersistable(fgPersistable, 'ZT_CODBAIR')]
+        [TMaxLenght(13)]
+        property CodigoBairro: string read FCodigoBairro write SetCodigoBairro;
+
+        [TPersistable(fgPersistable, 'ZT_BAIRRO')]
+        [TMaxLenght(40)]
+        property Bairro: string read FBairro write SetBairro;
+
+        [TPersistable(fgPersistable, 'ZT_CODLOGR')]
+        [TMaxLenght(14)]
+        property CodigoLogradouro: string read FCodigoLogradouro write SetCodigoLogradouro;
+
+        [TPersistable(fgPersistable, 'ZT_LOGRADO')]
+        [TMaxLenght(60)]
+        property Logradouro: string read FLogradouro write SetLogradouro;
+
+        [TPersistable(fgPersistable, 'ZT_CEP')]
+        [TMaxLenght(8)]
+        property CEP: string read FCEP write SetCEP;
+
+        [TPersistable(fgPersistable, 'D_E_L_E_T_')]
+        [TMaxLenght(1)]
+        property Delet: string read FDelet write SetDelet;
+
+    end;
+
+implementation
+
+
+{ TEndereco }
+
+uses Lib.Filter, Lib.Biblioteca;
+
+{$REGION 'Métodos CRUD'}
+
+function TEndereco.Inserir: integer;
+begin
+     //BaseLib.ExecutaTarefa('InserirEndereco', 'TEndereco', BaseLib.ObjectToParameters(Self,acInsercao));
+    //###Validar retorno da função
+    //result := 0;
+end;
+
+function TEndereco.Alterar: integer;
+begin
+    //BaseLib.ExecutaTarefa('AlterarEndereco', 'TEndereco' , BaseLib.ObjectToParameters(Self,acAlteracao));
+    //###Validar retorno da função
+    //result := 0;
+end;
+
+function TEndereco.Consultar(parametros: TParametro): TLista<TEndereco>;
+begin
+//   Result := BaseLib.XmlToObject<TEndereco>(BaseLib.ExecutaTarefa('ConsultarEndereco', 'TEndereco', parametros)).Tolist;
+end;
+
+function TEndereco.Excluir: integer;
+begin
+end;
+
+function TEndereco.Listar(tipoOperacao: TOparationTypes; multselect: Boolean): TResultFilter;
+var
+    campoFiltro:TFieldFilter;
+    filtro : TFilter<TEndereco>;
+    //parametro : TParametro;
+    //lista:TLista<TEndereco>
+begin
+    try
+        filtro := TFilter<TEndereco>.Create;
+        filtro.ScreenName := 'Filtro de Endereco';
+        filtro.OperationType := tipoOperacao;
+        filtro.MultiSelect := multselect;
+        filtro.Task := 'ConsultarEndereco';
+        filtro.AddIndex(1, 'CEP=ZT_CEP', 'CEP');
+        filtro.AddIndex(2, 'Logradouro=ZT_LOGRADO, Cidade=ZT_CIDADE', 'Lougradouro + Cidade');
+{$REGION 'Campo Filtro'}
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'UF';
+        campoFiltro.Name := 'UF';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'CodigoIBGE';
+        campoFiltro.Name := 'CodigoIBGE';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Cidade';
+        campoFiltro.Name := 'Cidade';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Bairro';
+        campoFiltro.Name := 'Bairro'; 
+        campoFiltro.MaskTypes := mtNone; 
+        campoFiltro.GridSize := 100; 
+        campoFiltro.FieldType := fdNormal; 
+        filtro.AddField(campoFiltro); 
+ 
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Logradouro'; 
+        campoFiltro.Name := 'Logradouro'; 
+        campoFiltro.MaskTypes := mtNone; 
+        campoFiltro.GridSize := 100; 
+        campoFiltro.FieldType := fdNormal; 
+        filtro.AddField(campoFiltro); 
+ 
+        campoFiltro := TFieldFilter.Create; 
+        campoFiltro.Description := 'CEP'; 
+        campoFiltro.Name := 'CEP'; 
+        campoFiltro.MaskTypes := mtCEP;
+        campoFiltro.GridSize := 100; 
+        campoFiltro.FieldType := fdNormal; 
+        filtro.AddField(campoFiltro); 
+
+        {$ENDREGION}
+
+        result := filtro.Execute;
+    finally
+        // FreeAndNil(parametro);
+        // FreeAndNil(lista.Destroy);
+    end;
+end;
+
+function TEndereco.Obter(parametros: TParametro): TEndereco;
+var
+  lista: TLista<TEndereco>;
+begin
+    try
+  //      lista := BaseLib.XmlToObject<TEndereco>(BaseLib.ExecutaTarefa('ConsultarEndereco', 'TEndereco', parametros));
+
+        if lista.Count = 1 then
+        begin
+           PreencherObjeto(lista[0]);
+           Result := Self;
+        end
+        else
+        begin
+            TLib.MensagemAdvertencia('Nenhum registro encontrado.', 'Aviso');
+            Result := nil;
+        end;
+    finally
+        lista.Destroy;
+    end;
+end;
+
+function TEndereco.Obter(ID: string): TEndereco;
+var
+    parametros: TParametro;
+
+begin
+    try
+        parametros := TParametro.Create;
+        parametros.Add('', 'R_E_C_N_O_', ID);
+        result := Obter(parametros);
+    finally
+        FreeAndNil(parametros);
+    end;
+end;
+
+
+{$ENDREGION}
+
+{$REGION 'Regras de Negócio'}
+
+procedure TEndereco.PreencherObjeto(Endereco: TEndereco);
+begin
+    Endereco.CopiarPara(Self);
+    FPreenchido := true;
+end;
+
+
+procedure TEndereco.SetBairro(const Value: string);
+begin
+  FBairro := Value;
+end;
+
+procedure TEndereco.SetCEP(const Value: string);
+begin
+  FCEP := Value;
+end;
+
+procedure TEndereco.SetCidade(const Value: string);
+begin
+  FCidade := Value;
+end;
+
+procedure TEndereco.SetCodigoBairro(const Value: string);
+begin
+  FCodigoBairro := Value;
+end;
+
+procedure TEndereco.SetCodigoCidade(const Value: string);
+begin
+  FCodigoCidade := Value;
+end;
+
+procedure TEndereco.SetCodigoIBGE(const Value: string);
+begin
+  FCodigoIBGE := Value;
+end;
+
+procedure TEndereco.SetCodigoLogradouro(const Value: string);
+begin
+  FCodigoLogradouro := Value;
+end;
+
+procedure TEndereco.SetDelet(const Value: string);
+begin
+  FDelet := Value;
+end;
+
+procedure TEndereco.SetLogradouro(const Value: string);
+begin
+  FLogradouro := Value;
+end;
+
+procedure TEndereco.SetRecno(const Value: integer);
+begin
+  FRecno := Value;
+end;
+
+procedure TEndereco.SetUF(const Value: string);
+begin
+  FUF := Value;
+end;
+
+{$ENDREGION}
+
+{$REGION 'Métodos de Propriedades'}
+
+
+{$ENDREGION}
+
+end.
+
+

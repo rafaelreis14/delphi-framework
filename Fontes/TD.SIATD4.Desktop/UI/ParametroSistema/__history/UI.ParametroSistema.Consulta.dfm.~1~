@@ -1,0 +1,12 @@
+inherited frmConParametroSistema: TfrmConParametroSistema
+  Caption = 'frmConParametroSistema'
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited pnlApresentacao: TPanel
+    inherited lblLetreiro: TLabel
+      Width = 169
+      Caption = 'Consulta de ParametroSistema'
+      ExplicitWidth = 169
+    end
+  end
+end

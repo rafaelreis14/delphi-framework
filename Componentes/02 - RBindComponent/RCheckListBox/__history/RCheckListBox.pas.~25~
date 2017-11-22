@@ -1,0 +1,436 @@
+unit RCheckListBox;
+
+interface
+
+uses
+    System.SysUtils, System.Classes, Vcl.Controls, Vcl.StdCtrls, Vcl.CheckLst, Generics.Collections, RTTI,
+    Data.DB;
+
+type
+    TRCheckListBox = class(TCheckListBox)
+    private
+        FDescriptionName: String;
+        FMandatoryField: boolean;
+        FDataSource: TList<TObject>;
+        FListSource: TList;
+        FDataSet: TDataSet;
+        FPersistentField: boolean;
+        FFieldName: String;
+        FIDName: String;
+        FListValue: TStrings;
+        FReadOnly: boolean;
+        FDataSetOK: boolean;
+        function GetValue: String;
+        procedure SetDescriptionName(const Value: String);
+        procedure SetFieldName(const Value: String);
+        procedure SetIDName(const Value: String);
+        procedure SetMandatoryField(const Value: boolean);
+        procedure SetPersistentField(const Value: boolean);
+        procedure SetValue(const Value: String);
+        procedure SetListValue(const Value: TStrings);
+        procedure SetReadOnly(const Value: boolean);
+
+        { Private declarations }
+    protected
+        index: integer;
+        procedure ClickCheck; override;
+
+        { Protected declarations }
+    published
+        property FieldName: String read FFieldName write SetFieldName;
+        property MandatoryField: boolean read FMandatoryField write SetMandatoryField;
+        property PersistentField: boolean read FPersistentField write SetPersistentField;
+        property IDFieldName: String read FIDName write SetIDName;
+        property DescriptionFieldName: String read FDescriptionName write SetDescriptionName;
+        property ListValue: TStrings read FListValue write SetListValue;
+        property &ReadOnly: boolean read FReadOnly write SetReadOnly;
+    public
+
+        property Value: String read GetValue write SetValue;
+        procedure FindIndexByIDFieldName(idFieldNameValue: string);
+        procedure DataSource<T>(DataSource: TList<T>); overload;
+        procedure DataSource(DataSource: TList); overload;
+        procedure DataSource(dataSouce: TDataSet); overload;
+        procedure DataBind;
+        function GetObject<T: class>: T; overload;
+        function GetObject: TFields; overload;
+        function GetCheckedObjects<T>: TList<T>;
+        function IsSelectedItemChecked: boolean;
+        procedure GetSelectedItemChecked;
+        procedure GetSelectedItemUnChecked;
+        function GetSelectedItemValue: string;
+
+        procedure DeleteSelectedItem;
+
+        constructor Create(AOwner: TComponent); override;
+        destructor Destroy; override;
+
+    end;
+
+procedure Register;
+
+implementation
+
+uses
+    Lib.Enumeradores, Lib.Base;
+
+procedure Register;
+begin
+    RegisterComponents('SIATD', [TRCheckListBox]);
+end;
+
+{ TRCheckListBox }
+
+procedure TRCheckListBox.ClickCheck;
+begin
+    if not(ReadOnly) then
+        inherited;
+
+end;
+
+constructor TRCheckListBox.Create(AOwner: TComponent);
+begin
+    inherited;
+    self.FListValue := TStringList.Create;
+    FListSource := nil;
+    FDataSet := nil;
+    FDataSource := nil;
+
+end;
+
+procedure TRCheckListBox.DataBind;
+var
+    i: integer;
+    context: TRttiContext;
+    prop: TRttiProperty;
+    rows: integer;
+    count: Integer;
+    obj: TObject;
+begin
+    index := self.ItemIndex;
+    self.Clear;
+    if (self.FDataSource <> nil) or (self.FListSource <> nil) then
+    begin
+        if (self.FDataSource <> nil) then count := FDataSource.count
+            else count := self.FListSource.count;
+
+        for i := 0 to count-1 do
+        begin
+            if (self.FDataSource <> nil) then obj := FDataSource[i]
+                else obj := FListSource[i];
+
+            if (obj.InheritsFrom(TBase) and (TBase(obj).TipoManutencao <> Exclusao)) or (not obj.InheritsFrom(TBase)) then
+            begin
+                prop := context.GetType(obj.ClassType).GetProperty(self.FDescriptionName);
+                self.Items.Add(prop.GetValue(obj).ToString);
+            end;
+        end;
+        if count > 0 then
+            self.ItemIndex := 0;
+    end
+    else
+    if (self.FDataSet <> nil) and (not FDataSetOK) then
+    begin
+        try
+            self.FDataSet.First;
+            if self.ListValue <> nil then
+                self.ListValue := TStringList.Create;
+
+            while not self.FDataSet.Eof do
+            begin
+                self.ListValue.Add(self.FDataSet.FieldByName(self.DescriptionFieldName).AsString + '=' + self.FDataSet.FieldByName(self.IDFieldName)
+                  .AsString);
+                self.FDataSet.Next;
+            end;
+
+            FDataSetOK := true;
+            self.DataBind;
+            FDataSetOK := false;
+
+        except
+            raise Exception.Create('Erro ao tentar acessar a propriedade: ' + self.DescriptionFieldName + '. Verifique Configuração');
+        end;
+    end
+    else
+    if self.FListValue <> nil then
+    begin
+        for i := 0 to self.FListValue.Count - 1 do
+        begin
+            self.Items.Add(self.FListValue.Names[i])
+        end;
+
+        if self.FListValue.Count > 0 then
+            self.ItemIndex := 0;
+    end;
+
+    if ((FDataSource <> nil) or (FDataSet <> nil) or (FListSource <> nil)) and (self.Count > 0) and (index <= self.Items.Count) and (index >= 0) then
+        self.ItemIndex := index;
+
+end;
+
+procedure TRCheckListBox.DataSource(DataSource: TList);
+begin
+    self.FListSource := DataSource;
+end;
+
+procedure TRCheckListBox.DataSource(dataSouce: TDataSet);
+begin
+    self.FDataSet := dataSouce;
+end;
+
+procedure TRCheckListBox.DataSource<T>(DataSource: TList<T>);
+begin
+    self.FDataSource := TList<TObject>(DataSource);
+end;
+
+procedure TRCheckListBox.DeleteSelectedItem;
+var
+    obj: TObject;
+begin
+    if Assigned(FDataSource) then
+    begin
+        obj := FDataSource[self.ItemIndex];
+        obj.Free;
+        FDataSource.Delete(self.ItemIndex);
+    end
+    else
+    begin
+        FDataSource.Delete(self.ItemIndex);
+    end;
+
+    self.DataBind;
+end;
+
+destructor TRCheckListBox.Destroy;
+var
+    i: integer;
+begin
+    if Assigned(FListValue) then
+        FListValue.Free;
+
+    inherited Destroy;
+end;
+
+procedure TRCheckListBox.FindIndexByIDFieldName(idFieldNameValue: string);
+var
+    i: integer;
+    context: TRttiContext;
+    prop: TRttiProperty;
+    count: integer;
+    obj: TObject;
+begin
+    if (FDataSource <> nil) or (FListSource <> nil) then
+    begin
+        if FDataSource <> nil then count := FDataSource.Count
+        else count := FListSource.Count;
+
+        for i := 0 to count-1 do
+        begin
+            if FDataSource <> nil then obj := FDataSource[i]
+            else obj := FListSource[i];
+
+            prop := context.GetType(obj.ClassType).GetProperty(self.IDFieldName);
+            if Pos(prop.GetValue(obj).ToString, idFieldNameValue) > 0 then
+                self.Checked[i] := true
+            else
+                self.Checked[i] := false;
+        end;
+    end
+    else
+    begin
+        for i := 0 to self.Items.Count - 1 do
+        begin
+            if FListValue.Count > 0 then
+            begin
+                if Pos(self.FListValue.ValueFromIndex[i], idFieldNameValue) > 0 then
+                    self.Checked[i] := true
+                else
+                    self.Checked[i] := false;
+
+            end
+            else
+            begin
+                if Pos(self.Items[i], idFieldNameValue) > 0 then
+                    self.Checked[i] := true
+                else
+                    self.Checked[i] := false;
+
+            end;
+        end;
+    end;
+end;
+
+function TRCheckListBox.GetCheckedObjects<T>: TList<T>;
+var
+    i: integer;
+    list: TList<T>;
+begin
+    if FDataSource <> nil then
+    begin
+        list := TList<T>.Create;
+        for i := 0 to FDataSource.Count - 1 do
+        begin
+            if self.Checked[i] then
+                list.Add(TList<T>(FDataSource)[i]);
+        end;
+        result := list;
+    end
+    else
+        result := nil;
+end;
+
+function TRCheckListBox.GetObject: TFields;
+begin
+    result := nil;
+    if FDataSet <> nil then
+    begin
+        if Self.BlankField then
+            FDataSet.RecNo := Self.ItemIndex+2
+        else
+            FDataSet.RecNo := Self.ItemIndex+1;
+
+        result := FDataSet.Fields;
+    end;
+end;
+
+function TRCheckListBox.GetObject<T>: T;
+begin
+    result := nil;
+    if (FDataSource <> nil) and (self.Count > 0) (* and (self.Checked[self.GetItemIndex]) *) then
+        result := T(TObject(FDataSource[self.ItemIndex]))
+    else
+    if (FListSource <> nil) and (self.Count > 0)then
+        result := T(TObject(FListSource[self.ItemIndex]));
+end;
+
+procedure TRCheckListBox.GetSelectedItemChecked;
+begin
+    self.Checked[self.GetItemIndex] := true;
+end;
+
+procedure TRCheckListBox.GetSelectedItemUnChecked;
+begin
+    self.Checked[self.GetItemIndex] := false;
+end;
+
+function TRCheckListBox.GetSelectedItemValue: string;
+var
+    ind: integer;
+    context: TRttiContext;
+    prop: TRttiProperty;
+begin
+    if self.FDataSource = nil then
+    begin
+        if self.FListValue.Count = 0 then
+            result := self.Items[self.ItemIndex]
+        else
+            result := self.FListValue.ValueFromIndex[self.ItemIndex];
+    end
+    else
+    begin
+        prop := context.GetType(TObject(self.FDataSource[self.ItemIndex]).ClassType).GetProperty(self.IDFieldName);
+        result := prop.GetValue(TObject(self.FDataSource[self.ItemIndex])).ToString;
+    end;
+end;
+
+function TRCheckListBox.GetValue: String;
+var
+    ind: integer;
+    context: TRttiContext;
+    prop: TRttiProperty;
+    val: string;
+    i: integer;
+    obj: TObject;
+    count: integer;
+begin
+    val := EmptyStr;
+    if self.FDataSource = nil then
+    begin
+        for i := 0 to self.Items.Count - 1 do
+        begin
+            if self.Checked[i] then
+            begin
+                if self.FListValue.Count = 0 then
+                    val := val + self.Items[i] + ','
+                else
+                    val := val + self.FListValue.ValueFromIndex[i] + ',';
+            end;
+        end;
+        System.Delete(val, System.Length(val), 1);
+        result := val;
+    end
+    else
+    begin
+        if self.FDataSource <> nil then count := self.FDataSource.Count
+        else count := self.FListSource.Count;
+
+        for i := 0 to count-1 do
+        begin
+            if self.Checked[i] then
+            begin
+                if self.FDataSource <> nil then obj := self.FDataSource[i]
+                else obj := self.FListSource[i];
+                prop := context.GetType(obj.ClassType).GetProperty(self.IDFieldName);
+                val := val + prop.GetValue(obj).ToString + ',';
+            end;
+        end;
+        System.Delete(val, System.Length(val), 1);
+        result := val;
+    end;
+end;
+
+function TRCheckListBox.IsSelectedItemChecked: boolean;
+begin
+    if self.ItemIndex >= 0 then
+        result := self.Checked[self.ItemIndex]
+    else
+        result := false;
+end;
+
+procedure TRCheckListBox.SetDescriptionName(const Value: String);
+begin
+    if FDescriptionName <> Value then
+        FDescriptionName := Value;
+end;
+
+procedure TRCheckListBox.SetFieldName(const Value: String);
+begin
+    if FFieldName <> Value then
+        FFieldName := Value;
+end;
+
+procedure TRCheckListBox.SetIDName(const Value: String);
+begin
+    if FIDName <> Value then
+        FIDName := Value;
+end;
+
+procedure TRCheckListBox.SetListValue(const Value: TStrings);
+begin
+    if FListValue <> Value then
+        FListValue.Assign(Value);
+end;
+
+procedure TRCheckListBox.SetMandatoryField(const Value: boolean);
+begin
+    if FMandatoryField <> Value then
+        FMandatoryField := Value;
+end;
+
+procedure TRCheckListBox.SetPersistentField(const Value: boolean);
+begin
+    if FPersistentField <> Value then
+        FPersistentField := Value;
+end;
+
+procedure TRCheckListBox.SetReadOnly(const Value: boolean);
+begin
+    FReadOnly := Value;
+end;
+
+procedure TRCheckListBox.SetValue(const Value: String);
+begin
+    self.FindIndexByIDFieldName(Value);
+end;
+
+end.

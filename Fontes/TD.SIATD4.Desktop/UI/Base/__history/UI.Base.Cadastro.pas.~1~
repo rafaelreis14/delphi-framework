@@ -1,0 +1,77 @@
+unit UntCadastro;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, UntFormBase, UntErrorProvider,
+  Vcl.StdCtrls, Vcl.Buttons, REdit;
+
+type
+  TFrmCadastro = class(TFrmBase)
+    procedure FormCreate(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    function Validar:boolean; virtual;
+    procedure Salvar; virtual;
+    procedure ForcarValoresOriginais;
+  end;
+
+var
+  FrmCadastro: TFrmCadastro;
+
+implementation
+
+{$R *.dfm}
+
+uses ClsErro, ClsEnumeradores;
+
+{ TFrmCadastro }
+
+procedure TFrmCadastro.ForcarValoresOriginais;
+var
+    componente:TComponent;
+begin
+    for componente in Self do
+    begin
+        if VerificarComponentes(componente) then
+        begin
+           // tem que ser tirado essa validação tnedo em vista que o metodo acima ja faz a mesma coisa
+           if (componente is TREdit) then
+           begin
+               (componente as TRedit).ForceOriginalValue;
+           end;
+        end;
+    end;
+end;
+
+procedure TFrmCadastro.FormCreate(Sender: TObject);
+begin
+  FecharComEsc := true;
+  inherited;
+
+end;
+
+procedure TFrmCadastro.FormShow(Sender: TObject);
+begin
+  inherited;
+  if AcaoJanela = acAlteracao then
+      ForcarValoresOriginais;
+
+end;
+
+procedure TFrmCadastro.Salvar;
+begin
+    if not Validar then
+        raise Erro.Create('Erro ao validar informações', MSGInformacao);
+
+end;
+
+function TFrmCadastro.Validar: boolean;
+begin
+    result := true;
+end;
+
+end.

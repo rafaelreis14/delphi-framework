@@ -1,0 +1,56 @@
+﻿unit UI.Sistema.TesteRelatorio;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, UI.Base.FormBase, UntErrorProvider,
+  Vcl.StdCtrls, Lib.Enumeradores;
+
+type
+  TFrmTesteRelatorio = class(TFrmBase)
+    Button1: TButton;
+    Memo1: TMemo;
+    Button2: TButton;
+    Button3: TButton;
+    procedure Button1Click(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
+    procedure Button3Click(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  FrmTesteRelatorio: TFrmTesteRelatorio;
+
+implementation
+
+{$R *.dfm}
+
+procedure TFrmTesteRelatorio.Button1Click(Sender: TObject);
+begin
+   // BaseLib.ExecutaRelatorio(tiCliente,'Clientes2','RelatorioCliente',nil);
+end;
+
+procedure TFrmTesteRelatorio.Button2Click(Sender: TObject);
+var
+  para : Parametro;
+begin
+   try
+      para := Parametro.Create;
+      para.Add('','Z6_EMISSAO','2013');
+      //BaseLib.ExecutaRelatorio(tiCliente,'GraficoFilial','TesteRelatorio',para);
+   finally
+      FreeAndNil(para);
+   end;
+end;
+
+procedure TFrmTesteRelatorio.Button3Click(Sender: TObject);
+begin
+  inherited;
+  //BaseLib.ExecutaRelatorio(tiCliente,'GraficoFilial',Memo1.Text);
+end;
+
+end.

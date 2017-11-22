@@ -1,0 +1,50 @@
+{*Created by @ReisCodeGenerator*}
+unit UI.Grupo.Consulta;
+
+interface
+
+uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, UntErrorProvider,
+    Vcl.ComCtrls, Vcl.Imaging.jpeg, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.Grids, RGrid,
+    Vcl.Buttons, Vcl.Menus, RTTI, UI.Base.Controlador.ConsultaDesktop,
+	Biz.Grupo, UI.Base.ConsultaPadrao;
+
+type
+    //TfrmConGrupo = class(TFrmConsultaPadrao)
+	TfrmConGrupo = class(TControladorConsultaDesktop<TGrupo>)
+        CadastrodeAcessos1: TMenuItem;
+        procedure FormCreate(Sender: TObject);
+        procedure CadastrodeAcessos1Click(Sender: TObject);
+    private
+        { Private declarations }
+    public
+        { Public declarations }
+    end;
+
+var
+    frmConGrupo: TfrmConGrupo;
+
+implementation
+
+{$R *.dfm}
+
+uses UI.Grupo.Cadastro, Lib.Biblioteca, UI.Acesso.Cadastro, Biz.Acesso;
+
+
+procedure TfrmConGrupo.FormCreate(Sender: TObject);
+begin
+    inherited;
+    grDados.AddCol('Grupo', 'Grupo', 200, RGrid.mtString);
+    grDados.AddCol('Descricao', 'Descrição', 200, RGrid.mtString);
+    Inicializar(TfrmCadGrupo);
+end;
+
+procedure TfrmConGrupo.CadastrodeAcessos1Click(Sender: TObject);
+begin
+    inherited;
+    if not grDados.IsEmpty then
+        TLib.AbrirFormulario(TfrmCadAcessos, grDados.GetObject<TAcesso>);
+end;
+
+end.

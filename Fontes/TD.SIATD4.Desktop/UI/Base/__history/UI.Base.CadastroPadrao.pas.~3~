@@ -1,0 +1,103 @@
+unit UI.Base.CadastroPadrao;
+
+interface
+
+uses
+
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+    System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, UI.Base.FormBase, Vcl.StdCtrls,
+    Vcl.Buttons, Vcl.ExtCtrls, Lib.Biblioteca,
+    UntErrorProvider, UI.Base.Cadastro, Vcl.ComCtrls, RTTI, REdit, RGrid, RComboBox, RSearch,
+    Lib.Enumeradores, Lib.Parametro, Lib.Base, Lib.CRUD;
+
+type
+    TFrmCadastroPadrao = class(TFrmCadastro)
+        Panel2: TPanel;
+        Label1: TLabel;
+        Panel3: TPanel;
+        pnlBotoes: TPanel;
+        btnConfirmar: TBitBtn;
+        btnCancelar: TBitBtn;
+        pgcComponentes: TPageControl;
+        tbPrincipal: TTabSheet;
+        procedure FormShow(Sender: TObject);
+        procedure btnConfirmarClick(Sender: TObject);
+    procedure btnCancelarClick(Sender: TObject);
+
+    protected
+
+    public
+       FecharTelaAoConfirmar: boolean;
+       procedure Salvar; override;
+
+    end;
+
+var
+    FrmCadastroPadrao: TFrmCadastroPadrao;
+
+implementation
+
+{$R *.dfm}
+
+
+procedure TFrmCadastroPadrao.btnCancelarClick(Sender: TObject);
+begin
+  inherited;
+  close;
+end;
+
+procedure TFrmCadastroPadrao.btnConfirmarClick(Sender: TObject);
+begin
+  Salvar;
+end;
+
+procedure TFrmCadastroPadrao.Salvar;
+var
+    par:TParametro;
+begin
+    inherited;
+    try
+        if ValidaCamposObrigatorios(ErrorProvider1) then exit;
+
+        CarregaObjeto;
+
+        if AcaoJanela = acAlteracao then
+           TBase(Objeto).Alterar
+        else
+        if AcaoJanela = acInsercao then
+           TBase(Objeto).Inserir;
+
+        RetornoFormulario := rfOK;
+
+    except
+        RetornoFormulario := rfComErro;
+        raise;
+    end;
+    if FecharTelaAoConfirmar then
+        close;
+
+end;
+
+
+procedure TFrmCadastroPadrao.FormShow(Sender: TObject);
+begin
+    FecharTelaAoConfirmar := true;
+
+    if AcaoJanela in [acAlteracao, acVisualizacao] then
+    begin
+        if AcaoJanela = acAlteracao then
+        begin
+            if Objeto <> nil then
+                TBase(Objeto).LimparPropriedadesAlteradas;
+        end;
+
+        CarregaComponentes;
+        btnConfirmar.Enabled := Tlib.IfTernario(AcaoJanela = acVisualizacao,false,true);
+    end;
+    inherited;
+end;
+
+
+
+end.

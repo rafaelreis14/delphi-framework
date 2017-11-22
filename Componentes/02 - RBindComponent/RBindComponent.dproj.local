@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2012/08/22 17:24:53.000.173,=rtl.dcp</Transaction>
+    <Transaction>2012/08/22 17:25:13.000.962,C:\Users\James\Documents\RAD Studio\Projects\Package1.dproj=C:\FONTES SIATD\3.0\COMPONENTE\02 - RBindComponent\RBindComponent.dproj</Transaction>
+    <Transaction>2012/08/22 17:26:07.000.900,=C:\FONTES SIATD\3.0\COMPONENTE\02 - RBindComponent\RGrid\ReisGrid.pas</Transaction>
+    <Transaction>2012/08/22 17:26:15.000.030,=C:\FONTES SIATD\3.0\COMPONENTE\02 - RBindComponent\RComboBox\ReisComboBox.pas</Transaction>
+    <Transaction>2012/08/22 17:26:20.000.553,C:\FONTES SIATD\3.0\COMPONENTE\02 - RBindComponent\RComboBox\ReisComboBox.pas=C:\FONTES SIATD\3.0\COMPONENTE\02 - RBindComponent\RComboBox\RComboBox.pas</Transaction>
+    <Transaction>2012/08/22 17:26:26.000.142,C:\FONTES SIATD\3.0\COMPONENTE\02 - RBindComponent\RGrid\ReisGrid.pas=C:\FONTES SIATD\3.0\COMPONENTE\02 - RBindComponent\RGrid\RGrid.pas</Transaction>
+    <Transaction>2012/08/22 17:27:24.000.259,=vcl.dcp</Transaction>
+    <Transaction>2012/08/30 10:24:20.000.370,=C:\SIATD 3.0\COMPONENTE\02 - RBindComponent\REdit\REdit.pas</Transaction>
+    <Transaction>2012/09/04 15:29:31.000.974,=C:\FONTES SIATD\3.0\CLIENTE_LIB\CLASSES COMUNS\ClsEnumeradores.pas</Transaction>
+    <Transaction>2012/09/14 12:56:31.000.479,=C:\SIATD 3.0\CLIENTE_LIB\CLASSES COMUNS\ClsParametro.pas</Transaction>
+    <Transaction>2012/09/19 15:06:14.000.958,=C:\SIATD 3.0\COMPONENTE\02 - RBindComponent\Unit1.pas</Transaction>
+    <Transaction>2012/09/19 15:06:58.000.289,C:\SIATD 3.0\COMPONENTE\02 - RBindComponent\RCheckBox\RCheckBox.pas=C:\SIATD 3.0\COMPONENTE\02 - RBindComponent\Unit1.pas</Transaction>
+    <Transaction>2012/09/19 15:12:40.000.482,=C:\SIATD 3.0\COMPONENTE\02 - RBindComponent\RCheckListBox\RCheckListBox.pas</Transaction>
+    <Transaction>2012/09/19 15:13:21.000.696,C:\SIATD 3.0\COMPONENTE\02 - RBindComponent\RCheckListBox\RCheckListBox.pas=</Transaction>
+    <Transaction>2012/09/19 15:14:07.000.006,=C:\SIATD 3.0\COMPONENTE\02 - RBindComponent\RCheckListBox\RCheckListBox.pas</Transaction>
+    <Transaction>2012/09/19 15:14:48.000.082,=vclx.dcp</Transaction>
+    <Transaction>2013/05/20 10:08:57.000.845,=vclactnband.dcp</Transaction>
+    <Transaction>2013/05/20 10:08:57.000.823,=C:\FONTES SIATD\COMPONENTE\02 - RBindComponent\RRadioGroup\RRadioGroup.pas</Transaction>
+    <Transaction>2013/05/20 10:08:57.000.834,=designide.dcp</Transaction>
+    <Transaction>2013/05/20 10:08:57.000.855,=xmlrtl.dcp</Transaction>
+    <Transaction>2013/09/12 15:42:23.000.035,=C:\FONTES SIATD\3.0\COMPONENTE\02 - RBindComponent\Unit1.pas</Transaction>
+    <Transaction>2013/09/12 15:42:29.000.791,C:\FONTES SIATD\3.0\COMPONENTE\02 - RBindComponent\Unit1.dfm=C:\FONTES SIATD\3.0\COMPONENTE\02 - RBindComponent\UntTeste.dfm</Transaction>
+    <Transaction>2013/09/12 15:42:29.000.791,C:\FONTES SIATD\3.0\COMPONENTE\02 - RBindComponent\Unit1.pas=C:\FONTES SIATD\3.0\COMPONENTE\02 - RBindComponent\UntTeste.pas</Transaction>
+    <Transaction>2013/09/12 15:43:42.000.747,C:\FONTES SIATD\3.0\COMPONENTE\02 - RBindComponent\UntTeste.pas=</Transaction>
+    <Transaction>2016/06/29 17:04:41.000.140,=C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Core\Lib\Lib.Base.pas</Transaction>
+    <Transaction>2016/06/29 17:04:41.000.348,=C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Core\Lib\Lib.Parametro.pas</Transaction>
+    <Transaction>2016/06/29 17:04:41.000.339,=C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Core\Lib\Lib.Lista.pas</Transaction>
+    <Transaction>2016/06/29 17:04:41.000.331,=C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Core\Lib\Lib.Enumeradores.pas</Transaction>
+    <Transaction>2016/06/29 17:05:35.000.888,=C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Core\Lib\Lib.ResultFilter.pas</Transaction>
+    <Transaction>2016/06/29 17:06:01.000.909,=C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Core\Framework\Interfaces\Framework.Interfaces.CRUDGenerico.pas</Transaction>
+    <Transaction>2016/06/29 17:19:13.000.247,=C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Core\Framework\Interfaces\Framework.Interfaces.Listavel.pas</Transaction>
+  </Transactions>
+</BorlandProject>

@@ -1,0 +1,92 @@
+unit Framework.Controlador.Consulta;
+
+interface
+
+uses RGrid, Forms, Framework.Interfaces.CRUD;
+
+type
+    TControladorConsulta<T: class> = class
+        class procedure ExecutaPesquisar(grid: TRGrid; CRUD: ICRUD<T>);
+        class procedure ExecutarInserir(Objeto: T; form: TForm);
+
+        class function ValidarInsercao: boolean; virtual;
+        class function Inserir: boolean; virtual;
+        class function ValidarAlteracao: boolean; virtual;
+        class function Alterar: boolean; virtual;
+        class function ValidarExclusao: boolean; virtual;
+        class function Excluir: boolean; virtual;
+        class function ValidarVisualizacao: boolean; Virtual;
+        class function Visualizar: boolean; virtual;
+        class procedure Pesquisar; virtual;
+
+  private
+    class procedure ExecutaListar(grid: TRGrid; CRUD: ICRUD<T>); static;
+    end;
+
+implementation
+
+{ TControladorConsulta<T> }
+
+class function TControladorConsulta<T>.Alterar: boolean;
+begin
+
+end;
+
+class function TControladorConsulta<T>.Excluir: boolean;
+begin
+
+end;
+
+class procedure TControladorConsulta<T>.ExecutaListar(grid: TRGrid;
+  CRUD: ICRUD<T>);
+begin
+
+end;
+
+class procedure TControladorConsulta<T>.ExecutaPesquisar(grid: TRGrid;
+  CRUD: ICRUD<T>);
+begin
+
+end;
+
+class procedure TControladorConsulta<T>.ExecutarInserir(Objeto: T; form: TForm);
+begin
+
+end;
+
+class function TControladorConsulta<T>.Inserir: boolean;
+begin
+
+end;
+
+class procedure TControladorConsulta<T>.Pesquisar;
+begin
+
+end;
+
+class function TControladorConsulta<T>.ValidarAlteracao: boolean;
+begin
+
+end;
+
+class function TControladorConsulta<T>.ValidarExclusao: boolean;
+begin
+
+end;
+
+class function TControladorConsulta<T>.ValidarInsercao: boolean;
+begin
+
+end;
+
+class function TControladorConsulta<T>.ValidarVisualizacao: boolean;
+begin
+
+end;
+
+class function TControladorConsulta<T>.Visualizar: boolean;
+begin
+
+end;
+
+end.

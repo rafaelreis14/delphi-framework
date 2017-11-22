@@ -1,0 +1,47 @@
+{*Created by @ReisCodeGenerator*}
+unit UI.ControleVersao.Cadastro;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, UntErrorProvider,
+  Vcl.StdCtrls, Vcl.Buttons, Vcl.ExtCtrls, Vcl.Mask, REdit, Vcl.ComCtrls, UI.Base.Controlador.CadastroDesktop, UI.Base.CadastroPadrao,
+  Biz.ControleVersao;
+
+type
+  TfrmCadControleVersao = class(TFrmCadastroPadrao)
+  TfrmCadControleVersao = class(TControladorCadastroDesktop<TControleVersao>)  
+    lblCodigoFilial: TLabel;
+    edCodigoFilial: TREdit;
+    lblVersao: TLabel;
+    edVersao: TREdit;
+    lblTipo: TLabel;
+    edTipo: TREdit;
+    lblStatus: TLabel;
+    edStatus: TREdit;
+    lblDelet: TLabel;
+    edDelet: TREdit;
+    lblRecno: TLabel;
+    edRecno: TREdit;
+	procedure FormCreate(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  frmCadControleVersao: TfrmCadControleVersao;
+
+implementation
+
+{$R *.dfm}
+
+procedure TfrmCadControleVersao.FormCreate(Sender: TObject);
+begin
+  inherited;
+  Inicializar;
+end;
+
+end.

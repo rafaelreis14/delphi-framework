@@ -1,0 +1,115 @@
+unit UntConsultaPadraoMobile;
+
+interface
+
+uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+    System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,
+    Vcl.Buttons,
+    Vcl.ExtCtrls, Data.DB, Vcl.Grids, Vcl.DBGrids, ClsLib, Vcl.ComCtrls,
+    DbClient, UntCadastroPadraoMobile, UntErrorProvider, UntFormBase, UntConsulta,
+    ClsEnumeradores, RGrid, RTTI;
+
+type
+    TFrmConsultaPadraoMobile = class(TFrmConsulta)
+        PnlGrade: TPanel;
+        pgControles: TPageControl;
+        tbsConsulta: TTabSheet;
+        tbsDados: TTabSheet;
+        Panel2: TPanel;
+        BtBtnConsultar: TBitBtn;
+        pnlBotoes: TPanel;
+        btnInserir: TBitBtn;
+        btnAlterar: TBitBtn;
+        btnExcluir: TBitBtn;
+        btnSair: TBitBtn;
+        grDados: TRGrid;
+        procedure btnInserirClick(Sender: TObject);
+        procedure btnAlterarClick(Sender: TObject);
+        procedure btnExcluirClick(Sender: TObject);
+        procedure btnSairClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    private
+        lista: Tlist;
+    protected
+
+    public
+
+    end;
+
+var
+    FrmConsultaPadraoMobile: TFrmConsultaPadraoMobile;
+
+implementation
+
+{$R *.dfm}
+
+
+procedure TFrmConsultaPadraoMobile.btnAlterarClick(Sender: TObject);
+begin
+   if grDados.IsEmpty then
+    begin
+      TLib.MensagemErro('Selecione um registro na grid para efetuar esta operação','Erro','');
+      exit;
+    end;
+    Objeto := grDados.GetObject<TObject>;
+    Alterar;
+    grDados.DataBind;
+end;
+
+procedure TFrmConsultaPadraoMobile.btnExcluirClick(Sender: TObject);
+var
+    context: TRttiContext;
+    prop: TRttiProperty;
+begin
+    if grDados.IsEmpty then
+    begin
+      TLib.MensagemErro('Selecione um registro na grid para efetuar esta operação','Erro','');
+      exit;
+    end;
+
+    if NomeID = EmptyStr then
+    begin
+      TLib.MensagemErro('Propriedade da tela Consulta NomeID nao fornecida.','Erro','');
+      exit;
+    end;
+
+    try
+      ID := context.GetType(grDados.GetObject<TObject>.ClassType).GetProperty(NomeID).GetValue(grDados.GetObject<TObject>).ToString;
+    Except
+        raise Exception.Create('Erro ao pegar a propriedade ID do Objeto ');
+    end;
+
+    Excluir;
+
+    grDados.DeleteRow;
+end;
+
+procedure TFrmConsultaPadraoMobile.btnInserirClick(Sender: TObject);
+begin
+    Inserir;
+    if Objeto <> nil then
+    begin
+        lista := TList.Create;
+
+        lista.Add(Objeto);
+        grDados.DataSource := lista;
+        grDados.DataBind;
+    end;
+end;
+
+procedure TFrmConsultaPadraoMobile.btnSairClick(Sender: TObject);
+begin
+    Inherited;
+    self.Close;
+end;
+
+procedure TFrmConsultaPadraoMobile.FormShow(Sender: TObject);
+begin
+    Inherited;
+    self.Width := MobileWidth;
+    self.Height := MobileHeight;
+end;
+
+end.

@@ -1,0 +1,18 @@
+unit Lib.Interfaces.CRUDGenerico;
+
+interface
+
+uses
+    Classes, Lib.Enumeradores, Lib.Parametro, Lib.ResultFilter, Lib.Lista,
+    Lib.Base;
+type
+    ICRUDGenerico = interface
+        function Listar(tipoOperacao: TOparationTypes): TResultFilter; overload;
+        function Listar(tipoOperacao: TOparationTypes; MultiSelect: Boolean): TResultFilter; overload;
+        function Obter: TBase;
+    end;
+
+
+implementation
+
+end.

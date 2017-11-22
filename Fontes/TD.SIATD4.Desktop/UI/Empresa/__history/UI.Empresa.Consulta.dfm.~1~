@@ -1,0 +1,12 @@
+inherited frmConEmpresa: TfrmConEmpresa
+  Caption = 'frmConEmpresa'
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited pnlApresentacao: TPanel
+    inherited Label1: TLabel
+      Width = 169
+      Caption = 'Consulta de Empresa'
+      ExplicitWidth = 169
+    end
+  end
+end

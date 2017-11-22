@@ -1,0 +1,97 @@
+unit Lib.Base;
+
+interface
+
+uses
+  Lib.Enumeradores, System.Rtti;
+type
+  {$RTTI INHERIT}
+  TBase = Class(TInterfacedObject)
+  private
+        FTipoManutencao: TTipoManutencao;
+        procedure SetTipoManutencao(const Value: TTipoManutencao);
+        function GetPreenchido: boolean;
+  protected
+        FPreenchido: boolean;
+  public
+        property TipoManutencao: TTipoManutencao read FTipoManutencao write SetTipoManutencao;
+        property Preenchido: boolean read GetPreenchido;
+        procedure CopiarPara(objeto: TObject); virtual;
+        procedure ConverteEPopularValorPropriedade(prop: TRttiProperty; objeto: TObject; valor: string);
+
+    end;
+
+implementation
+
+uses
+  System.SysUtils;
+
+{ TClasseBase }
+
+procedure TBase.CopiarPara(objeto: TObject);
+var
+    context: TRttiContext;
+    propriedadeOriginal: TRttiProperty;
+    propriedadeCopiada: TRttiProperty;
+    valor: string;
+begin
+    try
+        for propriedadeOriginal in context.GetType(TObject(Self).ClassType).GetProperties do
+        begin
+            if (propriedadeOriginal.PropertyType.ToString = 'string') or (propriedadeOriginal.PropertyType.ToString = 'Double') or
+              (propriedadeOriginal.PropertyType.ToString = 'Integer') or (propriedadeOriginal.PropertyType.ToString = 'Boolean') then
+            begin
+                if propriedadeOriginal.IsReadable then
+                begin
+                    valor := propriedadeOriginal.GetValue(Self).ToString;
+
+                    propriedadeCopiada := context.GetType(TObject(objeto).ClassType).GetProperty(propriedadeOriginal.Name);
+                    if propriedadeCopiada.IsWritable then
+                        Self.ConverteEPopularValorPropriedade(propriedadeCopiada, objeto, valor);
+                end;
+            end;
+        end;
+        TBase(objeto).FPreenchido := true;
+    except
+       raise Exception.Create('Erro de reflexão'+#13+'Erro ao tentar copiar objeto');
+    end;
+
+
+end;
+
+
+function TBase.GetPreenchido: boolean;
+begin
+    result := FPreenchido;
+end;
+
+procedure TBase.ConverteEPopularValorPropriedade(prop: TRttiProperty; objeto: TObject; valor: string);
+begin
+    try
+        if not(prop.GetValue(objeto).IsType<TBase>) then
+        begin
+            if (prop.GetValue(objeto).IsType<integer>) then
+                prop.SetValue(TObject(objeto), StrToIntDef(valor, 0))
+            else if (prop.GetValue(objeto).IsType<double>) then
+                prop.SetValue(TObject(objeto), StrToFloatDef(valor, 0))
+            else if (prop.GetValue(objeto).IsType<Currency>) then
+                prop.SetValue(TObject(objeto), StrToCurrDef(valor, 0))
+            else if (prop.GetValue(objeto).IsType<TDateTime>) then
+                prop.SetValue(TObject(objeto), StrToDateDef(valor, strtodate('01/01/1900')))
+            else if (prop.GetValue(objeto).IsType<boolean>) then
+                prop.SetValue(TObject(objeto), StrToBoolDef(valor, false))
+            else if (prop.GetValue(objeto).IsType<string>) then
+                prop.SetValue(TObject(objeto), valor);
+        end;
+    except
+        raise Exception.Create('Erro ao tentar converter valores na transformação do XML para Objeto. Veririfcar tipo da propriedade: ' + prop.Name +
+          ' da classe: ' + objeto.ClassName);
+    end;
+end;
+
+procedure TBase.SetTipoManutencao(const Value: TTipoManutencao);
+begin
+  FTipoManutencao := Value;
+end;
+
+end.

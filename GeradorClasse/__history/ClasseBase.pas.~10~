@@ -1,0 +1,267 @@
+{*Created by @ReisCodeGenerator*}
+unit Biz.ClasseBase;
+
+interface
+
+uses
+    Classes, System.SysUtils, Dialogs, Lib.ClasseBase, Lib.Parametro, Lib.Enumeradores,
+    Lib.Persistable, Lib.ResultFilter, Lib.Lista, Dal.ControleDados, Dal.CondicaoConsulta, 
+	Framework.Interfaces.CRUD, Dal.FabricaSQL[CRIAR_USES_DETALHES];
+
+type
+	TClasseBase = class(TClasseBase, ICRUD<TClasseBase>)
+	private
+	    [CRIAR_GETSET_ASSINATURA]
+
+    public
+        class var dao: TControleDados<TLista<TClasseBase>,TListaDAO<TClasseBase>>;
+
+        ///	<summary>
+        ///	  Metodo que faz a inserção da ClasseBase
+        ///	</summary>
+        function Inserir: boolean; 
+        ///	<summary>
+        ///	  Metodo que faz a alteração da ClasseBase
+        ///	</summary>
+        function Alterar: boolean;
+
+        ///	<summary>
+        ///	  Métido que faz a Deleção da ClasseBase
+        ///	</summary>
+        function Excluir: boolean;
+
+        ///	<summary>
+        ///	  Método que chama a tela de filtro
+        ///	</summary>
+        ///	<param name="tipoOperacao">
+        ///	  Tipo da operação, se é somente filtro, ou seleção de registro
+        ///	</param>
+        function Listar(tipoOperacao: TOparationTypes; multselect: Boolean): TResultFilter; 
+
+
+        ///	<summary>
+        ///	  Método que retorna um objeto preenchido
+        ///	</summary>
+        ///	<param name="ID">
+        ///	  Chave primária da tabela
+        ///	</param>
+        function Obter(ID: string): TClasseBase; overload; 
+
+        ///	<summary>
+        ///	  Método que retorna um objeto preenchido
+        ///	</summary>
+        ///	<param name="parametros">
+        ///	  Parametros para a consulta do objeto a ser preenchido
+        ///	</param>
+        function Obter(parametros:TParametro): TClasseBase; overload;
+
+
+        ///	<summary>
+        ///	  Método que retonar uma lista com varios objetos de acordo com parametro passado
+        ///	</summary>
+        ///	<param name="parametros">
+        ///	  Parametros para a consulta do objeto a ser preenchido
+        ///	</param>
+        function Consultar(parametros:TParametro): TLista<TClasseBase>;
+
+
+        ///	<summary>
+        ///	  Método que preenche a instância do Objeto
+        ///	</summary>
+        ///	<param name="ClasseBase">
+        ///	  objeto de parametro para preenchimento da instância
+        ///	</param>
+        procedure PreencherObjeto(ClasseBase: TClasseBase);
+
+
+        class function TabelaReferencia: string;  override;
+
+        [CRIAR_PROPRIEDADES]
+    end;
+
+implementation
+
+
+{ TClasseBase }
+
+uses Lib.Filter, Lib.Biblioteca, Biz.UsuarioLogado;
+
+{$REGION 'Métodos CRUD'}
+
+function TClasseBase.Inserir: boolean;
+var
+    fabrica: TFabricaSQL;
+    sql: WideString;
+    parametro: TParametro;
+begin
+    fabrica := TFabricaSQL.Create(Self);
+    try
+        try
+            sql := fabrica.GerarSqlInsercao;
+            parametro := Self.ObjetoParaParametros(Insercao);
+            result := dao.Inserir(sql, parametro);
+        except
+          on e: exception do
+              raise Exception.Create('Erro ao inserir ClasseBase'+#13+ e.Message);
+        end;
+    finally
+        if parametro <> nil then
+            FreeAndNil(parametro);
+    end;
+end;
+
+function TClasseBase.Alterar: boolean;
+var
+    fabrica: TFabricaSQL;
+    sql: WideString;
+    parametro: TParametro;
+begin
+    fabrica := TFabricaSQL.Create(Self);
+    try
+        try
+            sql := fabrica.GerarSqlAlteracao;
+            parametro := Self.ObjetoParaParametros(Alteracao);
+            result := dao.Alterar(sql, parametro);
+        except
+          on e: exception do
+              raise Exception.Create('Erro ao alterar ClasseBase'+'#13+ e.Message);
+        end;
+    finally
+        if parametro <> nil then
+            FreeAndNil(parametro);
+    end;
+end;
+
+
+function TClasseBase.Excluir: boolean;
+var
+    fabrica: TFabricaSQL;
+    sql: WideString;
+    parametro: TParametro;
+begin
+    fabrica := TFabricaSQL.Create(Self);
+    try
+        try
+            sql := fabrica.GerarSqlExclusao;
+            parametro := Self.ObjetoParaParametros(Exclusao);
+            result := dao.Excluir(sql, parametro);
+        except
+          on e: exception do
+              raise Exception.Create('Erro ao excluir ClasseBase'+#13+ e.Message);
+        end;
+    finally
+        if parametro <> nil then
+            FreeAndNil(parametro);
+    end;
+
+end;
+
+function TClasseBase.Consultar(parametros: TParametro): Tlista<TClasseBase>;
+var
+    query: string;
+    condicao: TCondicaoConsulta;
+begin
+    try
+        condicao := TCondicaoConsulta.Create(parametros);
+		[CRIAR_CONSULTA]
+
+        query := 'SELECT '+Self.ObterCamposSeparadosPorVirgula(Consulta,[]) + ' FROM ' + Self.TabelaReferencia + ' WHERE D_E_L_E_T_ = '''' ' + condicao.ToString(true);
+
+        Result := dao.Consultar(query,parametros);
+    finally
+        condicao.Free;
+    end;
+end;
+
+function TClasseBase.Listar(tipoOperacao: TOparationTypes; multselect: Boolean): TResultFilter;
+var
+    campoFiltro:TFieldFilter;
+    filtro : TFilter<TClasseBase>;
+    //parametro : TParametro;
+    //lista:TLista<TClasseBase>
+begin
+    try
+        filtro := TFilter<TClasseBase>.Create;
+        filtro.ScreenName := 'Filtro de ClasseBase';
+        filtro.OperationType := tipoOperacao;
+        filtro.MultiSelect := multselect;
+		[CRIAR_INDICES_FILTRO]
+        //###Criar os Índices do filtro
+		// filtro.AddIndex(99, 'Empresa=S01_EMP, Filial=S01_FILIAL, Descricao=S01_DESC', 'Empresa + Filial + Descrição');
+
+        {$REGION 'Campo Filtro'}
+
+        [CRIAR_CAMPOS_FILTRO]
+
+        {$ENDREGION}
+
+        result := filtro.Execute;
+    finally
+        // FreeAndNil(parametro);
+        // FreeAndNil(lista);
+    end;
+end;
+
+function TClasseBase.Obter(parametros: TParametro): TClasseBase;
+var
+  lista: TLista<TClasseBase>;
+begin
+    try
+        lista := Self.Consultar(parametros);
+
+        if lista.Count = 1 then
+        begin
+           PreencherObjeto(lista[0]);
+           Result := Self;
+        end
+        else
+        begin
+            TLib.MensagemAdvertencia('Nenhum registro encontrado.', 'Aviso');
+            Result := nil;
+        end;
+    finally
+        lista.Destroy;
+    end;
+end;
+
+function TClasseBase.Obter(ID: string): TClasseBase;
+var
+    parametros: TParametro;
+
+begin
+    try
+        parametros := TParametro.Create;
+        parametros.Add('', 'R_E_C_N_O_', ID);
+        result := Obter(parametros);
+    finally
+        FreeAndNil(parametros);
+    end;
+end;
+
+
+{$ENDREGION}
+
+{$REGION 'Regras de Negócio'}
+
+procedure TClasseBase.PreencherObjeto(ClasseBase: TClasseBase);
+begin
+    ClasseBase.CopiarPara(Self);
+    FPreenchido := true;
+end;
+
+function TClasseBase.TabelaReferencia: string;
+begin
+    Result := '[TABELA]';
+end;
+
+
+{$ENDREGION}
+
+{$REGION 'Métodos de Propriedades'}
+
+[CRIAR_GETSET_CORPO]
+
+{$ENDREGION}
+
+end.
+

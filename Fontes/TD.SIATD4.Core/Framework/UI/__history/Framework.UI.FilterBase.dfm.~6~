@@ -1,0 +1,13 @@
+inherited FrmFilterBase: TFrmFilterBase
+  Caption = 'Form1'
+  ClientHeight = 299
+  ClientWidth = 635
+  ExplicitWidth = 651
+  ExplicitHeight = 338
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited ErrorProvider1: TErrorProvider
+    Left = 40
+    Top = 216
+  end
+end

@@ -1,0 +1,101 @@
+inherited frmCadParametroSistema: TfrmCadParametroSistema
+  Caption = 'frmCadParametroSistema'
+  ClientHeight = 263
+  ClientWidth = 467
+  ExplicitWidth = 473
+  ExplicitHeight = 292
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited Panel2: TPanel
+    Width = 467
+    inherited lblLetreiro: TLabel
+      Width = 301
+      Caption = 'Cadastro de Parametro de Sistema'
+      ExplicitWidth = 301
+    end
+  end
+  inherited Panel3: TPanel
+    Top = 223
+    Width = 467
+    inherited pnlBotoes: TPanel
+      Left = 268
+    end
+  end
+  inherited pgcComponentes: TPageControl
+    Width = 467
+    Height = 186
+    inherited tbPrincipal: TTabSheet
+      ExplicitLeft = 8
+      ExplicitTop = 40
+      ExplicitWidth = 459
+      ExplicitHeight = 158
+      object lblNome: TLabel
+        Left = 20
+        Top = 55
+        Width = 27
+        Height = 13
+        Caption = 'Nome'
+      end
+      object lblValor: TLabel
+        Left = 20
+        Top = 104
+        Width = 24
+        Height = 13
+        Caption = 'Valor'
+      end
+      object Label1: TLabel
+        Left = 20
+        Top = 8
+        Width = 27
+        Height = 13
+        Caption = 'Nome'
+      end
+      object edNome: TREdit
+        Left = 20
+        Top = 72
+        Width = 93
+        Height = 21
+        CharCase = ecUpperCase
+        MaxLength = 60
+        TabOrder = 0
+        Text = ''
+        FieldName = 'Nome'
+        MaskType = mtString
+        MandatoryField = True
+        PersistentField = True
+        SaveLiteralCharacters = False
+        DecimalPlaces = 2
+      end
+      object edValor: TREdit
+        Left = 20
+        Top = 120
+        Width = 150
+        Height = 21
+        CharCase = ecUpperCase
+        MaxLength = 150
+        TabOrder = 1
+        Text = ''
+        FieldName = 'Valor'
+        MaskType = mtString
+        MandatoryField = True
+        PersistentField = True
+        SaveLiteralCharacters = False
+        DecimalPlaces = 2
+      end
+      object cbFilial: TRComboBox
+        Left = 20
+        Top = 27
+        Width = 213
+        Height = 22
+        Style = csOwnerDrawFixed
+        TabOrder = 2
+        FieldName = 'CodigoFilial'
+        MandatoryField = True
+        PersistentField = True
+        BlankField = False
+        IDFieldName = 'Filial'
+        DescriptionFieldName = 'CodigoNomeFilial'
+      end
+    end
+  end
+end

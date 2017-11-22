@@ -1,0 +1,524 @@
+unit Lib.Base;
+
+interface
+
+uses dbClient, System.Classes, Lib.Lista, Lib.Enumeradores, Lib.Parametro, RTTI,
+    Lib.Observador, ScktComp, Generics.Collections, Vcl.Forms, Lib.Persistable, Lib.ResultFilter, Dialogs;
+
+type
+{$RTTI INHERIT}
+
+
+    TPropriedadeAlterada = class
+    private
+        FValorAntigo: variant;
+        FNomePropriedade: string;
+        procedure SetValorAntigo(const Value: variant);
+        procedure SetNomePropriedade(const Value: string);
+    public
+        property NomePropriedade: string read FNomePropriedade write SetNomePropriedade;
+        property ValorAntigo: variant read FValorAntigo write SetValorAntigo;
+
+    end;
+
+    TBase = class(TInterfacedObject)
+    private
+        FPropriedadesAlteradas: TLista<TPropriedadeAlterada>;
+        FTabelaReferencia: string;
+        FTipoManutencao: TTipoManutencao;
+        function GetPreenchido: boolean;
+        procedure SetPreenchido(const Value: boolean);
+        procedure SetPropriedadesAlteradas(const Value: TLista<TPropriedadeAlterada>);
+        function VeririficarPropriedadeAlterada(NomePropriedade: string): boolean;
+        procedure AdicionarPropriedadeAlterada(NomePropriedade: string; valor: variant);
+        function GetTabelaReferencia: string;
+        procedure SetTabelaReferencia(const Value: string);
+        procedure SetTipoManutencao(const Value: TTipoManutencao);
+    function GetTipoManutencao: TTipoManutencao;
+    protected
+        FPreenchido: boolean;
+
+    public
+        property Preenchido: boolean read GetPreenchido;
+        property TabelaReferencia: string read GetTabelaReferencia;
+        property PropriedadesAlteradas: TLista<TPropriedadeAlterada> read FPropriedadesAlteradas write SetPropriedadesAlteradas;
+        property TipoManutencao: TTipoManutencao read GetTipoManutencao write SetTipoManutencao;
+
+        /// <summary>
+        /// seta o valor da propriedade por nome
+        /// </summary>
+        /// <param name="nomePropriedade">
+        /// nome da propriedade
+        /// </param>
+        /// <param name="valor">
+        /// valor da propriedade
+        /// </param>
+        procedure SetarValorPorNomePropriedade(NomePropriedade: string; valor: string);
+
+        /// <summary>
+        /// Obtem o valor da propriedade por nome
+        /// </summary>
+        /// <param name="nomePropriedade">
+        /// nome da propriedade
+        /// </param>
+        function ObterValorPorNomePropriedade(NomePropriedade: string): string;
+
+        /// <summary>
+        /// Cópia por valor de um objeto para o outro
+        /// </summary>
+        /// <param name="base">
+        /// objeto em questão
+        /// </param>
+        procedure CopiarPara(objeto: TObject); virtual;
+
+        /// <summary>
+        /// Cópia por valor de um objeto para o outro
+        /// </summary>
+        /// <param name="nomePropriedade">
+        /// Nome da propriedade
+        /// </param>
+        /// <param name="valor">
+        /// valor da propriedade
+        /// </param>
+        procedure ValidarAlteracaoPropriedade(NomePropriedade: string; valor: variant);
+
+        /// <summary>
+        /// Transforma as propriedades do objeto em parametros
+        /// </summary>
+        /// <param name="obj">
+        /// Objeto em questao
+        /// </param>
+        /// <param name="acaoJanela">
+        /// ação da janela, se  for Alteração, todos os campos sao
+        /// transoformados, se Inserção somente as propriedades do tipo
+        /// Persistable
+        function ObjetoParaParametros(tipoManutencao: TTipoManutencao): TParametro; overload;
+
+        /// <summary>
+        /// Transforma as propriedades do objeto em parametros
+        /// </summary>
+        /// <param name="obj">
+        /// Objeto em questao
+        /// </param>
+        /// <param name="acaoJanela">
+        /// ação da janela, se  for Alteração, todos os campos sao
+        /// transoformados, se Inserção somente as propriedades do tipo
+        /// Persistable
+        /// </param>
+        /// <param name="processo">
+        /// processo do servidor
+        /// </param>
+        function ObjetoParaParametros(tipoManutencao: TTipoManutencao; processo: String): TParametro; overload;
+
+        /// <summary>
+        /// Transforma as propriedades do objeto em parametros
+        /// </summary>
+        /// <param name="obj">
+        /// Objeto em questao
+        /// </param>
+        /// <param name="acaoJanela">
+        /// ação da janela, se  for Alteração, todos os campos sao
+        /// transoformados, se Inserção somente as propriedades do tipo
+        /// Persistable
+        /// </param>
+        /// <param name="parametro">
+        /// Caso exista um parametro já criado
+        /// </param>
+        /// <param name="processo">
+        /// processo do servidor
+        /// </param>
+        function ObjetoParaParametros(tipoManutencao: TTipoManutencao; Parametro: TParametro; processo: String): TParametro; overload;
+
+        /// <summary>
+        /// Transforma as propriedades do objeto em parametros
+        /// </summary>
+        /// <param name="obj">
+        /// Objeto em questao
+        /// </param>
+        /// <param name="acaoJanela">
+        /// ação da janela, se  for Alteração, todos os campos sao
+        /// transoformados, se Inserção somente as propriedades do tipo
+        /// Persistable, se for nenhuma ação eu pego todas as propriedades.
+        /// </param>
+        /// <param name="parametro">
+        /// Caso exista um parametro já criado
+        /// </param>
+        /// <param name="processo">
+        /// processo do servidor
+        /// </param>
+        /// <param name="linha">
+        /// Este parametro e refente ao registro, caso estejamos criando
+        /// parametro de uma lista de objetos
+        /// </param>
+        function ObjetoParaParametros(tipoManutencao: TTipoManutencao; Parametro: TParametro; processo: String; linha: integer): TParametro; overload;
+
+        /// <summary>
+        /// Limpa a lista de propriedades alteradas
+        /// </summary>
+        procedure LimparPropriedadesAlteradas;
+
+        /// <summary>
+        /// Obtem uma lista com os nomes dos campos do banco
+        /// </summary>
+        function ObterListaDeCampos(tipoManutencao: TTipoManutencao; propriedadesExcecao: array of string; retornoTipoParametro: boolean = false): TStringList;
+
+
+        /// <summary>
+        /// Obtem campos serparados por virgula = "campos1, campo2, campo 3"
+        /// </summary>
+        function ObterCamposSeparadosPorVirgula(tipoManutencao: TTipoManutencao; propriedadesExcecao: array of string; alias: string = ''): wideString;
+
+
+
+        constructor Create; virtual;
+        destructor Destroy; override;
+    end;
+
+implementation
+
+uses
+    System.SysUtils, Variants, Lib.MaxLenght, Lib.Biblioteca;
+
+{ TBase }
+
+constructor TBase.Create;
+begin
+    FPropriedadesAlteradas := TLista<TPropriedadeAlterada>.Create;
+    Self.TipoManutencao := Insercao;
+end;
+
+destructor TBase.Destroy;
+begin
+    if FPropriedadesAlteradas <> nil then
+        FreeAndNil(FPropriedadesAlteradas);
+end;
+
+function TBase.GetPreenchido: boolean;
+begin
+    result := FPreenchido;
+end;
+
+function TBase.GetTabelaReferencia: string;
+var
+  _ctx : TRttiContext;
+  _typ  : TRttiType;
+  _ca: TCustomAttribute;
+   _pro: TRttiProperty;
+    oAtt: TCustomAttribute;
+begin
+  if FTabelaReferencia = EmptyStr then
+  begin
+      _ctx := TRttiContext.Create;
+
+      try
+       _typ := _ctx.GetType(Self.ClassType);
+        if Assigned(_typ) then
+        begin
+          for _ca in _typ.GetAttributes do
+          begin
+            if _ca is TReferenceTable then
+              FTabelaReferencia := (TReferenceTable(_ca).TableName);
+          end;
+        end;
+
+
+      finally
+        _ctx.Free;
+      end;
+
+  end;
+  result := FTabelaReferencia;
+
+end;
+
+function TBase.GetTipoManutencao: TTipoManutencao;
+begin
+    result := FTipoManutencao;
+end;
+
+procedure TBase.LimparPropriedadesAlteradas;
+begin
+    if FPropriedadesAlteradas <> nil then
+        FreeAndNil(FPropriedadesAlteradas);
+    FPropriedadesAlteradas := TLista<TPropriedadeAlterada>.Create();
+end;
+
+function TBase.ObterCamposSeparadosPorVirgula(tipoManutencao: TTipoManutencao; propriedadesExcecao: array of string; alias: string): wideString;
+var
+    listaCampos: TStringList;
+    item: string;
+    campos: widestring;
+begin
+    try
+        listaCampos := ObterListaDeCampos(tipoManutencao, propriedadesExcecao);
+        for item in listaCampos do
+            campos := campos + tlib.IfTernario(alias = EmptyStr, item, alias+'.'+item) + ',';
+
+        Delete(campos,length(campos),1);
+
+        result := campos;
+
+    finally
+        if listaCampos <> nil then
+            FreeAndNil(listaCampos);
+
+    end;
+
+
+end;
+
+function TBase.ObterListaDeCampos(tipoManutencao: TTipoManutencao; propriedadesExcecao: array of string; retornoTipoParametro: boolean): TStringList;
+    function VerificarExcecao(nomePropriedade: string): boolean;
+    var
+        item: string;
+    begin
+        result := false;
+        for item in propriedadesExcecao do
+        begin
+            if item = nomePropriedade then
+            begin
+                result := true;
+                break;
+            end;
+        end;
+
+    end;
+var
+    context: TRttiContext;
+    Propriedade: TRttiProperty;
+    _ctx: TRttiContext;
+    _typ: TRttiType;
+    _pro: TRttiProperty;
+    oAtt: TCustomAttribute;
+    persistivel: boolean;
+begin
+    result := TStringList.Create;
+    try
+        _typ := _ctx.GetType(Self.ClassType);
+
+        for _pro in _typ.GetProperties do
+        begin
+            if not VerificarExcecao(_pro.Name) then
+            begin
+                persistivel := false;
+                for oAtt in _pro.GetAttributes do
+                begin
+                    if oAtt is TPersistable then
+                    begin
+                        if ((TPersistable(oAtt).Flag = fgPersistable) and (tipoManutencao = Insercao)) or
+                          ((TPersistable(oAtt).Flag in [fgUpdateable, fgPersistable]) and (tipoManutencao <> Insercao)) or (tipoManutencao = Consulta)
+                        then
+                        begin
+                            result.Add(Tlib.IfTernario(retornoTipoParametro, ':' + TPersistable(oAtt).FieldName, TPersistable(oAtt).FieldName));
+                        end;
+                    end;
+                end;
+            end;
+        end;
+    except
+        if result <> nil then
+            FreeAndNil(result);
+    end;
+end;
+
+function TBase.ObterValorPorNomePropriedade(NomePropriedade: string): string;
+var
+    context: TRttiContext;
+    prop: TRttiProperty;
+begin
+    try
+        prop := context.GetType(Self.ClassType).GetProperty(NomePropriedade);
+        result := prop.GetValue(Self).ToString;
+    except
+        Tlib.MensagemErro('Erro de reflexão', 'Erro ao acessar propriedade: ' + NomePropriedade + ' da classe: ' + Self.ClassName);
+        result := '';
+    end;
+end;
+
+procedure TBase.SetarValorPorNomePropriedade(NomePropriedade, valor: string);
+var
+    context: TRttiContext;
+    prop: TRttiProperty;
+begin
+    try
+        prop := context.GetType(Self.ClassType).GetProperty(NomePropriedade);
+        Tlib.ConverteEPopularValorPropriedade(prop, Self, valor);
+    except
+        Tlib.MensagemErro('Erro de reflexão', 'Erro ao setar valor na propriedade: ' + NomePropriedade + ' da classe: ' + Self.ClassName);
+    end;
+end;
+
+procedure TBase.ValidarAlteracaoPropriedade(NomePropriedade: string; valor: variant);
+var
+    prop: TRttiProperty;
+    context: TRttiContext;
+    oAtt: TCustomAttribute;
+begin
+    try
+        prop := context.GetType(Self.ClassType).GetProperty(NomePropriedade);
+
+        if VarToStr(valor) <> prop.GetValue(Self).ToString then
+        begin
+            Self.AdicionarPropriedadeAlterada(NomePropriedade, valor);
+            if Self.TipoManutencao = Consulta then
+                Self.TipoManutencao := Alteracao;
+        end;
+
+    except
+        Tlib.MensagemErro('Erro ao validar alteração', 'Erro ao validar alteração da propriedade: ' + NomePropriedade + ' da classe: ' +
+          Self.ClassName);
+    end;
+end;
+
+function TBase.VeririficarPropriedadeAlterada(NomePropriedade: string): boolean;
+var
+    item: TPropriedadeAlterada;
+begin
+    result := false;
+    for item in PropriedadesAlteradas do
+    begin
+        if item.NomePropriedade = NomePropriedade then
+        begin
+            result := true;
+            break;
+        end;
+    end;
+end;
+
+procedure TBase.SetPreenchido(const Value: boolean);
+begin
+    FPreenchido := Value;
+end;
+
+procedure TBase.SetPropriedadesAlteradas(const Value: TLista<TPropriedadeAlterada>);
+begin
+    FPropriedadesAlteradas := Value;
+end;
+
+procedure TBase.SetTabelaReferencia(const Value: string);
+begin
+    FTabelaReferencia := Value;
+end;
+
+procedure TBase.SetTipoManutencao(const Value: TTipoManutencao);
+begin
+  FTipoManutencao := Value;
+end;
+
+procedure TBase.AdicionarPropriedadeAlterada(NomePropriedade: string; valor: variant);
+var
+    propAlt: TPropriedadeAlterada;
+begin
+    propAlt := TPropriedadeAlterada.Create;
+    propAlt.NomePropriedade := NomePropriedade;
+    propAlt.ValorAntigo := valor;
+    FPropriedadesAlteradas.Add(propAlt);
+end;
+
+procedure TBase.CopiarPara(objeto: TObject);
+var
+    context: TRttiContext;
+    propriedadeOriginal: TRttiProperty;
+    propriedadeCopiada: TRttiProperty;
+    valor: string;
+begin
+    try
+        for propriedadeOriginal in context.GetType(TObject(Self).ClassType).GetProperties do
+        begin
+            if (propriedadeOriginal.PropertyType.ToString = 'string') or (propriedadeOriginal.PropertyType.ToString = 'Double') or
+              (propriedadeOriginal.PropertyType.ToString = 'Integer') or (propriedadeOriginal.PropertyType.ToString = 'Boolean') then
+            begin
+                if propriedadeOriginal.IsReadable then
+                begin
+                    valor := propriedadeOriginal.GetValue(Self).ToString;
+
+                    propriedadeCopiada := context.GetType(TObject(objeto).ClassType).GetProperty(propriedadeOriginal.Name);
+                    if propriedadeCopiada.IsWritable then
+                        Tlib.ConverteEPopularValorPropriedade(propriedadeCopiada, objeto, valor);
+                end;
+            end;
+        end;
+        TBase(objeto).FPreenchido := true;
+    except
+        Tlib.MensagemErro('Erro de reflexão', 'Erro ao tentar copiar objeto');
+    end;
+end;
+
+function TBase.ObjetoParaParametros(tipoManutencao: TTipoManutencao; Parametro: TParametro; processo: String; linha: integer): TParametro;
+var
+    context: TRttiContext;
+    Propriedade: TRttiProperty;
+    _ctx: TRttiContext;
+    _typ: TRttiType;
+    _pro: TRttiProperty;
+    oAtt: TCustomAttribute;
+    persistivel: boolean;
+begin
+    _typ := _ctx.GetType(Self.ClassType); // Pega o objeto em tempo de execeção.    //
+
+    for _pro in _typ.GetProperties do
+    begin
+        persistivel := false;
+        for oAtt in _pro.GetAttributes do
+        begin
+            if oAtt is TPersistable then
+            begin
+                if ((TPersistable(oAtt).Flag = fgPersistable) and (tipoManutencao = Insercao)) or
+                  ((TPersistable(oAtt).Flag in [fgUpdateable, fgPersistable]) and (tipoManutencao = Alteracao)) or (tipoManutencao = Consulta)
+                // para casos que eu quero pegar todos os parametros
+                then
+                begin
+                    Parametro.Add(processo, TPersistable(oAtt).FieldName, _pro.GetValue(Self).ToString, IntToStr(linha));
+
+                end
+                else if (tipoManutencao = Exclusao) then
+                begin
+                    if TPersistable(oAtt).FieldName = 'R_E_C_N_O_' then
+                        Parametro.Add(processo, TPersistable(oAtt).FieldName, _pro.GetValue(Self).ToString, IntToStr(linha));
+                end;
+
+            end;
+
+            if oAtt is TMaxLenght then
+            begin
+                if (TMaxLenght(oAtt).MaxLenght > 0) and persistivel then
+                    Parametro.item[Parametro.item.Count - 1].valor := copy(Parametro.item[Parametro.item.Count - 1].valor, 1,
+                      TMaxLenght(oAtt).MaxLenght);
+
+            end;
+        end;
+    end;
+    result := Parametro;
+end;
+
+function TBase.ObjetoParaParametros(tipoManutencao: TTipoManutencao): TParametro;
+begin
+    result := ObjetoParaParametros(tipoManutencao, EmptyStr);
+end;
+
+function TBase.ObjetoParaParametros(tipoManutencao: TTipoManutencao; processo: String): TParametro;
+var
+    param: TParametro;
+begin
+    param := TParametro.Create;
+    result := ObjetoParaParametros(tipoManutencao, param, '', 1);
+end;
+
+function TBase.ObjetoParaParametros(tipoManutencao: TTipoManutencao; Parametro: TParametro; processo: String): TParametro;
+begin
+    result := ObjetoParaParametros(tipoManutencao, Parametro, processo, 1);
+end;
+
+{ TPropriedadeAlterada }
+
+procedure TPropriedadeAlterada.SetNomePropriedade(const Value: string);
+begin
+    FNomePropriedade := Value;
+end;
+
+procedure TPropriedadeAlterada.SetValorAntigo(const Value: variant);
+begin
+    FValorAntigo := Value;
+end;
+
+end.

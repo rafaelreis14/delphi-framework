@@ -1,0 +1,308 @@
+inherited frmTeste: TfrmTeste
+  Caption = 'frmTeste'
+  ClientHeight = 816
+  ClientWidth = 1564
+  ExplicitWidth = 1580
+  ExplicitHeight = 855
+  PixelsPerInch = 96
+  TextHeight = 13
+  object BitBtn1: TBitBtn [0]
+    Left = 8
+    Top = 8
+    Width = 75
+    Height = 25
+    Caption = 'BitBtn1'
+    TabOrder = 0
+    OnClick = BitBtn1Click
+  end
+  object RComboBox1: TRComboBox [1]
+    Left = 89
+    Top = 8
+    Width = 144
+    Height = 22
+    Style = csOwnerDrawFixed
+    TabOrder = 1
+    OnExit = RComboBox1Exit
+    MandatoryField = False
+    PersistentField = False
+    BlankField = False
+  end
+  object REdit1: TREdit [2]
+    Left = 592
+    Top = 48
+    Width = 93
+    Height = 21
+    EditMask = '!#0000-0000;1;_'
+    MaxLength = 10
+    TabOrder = 2
+    Text = '     -    '
+    MaskType = mtShortPhone
+    MandatoryField = False
+    PersistentField = False
+    SaveLiteralCharacters = False
+    DecimalPlaces = 9
+  end
+  object REdit2: TREdit [3]
+    Left = 580
+    Top = 92
+    Width = 176
+    Height = 21
+    TabOrder = 3
+    Text = ''
+    MaskType = mtDouble
+    MandatoryField = False
+    PersistentField = False
+    SaveLiteralCharacters = False
+    DecimalPlaces = 2
+  end
+  object BitBtn4: TBitBtn [4]
+    Left = 8
+    Top = 86
+    Width = 89
+    Height = 25
+    Caption = 'PDV'
+    TabOrder = 4
+    OnClick = BitBtn4Click
+  end
+  object BitBtn2: TBitBtn [5]
+    Left = 103
+    Top = 86
+    Width = 106
+    Height = 25
+    Caption = 'Consultar Filiais'
+    TabOrder = 5
+    OnClick = BitBtn2Click
+  end
+  object BitBtn3: TBitBtn [6]
+    Left = 499
+    Top = 90
+    Width = 75
+    Height = 25
+    Caption = 'BitBtn3'
+    TabOrder = 6
+    OnClick = BitBtn3Click
+  end
+  object BitBtn5: TBitBtn [7]
+    Left = 1144
+    Top = 30
+    Width = 159
+    Height = 25
+    Caption = 'Consultar Rotina'
+    TabOrder = 7
+    OnClick = BitBtn5Click
+  end
+  object Button2: TButton [8]
+    Left = 708
+    Top = 39
+    Width = 75
+    Height = 25
+    Caption = 'Button2'
+    TabOrder = 8
+    OnClick = Button2Click
+  end
+  object Button3: TButton [9]
+    Left = 8
+    Top = 39
+    Width = 75
+    Height = 25
+    Caption = 'Button2'
+    TabOrder = 9
+    OnClick = Button3Click
+  end
+  object RSearch1: TRSearch [10]
+    Left = 294
+    Top = 45
+    Width = 280
+    Height = 21
+    Hint = 'Pressione F3 para pesquisar'
+    BevelOuter = bvNone
+    Caption = 'RSearch1'
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 10
+    TabStop = True
+    IDFieldName = 'Filial'
+    DescriptionFieldName = 'Descricao'
+    MandatoryField = False
+    PersistentField = False
+    IDFieldWidth = 0
+  end
+  object BitBtn6: TBitBtn [11]
+    Left = 215
+    Top = 86
+    Width = 106
+    Height = 25
+    Caption = 'Consultar Caixas'
+    TabOrder = 11
+  end
+  object RComboBox2: TRComboBox [12]
+    Left = 89
+    Top = 32
+    Width = 144
+    Height = 22
+    Style = csOwnerDrawFixed
+    TabOrder = 12
+    OnExit = RComboBox2Exit
+    MandatoryField = False
+    PersistentField = False
+    BlankField = False
+  end
+  object RComboBox3: TRComboBox [13]
+    Left = 89
+    Top = 56
+    Width = 144
+    Height = 22
+    Style = csOwnerDrawFixed
+    TabOrder = 13
+    MandatoryField = False
+    PersistentField = False
+    BlankField = False
+    ListValue.Strings = (
+      'ooio')
+  end
+  object Button1: TButton [14]
+    Left = 237
+    Top = 31
+    Width = 47
+    Height = 25
+    Caption = 'Button2'
+    TabOrder = 14
+    OnClick = Button1Click
+  end
+  object BitBtn7: TBitBtn [15]
+    Left = 327
+    Top = 86
+    Width = 106
+    Height = 25
+    Caption = 'Consultar Caixas'
+    TabOrder = 15
+  end
+  object MaskEdit1: TMaskEdit [16]
+    Left = 794
+    Top = 513
+    Width = 117
+    Height = 21
+    EditMask = '!\(999\)90000-0000;1;_'
+    MaxLength = 15
+    TabOrder = 16
+    Text = '(   )     -    '
+  end
+  inline frmPesquisaEndereco1: TfrmPesquisaEndereco [17]
+    Left = 273
+    Top = 549
+    Width = 638
+    Height = 105
+    TabOrder = 17
+    ExplicitLeft = 273
+    ExplicitTop = 549
+    inherited edCEP: TREdit
+      Text = '  .   -------------------------   '
+      Value = '     -------------------------   '
+    end
+  end
+  object RGrid1: TRGrid
+    Left = 122
+    Top = 218
+    Width = 563
+    Height = 120
+    ColCount = 2
+    DefaultRowHeight = 18
+    DrawingStyle = gdsClassic
+    RowCount = 2
+    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goRowSelect]
+    TabOrder = 18
+    MultiSelect = False
+    DetailGrid = RGrid2
+    MasterDetailFields.Strings = (
+      'Empresa'
+      'Filial')
+    MasterDetailType = mdMaster
+    ColWidths = (
+      11
+      64)
+    RowHeights = (
+      18
+      18)
+  end
+  object RGrid2: TRGrid
+    Left = 122
+    Top = 360
+    Width = 1111
+    Height = 120
+    ColCount = 2
+    DefaultRowHeight = 18
+    DrawingStyle = gdsClassic
+    RowCount = 2
+    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goRowSelect]
+    TabOrder = 19
+    MultiSelect = False
+    MasterDetailFields.Strings = (
+      'Empresa')
+    MasterDetailType = mdDetail
+    ColWidths = (
+      11
+      64)
+    RowHeights = (
+      18
+      18)
+  end
+  object DBGrid1: TDBGrid
+    Left = 691
+    Top = 218
+    Width = 542
+    Height = 120
+    DataSource = DataSource1
+    TabOrder = 20
+    TitleFont.Charset = DEFAULT_CHARSET
+    TitleFont.Color = clWindowText
+    TitleFont.Height = -11
+    TitleFont.Name = 'Tahoma'
+    TitleFont.Style = []
+  end
+  object BitBtn8: TBitBtn
+    Left = 1360
+    Top = 90
+    Width = 159
+    Height = 25
+    Caption = 'Encriptar Senha'
+    TabOrder = 21
+    OnClick = BitBtn8Click
+  end
+  object BitBtn9: TBitBtn
+    Left = 1144
+    Top = 61
+    Width = 159
+    Height = 25
+    Caption = 'Cadstro Acesso'
+    TabOrder = 22
+    OnClick = BitBtn9Click
+  end
+  object RCheckListBox1: TRCheckListBox
+    Left = 992
+    Top = 523
+    Width = 401
+    Height = 198
+    ItemHeight = 13
+    TabOrder = 23
+    OnClick = RCheckListBox1Click
+    MandatoryField = False
+    PersistentField = False
+    ReadOnly = False
+  end
+  object BitBtn10: TBitBtn
+    Left = 992
+    Top = 727
+    Width = 75
+    Height = 25
+    Caption = 'BitBtn3'
+    TabOrder = 24
+    OnClick = BitBtn10Click
+  end
+  inherited ErrorProvider1: TErrorProvider
+    Top = 240
+  end
+  object DataSource1: TDataSource
+    Left = 1008
+    Top = 152
+  end
+end

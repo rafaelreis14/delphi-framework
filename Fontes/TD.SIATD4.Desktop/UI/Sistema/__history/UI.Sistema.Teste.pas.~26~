@@ -1,0 +1,582 @@
+unit UI.Sistema.Teste;
+
+interface
+
+uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, StrUtils,
+    System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Grids, RGrid, Vcl.StdCtrls,
+    Vcl.Buttons, Lib.Base, Lib.Biblioteca, Biz.Filial,
+    Lib.Enumeradores, Lib.Lista, Generics.Collections, Lib.Parametro, Vcl.Mask,
+    REdit, Vcl.ExtCtrls, RSearch, RComboBox,
+    Framework.UI.FormBase, UntErrorProvider, UI.Frame.PesquisaEndereco,
+    Dal.ControleDados, DB, Vcl.DBGrids, DBClient, Xml.XMLDoc, Biz.UsuarioLogado,
+  Dal.FabricaSQL, Vcl.CheckLst, RCheckListBox;
+
+type
+
+
+
+    TmyClass = class of TBase;
+    TClasse = TClass;
+
+    TImprimir = Function(texto: AnsiString; tamanho: integer): integer;  StdCall;
+
+    TConsultarStatusImpressora = Function (stIndice: string; StTipo: string; StRetorno: string): integer; StdCall;
+    TStatusImpressora = Function: integer;
+    Hnd= THandle;
+
+
+    TfrmTeste = class(TFrmBase)
+        BitBtn1: TBitBtn;
+    RComboBox1: TRComboBox;
+    REdit1: TREdit;
+    REdit2: TREdit;
+    BitBtn4: TBitBtn;
+    BitBtn2: TBitBtn;
+    BitBtn3: TBitBtn;
+    BitBtn5: TBitBtn;
+    Button2: TButton;
+    Button3: TButton;
+    RSearch1: TRSearch;
+    BitBtn6: TBitBtn;
+    RComboBox2: TRComboBox;
+    RComboBox3: TRComboBox;
+    Button1: TButton;
+    BitBtn7: TBitBtn;
+    MaskEdit1: TMaskEdit;
+    frmPesquisaEndereco1: TfrmPesquisaEndereco;
+    RGrid1: TRGrid;
+    RGrid2: TRGrid;
+    DBGrid1: TDBGrid;
+    DataSource1: TDataSource;
+    BitBtn8: TBitBtn;
+    BitBtn9: TBitBtn;
+    RCheckListBox1: TRCheckListBox;
+    BitBtn10: TBitBtn;
+
+
+
+
+        procedure BitBtn1Click(Sender: TObject);
+        procedure BitBtn2Click(Sender: TObject);
+    procedure Button3Click(Sender: TObject);
+    procedure BitBtn4Click(Sender: TObject);
+    procedure BitBtn5Click(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
+    procedure BitBtn3Click(Sender: TObject);
+    procedure RComboBox1Exit(Sender: TObject);
+    procedure RComboBox2Exit(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure BitBtn8Click(Sender: TObject);
+    procedure BitBtn9Click(Sender: TObject);
+    procedure BitBtn10Click(Sender: TObject);
+    procedure RCheckListBox1Click(Sender: TObject);
+      private
+        { Private declarations }
+    public
+        { Public declarations }
+
+    end;
+
+var
+    frmTeste: TfrmTeste;
+
+implementation
+
+uses
+    RTTI, UI.Filial.Consulta, Biz.FilialUsuario, Biz.GrupoUsuario, Biz.Usuario,
+  UI.Rotina.Consulta, Biz.Grupo,
+  UI.Acesso.Cadastro, Biz.Rotina, Lib.Persistable;
+
+{$R *.dfm}
+
+procedure TfrmTeste.BitBtn10Click(Sender: TObject);
+begin
+  inherited;
+  RCheckListBox1.DeleteSelectedItem;
+
+  RGrid1.DataSource := RCheckListBox1.DataSource;
+  RGrid1.DataBind;
+end;
+
+procedure TfrmTeste.BitBtn1Click(Sender: TObject);
+var
+    parametro : TParametro;
+    Lib : Tlib;
+    Lista : TLista<TFilial>;
+    filial, fil1 : TFilial;
+    I: Integer;
+    Classe : TClass;
+    lRttiContext: TRttiContext;
+    rtti :  TRttiType;
+    Value : TValue;
+    f :TList<TFilial>;
+        h: TTime;
+
+        fabrica : TFabricaSQL;
+begin
+    inherited;
+
+
+    filial := TFilial.Create;
+    filial.Obter('02');
+
+
+    fil1 := TFilial.Create;
+    fil1.Obter('02');
+
+
+    f := TList<TFilial>.Create;
+
+
+    f.Add(filial);
+    f.Add(fil1);
+    f.Add(fil1);
+
+    ShowMessage(inttostr(f.IndexOf(fil1)));
+
+
+
+
+
+
+
+
+
+
+
+//    orc := tOrcamento.create();
+//
+//    orc.Obter('294CTT');
+////    orc.ObterItensOrcamento;
+////    orc.ObterCondicaoPagamentoOrcamento;
+//    h := time;
+//    orc.DesmembrarOrcamento;
+//
+//    ShowMessage(FormatDateTime('HH:MM:SS.ZZZ',(time-h)));
+
+
+
+//    try
+//        vParametro := TParametro.Create;
+//        vParametro.Add('','S13_DESC','');
+//        Lib := Tlib.Create;
+//
+//        Lista := TLib.XmlToObject<TFilial>
+//        (TLib.ExecutaTarefa('ConsultaFilial', '', vParametro));
+//        //
+//        RGrid1.AddCol('S13_S12_EMP', 'S13_S12_EMP', 40, RGrid.mtString);
+//        RGrid1.AddCol('S13_FILIAL', 'S13_FILIAL', 150, RGrid.mtString);
+//        RGrid1.AddCol('S13_DESC', 'S13_DESC', 80, RGrid.mtString);
+//        //
+//        RGrid1.DataSource := Lista.ToList;
+//        RGrid1.DataBind;
+//    finally
+//        FreeAndNil(vParametro);
+//        FreeAndNil(lib);
+//    end;
+
+
+ // ShowMessage(RComboBox1.Value);
+end;
+
+procedure TfrmTeste.BitBtn2Click(Sender: TObject);
+begin
+    TLib.AbrirFormulario(TfrmConFilial);
+end;
+
+procedure TfrmTeste.BitBtn3Click(Sender: TObject);
+var
+  _ctx : TRttiContext;
+  _typ  : TRttiType;
+  _ca: TCustomAttribute;
+   _pro: TRttiProperty;
+
+    rotina: TRotina;
+
+
+begin
+    rotina := TRotina.Create;
+
+    _ctx := TRttiContext.Create;
+
+    _typ :=  _ctx.GetType(rotina.ClassType);
+
+
+     _pro :=  _typ.GetProperties[3];
+     ShowMessage(_pro.Name)  ;
+
+    begin
+        for _ca in _pro.GetAttributes do
+        begin
+
+            if (_ca is TMaxLenght) then
+                ShowMessage('Joao Gabriel')  ;
+
+
+            if (_ca is TPersistable) then
+                ShowMessage('Manutencao');
+
+
+        end;
+
+    end;
+
+
+end;
+
+procedure TfrmTeste.BitBtn4Click(Sender: TObject);
+begin
+  //TLib.AbrirFormulario(TfrmInicializaPDV);
+end;
+
+procedure TfrmTeste.BitBtn5Click(Sender: TObject);
+var
+//    CRUD: ICRUD;
+    lib:Tlib;
+    Lista : Tlist;
+
+begin
+    TLib.AbrirFormulario(TfrmConRotina);
+end;
+
+procedure TfrmTeste.BitBtn8Click(Sender: TObject);
+var
+    usuario: TUsuario;
+begin
+
+    usuario := TUsuario.Create;
+    usuario := TUsuario(usuario.Listar(TOparationTypes.otSelect,false).List[0]);
+    usuario.Senha := TLib.Encriptar(usuario.Senha);
+    usuario.Alterar;
+
+end;
+
+procedure TfrmTeste.BitBtn9Click(Sender: TObject);
+var
+    grupo: TGrupo;
+begin
+  inherited;
+    grupo := TGrupo.Create;
+    grupo.Obter('ADMINISTRADORES');
+    TLIB.AbrirFormulario(TFrmCadAcessos,grupo);
+end;
+
+procedure TfrmTeste.Button1Click(Sender: TObject);
+var
+  teste: string;
+begin
+
+  teste := tlib.Encriptar('RAFAEL REIS');
+
+  ShowMessage(teste);
+
+  teste := tlib.Desencriptar(teste);
+
+  ShowMessage(teste);
+
+
+
+//  ShowMessage(tlib.IncrementaData<String>(Tlib.ObterDataAtual,1));
+//
+//
+//
+//  ShowMessage( datetostr(tlib.IncrementaData<TDateTime>(Date,3)));
+
+
+
+
+end;
+
+procedure TfrmTeste.Button2Click(Sender: TObject);
+    procedure adicionarOutraFilial;
+    var
+        FilialUsuario1: TFilialUsuario;
+    begin
+
+        FilialUsuario1 := TFilialUsuario.Create;
+        FilialUsuario1.CodigoEmpresa := '01';
+        FilialUsuario1.CodigoFilial := '01';
+        FilialUsuario1.Login := '01';
+        FilialUsuario1.Inserir;
+    end;
+var
+    GrupoUsuario1: TGrupoUsuario;
+begin
+    try
+        TGrupoUsuario.dao.IniciarTransacao;
+
+        GrupoUsuario1 := TGrupoUsuario.Create;
+        GrupoUsuario1.Login := '01';
+        GrupoUsuario1.Grupo := '01';
+        GrupoUsuario1.Inserir;
+
+
+        adicionarOutraFilial;
+        adicionarOutraFilial;
+        adicionarOutraFilial;
+        adicionarOutraFilial;
+        adicionarOutraFilial;
+        adicionarOutraFilial;
+        adicionarOutraFilial;
+        adicionarOutraFilial;
+        adicionarOutraFilial;
+        adicionarOutraFilial;
+        adicionarOutraFilial;
+        adicionarOutraFilial;
+
+               raise Exception.Create('Error Message');
+        adicionarOutraFilial;
+
+
+
+        TGrupoUsuario.dao.ConfirmarTransacao;
+    except
+        TGrupoUsuario.dao.ReverterTransacao;
+        ShowMessage('erro');
+    end;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//Hnd := LoadLibrary('DarumaFrameWork.dll');
+//if Hnd > 0 then
+//begin
+//// Executa a função da DLL
+//minhaFuncao := GetProcAddress(Hnd, 'rConsultaStatusImpressora_DUAL_DarumaFramework');
+//if @minhaFuncao <> nil then
+//begin
+//  minhaFuncao('1', '0', retorno);
+//  ShowMessage(retorno);
+//end;
+//end;
+
+
+//    case iRetorno of    iImprimirTexto_DUAL_DarumaFramework        ('1', '0', retorno)
+//        0:
+//            msgErro := '[0] - Impressora desligada';
+//        1:
+//            msgErro := '[1] - Impressora OK';
+//        -27:
+//            msgErro := '[-27] - Erro generico';
+//        -50:
+//            msgErro := '[-50] - Impressora OFFLINE';
+//        -51:
+//            msgErro := '[-51] - Impressora sem papel!';
+//        -52:
+//            msgErro := '[-52] - Impressora inicializando';
+//    else
+//        msgErro := 'Retorno não esperado';
+//    end;
+
+
+
+  
+
+
+//   REdit1.value := '72.30';
+
+  //teste := StrToFloatDef('10,00', 0);
+  //teste := teste;
+
+//   REdit1.Value := '20110203';
+//   ShowMessage( ReverseString('20110203'));
+//   ShowMessage(REdit1.Value);
+
+//REdit1.MaskType := mtNone;
+//REdit1.Value := '70232124158';
+//REdit1.MaskType := mtCPF;
+end;
+
+procedure TfrmTeste.Button3Click(Sender: TObject);
+var
+  _ctx    : TRttiContext;
+_typ    : TRttiType;
+_pro    : TRttiProperty;
+oAtt    : TCustomAttribute;
+    parametro : TParametro;
+    Lista: Tlista<TFilial>;
+    filial:tfilial;
+begin
+    inherited;
+           parametro := TParametro.Create;
+        parametro.Add('', 'EMPRESA', TUsuarioLogado.ObterInstancia.Filial.Empresa);
+
+//        Lista := BaseLib.XmlToObject<TFilial>(BaseLib.ExecutaTarefa('ConsultaFilial', 'TFilial', parametro));
+//  Prod := TProduto.Create;
+//  prod.Codigo := '1';
+//  prod.Descricao := ' Prego';
+//  prod.Preco := '2.2';
+//
+//  _ctx := TRttiContext.Create;
+//  _typ := _ctx.GetType(prod.ClassType);
+//
+//  for _pro in _typ.GetProperties do
+//  begin
+//    for oAtt in _pro.GetAttributes do
+//    begin
+//        if oAtt is TPersistable then
+//        begin
+//            if TPersistable(oAtt).Persistable then
+//            begin
+//                ShowMessage (TPersistable(oAtt).FieldName)
+//            end;
+//        end;
+//    end;
+//  end;
+//  RComboBox1.ListValue.Add('Sim=S');
+//  RComboBox1.ListValue.Add('Não=N');
+
+
+  RComboBox1.DataSource := lista.ToList;
+  RComboBox1.IDFieldName := 'Filial';
+  RComboBox1.DescriptionFieldName := 'Descricao';
+
+
+ // RComboBox1.Filter.Add('Filial=02');
+  RComboBox1.DataBind;
+
+
+end;
+
+procedure TfrmTeste.FormCreate(Sender: TObject);
+var
+
+
+    fil1,fil2,fil3,fil4, fil5: TFilial;
+    listFil: TLista<TFilial>;
+begin
+  inherited;
+  listFil  := TLista<TFilial>.Create;
+  fil1 := TFilial.Create;
+  fil2 := TFilial.Create;
+  fil3 := TFilial.Create;
+  fil4 := TFilial.Create;
+  fil5 := TFilial.Create;
+//
+  fil1.Obter('02');
+  fil2.Obter('02');
+  fil3.Obter('02');
+  fil4.Obter('03');
+  fil5.Obter('06');
+
+  listFil.Add(fil1);
+  listFil.Add(fil2);
+  listFil.Add(fil3);
+  listFil.Add(fil4);
+  listFil.Add(fil5);
+
+
+
+  RCheckListBox1.DataSource := listFil.ToList;
+  RCheckListBox1.IDFieldName := 'Filial';
+  RCheckListBox1.DescriptionFieldName := 'Filial';
+  RCheckListBox1.DataBind;
+
+
+
+
+
+
+
+//
+//
+//  fil2.Empresa := '02';
+//
+//  RGrid1.DataSource := TList.Create;
+////  RGrid1.DetailGrid := RGrid2;
+////  RGrid1.MasterDetailType := mdMaster;
+// // RGrid1.MasterDetailField := 'Filial';
+//  RGrid1.DataSource.Add(fil1);
+//  RGrid1.DataSource.Add(fil2);
+//  RGrid1.DataSource.Add(fil3);
+////  RGrid1.DataSource.Add(fil4);
+////  RGrid1.DataSource.Add(fil5);
+//
+//  RGrid2.DataSource := TList.Create;
+////  RGrid2.DetailGrid := RGrid3;
+////  RGrid2.MasterDetailType := mdMasterDetail;
+////  RGrid2.MasterDetailField := 'Filial';
+//  RGrid2.DataSource.Add(fil1);
+//  RGrid2.DataSource.Add(fil1);
+//  RGrid2.DataSource.Add(fil1);
+//  RGrid2.DataSource.Add(fil2);
+//  RGrid2.DataSource.Add(fil2);
+//
+//
+//  //RGrid3.DataSource := TList.Create;
+////  RGrid3.MasterDetailField := 'Filial';
+////  RGrid3.MasterDetailType := mdDetail;
+////  RGrid3.DataSource.Add(fil2);
+////  RGrid3.DataSource.Add(fil2);
+////  RGrid3.DataSource.Add(fil2);
+////  RGrid3.DataSource.Add(fil2);
+//
+//
+//  RGrid1.DataBind;
+
+////  RGrid1.RowHeights[1] := -1;
+//    RGrid1.RowHeights[2] := -1;
+//      RGrid1.RowHeights[3] := -1;
+//        RGrid1.RowHeights[4] := -1;
+////          RGrid1.RowHeights[5] := -1;
+
+//  RGrid2.DataBind;
+end;
+
+procedure TfrmTeste.RCheckListBox1Click(Sender: TObject);
+begin
+  inherited;
+  if RCheckListBox1.IsSelectedItemChecked then
+  begin
+        ShowMessage('true');
+  end
+  else
+  ShowMessage('false');
+end;
+
+procedure TfrmTeste.RComboBox1Exit(Sender: TObject);
+var
+  teste:string;
+begin
+  RComboBox2.DataSource := RComboBox1.DataSource;
+  RComboBox2.IDFieldName := 'Filial';
+  RComboBox2.DescriptionFieldName := 'Descricao';
+  teste := 'Filial='+RComboBox1.Value;
+  //RComboBox2.ClearFilter;
+  RComboBox2.Filter.Add(teste);
+  RComboBox2.DataBind;
+
+end;
+
+procedure TfrmTeste.RComboBox2Exit(Sender: TObject);
+begin
+  RComboBox3.DataSource := RComboBox1.DataSource;
+  RComboBox3.IDFieldName := 'Filial';
+  RComboBox3.DescriptionFieldName := 'Descricao';
+  //RComboBox3.ClearFilter;
+  RComboBox3.Filter.Add('Filial='+RComboBox2.Value);
+  RComboBox3.DataBind;
+end;
+
+
+
+end.

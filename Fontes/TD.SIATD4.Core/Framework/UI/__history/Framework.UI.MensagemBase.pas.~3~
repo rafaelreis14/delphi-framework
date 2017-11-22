@@ -1,0 +1,24 @@
+unit Framework.UI.MensagemBase;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Framework.UI.FormBase;
+
+type
+  TfrmMensagemBase = class(TFrmBase)
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  frmMensagemBase: TfrmMensagemBase;
+
+implementation
+
+{$R *.dfm}
+
+end.

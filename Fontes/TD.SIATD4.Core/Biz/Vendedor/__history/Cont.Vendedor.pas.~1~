@@ -1,0 +1,189 @@
+unit ClsVendedor;
+
+interface
+
+uses Classes, System.SysUtils, ClsParametro, ClsCRUD, ClsEnumeradores, ClsBase, ClsFilial,
+  ClsFieldFilter, ClsFilter, ClsPersistable, ClsResultFilter;
+
+type
+    TVendedor = class(TBase)
+    private
+        FCodigo: string;
+        FNomeReduzido: string;
+        FNome: string;
+        FVendedorPadrao: string;
+        FTabelaComissao: string;
+        procedure SetCodigo(const Value: string);
+        procedure SetNomeReduzido(const Value: string);
+        procedure SetNome(const Value: string);
+        procedure SetTabelaComissao(const Value: string);
+    public
+        function Inserir: integer; override;
+        function Alterar: integer; override;
+        function Deletar(ID: string): integer; override;
+        function Listar(tipoOperacao: TOparationTypes; multselect: Boolean): TResultFilter; override;
+        function Obter(ID: string): TObject; override;
+        procedure PreencherObjeto(vendedor: TVendedor);
+
+        [TPersistable(fgPersistable, 'A3_COD')]
+        property Codigo: string read FCodigo write SetCodigo;
+
+        [TPersistable(fgPersistable, 'A3_NREDUZ')]
+        property NomeReduzido: string read FNomeReduzido write SetNomeReduzido;
+
+        [TPersistable(fgPersistable, 'A3_NOME')]
+        property Nome: string read FNome write SetNome;
+
+        [TPersistable(fgPersistable, 'A3_TCOMIS')]
+        property TabelaComissao: string read FTabelaComissao write SetTabelaComissao;
+
+        property VendedorPadrao: string read FVendedorPadrao;
+
+
+        ///	<summary>
+        ///	  Obtem somente o código do vendedor padrao
+        ///	</summary>
+        procedure ObterCodigoVendedorPadrao;
+
+        ///	<summary>
+        ///	  Obter e popula o vendedor
+        ///	</summary>
+        procedure ObterVendedorPadrao;
+
+
+        constructor Create;
+    end;
+
+implementation
+
+{ TVendedor }
+
+uses ClsLista, ClsLib;
+
+function TVendedor.Alterar: integer;
+begin
+    //
+end;
+
+constructor TVendedor.Create;
+begin
+
+end;
+
+function TVendedor.Deletar(ID: string): integer;
+begin
+    //
+end;
+
+function TVendedor.Inserir: integer;
+begin
+    //
+end;
+
+function TVendedor.Listar(tipoOperacao: TOparationTypes; multselect: Boolean): TResultFilter;
+var
+    campoFiltro: TFieldFilter;
+    filtro: TFilter<TVendedor>;
+begin
+    inherited;
+    filtro := TFilter<TVendedor>.Create;
+    filtro.ScreenName := 'Filtro de Vendedores';
+    filtro.OperationType := tipoOperacao;
+    filtro.MultiSelect := multselect;
+    filtro.AddIndex(1, 'Codigo=A3_COD', 'Código');
+    filtro.AddIndex(2, 'Nome=A3_NREDUZ', 'Nome');
+    filtro.Task := 'ConsultarVendedor';
+
+    campoFiltro := TFieldFilter.Create;
+    campoFiltro.Description := 'Codigo';
+    campoFiltro.Name := 'Codigo';
+    campoFiltro.MaskTypes := mtNone;
+    campoFiltro.GridSize := 80;
+    campoFiltro.FieldType := fdNormal;
+    filtro.AddField(campoFiltro);
+
+    campoFiltro := TFieldFilter.Create;
+    campoFiltro.Description := 'Nome Reduzido';
+    campoFiltro.Name := 'NomeReduzido';
+    campoFiltro.MaskTypes := mtNone;
+    campoFiltro.FieldType := fdNormal;
+    campoFiltro.GridSize := 200;
+    filtro.AddField(campoFiltro);
+
+    campoFiltro := TFieldFilter.Create;
+    campoFiltro.Description := 'Nome';
+    campoFiltro.Name := 'Nome';
+    campoFiltro.MaskTypes := mtNone;
+    campoFiltro.FieldType := fdNormal;
+    campoFiltro.GridSize := 200;
+    filtro.AddField(campoFiltro);
+
+    result := filtro.Execute;
+end;
+
+function TVendedor.Obter(ID: string): TObject;
+var
+    parametro: TParametro;
+    lista: TLista<TVendedor>;
+begin
+    // inherited;
+    try
+        parametro := TParametro.Create;
+        parametro.Add('', 'A3_COD', ID);
+        lista := BaseLib.XmlToObject<TVendedor>(BaseLib.ExecutaTarefa('ConsultarVendedor', '', parametro));
+
+        if lista.Count = 1 then
+        begin
+            PreencherObjeto(lista[0]);
+            Result := self;
+        end else
+        begin
+            TLib.MensagemAdvertencia('Nenhum registro encontrado.', 'Aviso');
+            Result := nil;
+        end;
+    finally
+        parametro.Free;
+        lista.Destroy;
+    end;
+end;
+
+procedure TVendedor.ObterCodigoVendedorPadrao;
+begin
+    FVendedorPadrao := BaseLib.XmlToString(BaseLib.ExecutaTarefa('ObterVendedorPadrao', 'TVendedor', nil));
+end;
+
+procedure TVendedor.ObterVendedorPadrao;
+begin
+    if Self.VendedorPadrao = '' then
+        Self.ObterCodigoVendedorPadrao;
+
+    Self.Obter(Self.VendedorPadrao);
+end;
+
+procedure TVendedor.PreencherObjeto(vendedor: TVendedor);
+begin
+    vendedor.CopiarPara(self);
+end;
+
+procedure TVendedor.SetCodigo(const Value: string);
+begin
+  FCodigo := Value;
+end;
+
+procedure TVendedor.SetNome(const Value: string);
+begin
+  FNome := Value;
+end;
+
+procedure TVendedor.SetNomeReduzido(const Value: string);
+begin
+  FNomeReduzido := Value;
+end;
+
+procedure TVendedor.SetTabelaComissao(const Value: string);
+begin
+  FTabelaComissao := Value;
+end;
+
+end.
+

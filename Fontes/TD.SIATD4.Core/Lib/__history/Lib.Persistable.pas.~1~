@@ -1,0 +1,36 @@
+unit ClsPersistable;
+
+interface
+
+//uses System.SysUtils, Rtti;
+
+type
+  TFlag = (fgPersistable, fgUpdateable, fgReadOnly);
+
+
+  TPersistable = class(TCustomAttribute)
+  private
+      FFlag: TFlag;
+      FFieldName: string;
+      procedure SetFlag(const Value: TFlag);
+   public
+       constructor Create(pFlag:TFlag; pFieldName: string); overload;
+       property Flag: TFlag read FFlag write SetFlag;
+       property FieldName: string read FFieldName;
+  end;
+implementation
+
+{ TPersistable }
+
+constructor TPersistable.Create(pFlag: TFlag; pFieldName: string);
+begin
+    self.FFieldName :=  pFieldName;
+    self.FFlag := pFlag;
+end;
+
+procedure TPersistable.SetFlag(const Value: TFlag);
+begin
+  FFlag := Value;
+end;
+
+end.

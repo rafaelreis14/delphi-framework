@@ -1,0 +1,17 @@
+unit Framework.Interfaces.CRUD;
+
+interface
+
+uses
+    Classes, Lib.Enumeradores, Lib.Parametro, Lib.ResultFilter, Lib.Lista,
+    Lib.Base, Framework.Interfaces.CRUDBase;
+
+type
+    ICRUD<T: class> = interface(ICRUDBase)
+        function Consultar(parametros:TParametro): TLista<T>;
+        function Obter(id: string): T;
+    end;
+
+implementation
+
+end.

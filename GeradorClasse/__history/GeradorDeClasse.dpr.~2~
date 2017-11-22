@@ -1,0 +1,17 @@
+program GeradorDeClasse;
+
+uses
+  Vcl.Forms,
+  Principal in 'Principal.pas' {frmGeradorClasse},
+  ClsCampo in 'ClsCampo.pas';
+
+{$R *.res}
+
+begin
+ // ReportMemoryLeaksOnShutdown := True;
+
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TfrmGeradorClasse, frmGeradorClasse);
+  Application.Run;
+end.

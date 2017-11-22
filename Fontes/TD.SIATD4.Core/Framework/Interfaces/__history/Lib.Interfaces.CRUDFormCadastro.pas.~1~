@@ -1,0 +1,18 @@
+unit Lib.Interfaces.CRUDFormContulta;
+
+interface
+
+uses
+    Classes, Lib.Enumeradores, Lib.Parametro, Lib.ResultFilter, Lib.Lista;
+
+type
+    ICRUDFormContulta = interface
+        function DoListar: TResultFilter;
+        procedure DoInserir;
+        procedure ObterInstanciaObjeto;
+    end;
+
+
+implementation
+
+end.

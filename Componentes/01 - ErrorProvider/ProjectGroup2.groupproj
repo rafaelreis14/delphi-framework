@@ -1,0 +1,34 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectGuid>{f7f64e5c-1bee-4b20-9bd5-80700c80661c}</ProjectGuid>
+  </PropertyGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Projects Include="Error_Provider.dproj" />
+  </ItemGroup>
+  <ProjectExtensions>
+    <Borland.Personality>Default.Personality</Borland.Personality>
+    <Borland.ProjectType />
+    <BorlandProject>
+<BorlandProject xmlns=""><Default.Personality></Default.Personality></BorlandProject></BorlandProject>
+  </ProjectExtensions>
+  <Target Name="Error_Provider">
+    <MSBuild Projects="Error_Provider.dproj" Targets="" />
+  </Target>
+  <Target Name="Error_Provider:Clean">
+    <MSBuild Projects="Error_Provider.dproj" Targets="Clean" />
+  </Target>
+  <Target Name="Error_Provider:Make">
+    <MSBuild Projects="Error_Provider.dproj" Targets="Make" />
+  </Target>
+  <Target Name="Build">
+    <CallTarget Targets="Error_Provider" />
+  </Target>
+  <Target Name="Clean">
+    <CallTarget Targets="Error_Provider:Clean" />
+  </Target>
+  <Target Name="Make">
+    <CallTarget Targets="Error_Provider:Make" />
+  </Target>
+  <Import Condition="Exists('$(MSBuildBinPath)\Borland.Group.Targets')" Project="$(MSBuildBinPath)\Borland.Group.Targets" />
+</Project>

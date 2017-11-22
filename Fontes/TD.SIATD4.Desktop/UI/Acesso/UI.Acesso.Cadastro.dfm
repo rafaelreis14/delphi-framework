@@ -1,0 +1,200 @@
+inherited frmCadAcessos: TfrmCadAcessos
+  Caption = 'frmCadAcessos'
+  ClientHeight = 529
+  ClientWidth = 819
+  ExplicitWidth = 825
+  ExplicitHeight = 558
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited Panel2: TPanel
+    Width = 819
+    ExplicitWidth = 819
+    inherited lblLetreiro: TLabel
+      Width = 182
+      Caption = 'Cadastro de Acessos'
+      ExplicitWidth = 182
+    end
+  end
+  inherited Panel3: TPanel
+    Top = 489
+    Width = 819
+    ExplicitTop = 489
+    ExplicitWidth = 819
+    inherited pnlBotoes: TPanel
+      Left = 620
+      ExplicitLeft = 620
+    end
+  end
+  inherited pgcComponentes: TPageControl
+    Width = 819
+    Height = 452
+    ExplicitWidth = 819
+    ExplicitHeight = 452
+    inherited tbPrincipal: TTabSheet
+      ExplicitLeft = 4
+      ExplicitTop = 24
+      ExplicitWidth = 811
+      ExplicitHeight = 424
+      object PageControl1: TPageControl
+        Left = 0
+        Top = 304
+        Width = 811
+        Height = 120
+        ActivePage = TabSheet4
+        Align = alBottom
+        TabOrder = 0
+        object TabSheet3: TTabSheet
+          Caption = 'Permiss'#227'o de Janela'
+          Enabled = False
+          TabVisible = False
+          object RChckLstBxRotinaPermissoes: TRCheckListBox
+            Left = 0
+            Top = 0
+            Width = 803
+            Height = 92
+            Align = alClient
+            BevelInner = bvNone
+            BevelOuter = bvNone
+            BorderStyle = bsNone
+            Columns = 3
+            ItemHeight = 13
+            TabOrder = 0
+            MandatoryField = False
+            PersistentField = False
+            IDFieldName = 'Permissao'
+            DescriptionFieldName = 'Permissao'
+            ReadOnly = False
+          end
+        end
+        object TabSheet4: TTabSheet
+          Caption = 'Permiss'#245'es da Rotina'
+          ImageIndex = 1
+          object cklAcessoPermissoes: TRCheckListBox
+            Left = 0
+            Top = 0
+            Width = 803
+            Height = 92
+            OnClickCheck = cklAcessoPermissoesClickCheck
+            Align = alClient
+            BevelInner = bvNone
+            BevelOuter = bvNone
+            BorderStyle = bsNone
+            Columns = 3
+            Enabled = False
+            ItemHeight = 13
+            PopupMenu = ppPermissoesRotina
+            TabOrder = 0
+            MandatoryField = False
+            PersistentField = False
+            IDFieldName = 'Permissao'
+            DescriptionFieldName = 'Permissao'
+            ReadOnly = False
+          end
+        end
+      end
+      object GroupBox2: TGroupBox
+        Left = 3
+        Top = 3
+        Width = 222
+        Height = 49
+        Caption = 'Tipo de Rotina'
+        TabOrder = 1
+        object cbTipo: TRComboBox
+          Left = 10
+          Top = 18
+          Width = 200
+          Height = 22
+          Style = csOwnerDrawFixed
+          TabOrder = 0
+          OnClick = cbTipoClick
+          MandatoryField = False
+          PersistentField = False
+          BlankField = False
+          ListValue.Strings = (
+            'DESKTOP=DESKTOP'
+            'MOBILE=MOBILE')
+        end
+      end
+      object GroupBox3: TGroupBox
+        Left = 0
+        Top = 58
+        Width = 811
+        Height = 242
+        Caption = 'Rotinas'
+        TabOrder = 2
+        object cklModuloRotina: TRCheckListBox
+          Left = 2
+          Top = 15
+          Width = 807
+          Height = 225
+          OnClickCheck = cklModuloRotinaClickCheck
+          Align = alClient
+          BevelInner = bvNone
+          BevelOuter = bvNone
+          BorderStyle = bsNone
+          Columns = 4
+          ItemHeight = 13
+          PopupMenu = ppRotinas
+          TabOrder = 0
+          OnClick = cklModuloRotinaClick
+          MandatoryField = False
+          PersistentField = False
+          IDFieldName = 'Rotina'
+          DescriptionFieldName = 'Rotina'
+          ReadOnly = False
+          ExplicitHeight = 238
+        end
+      end
+      object GroupBox1: TGroupBox
+        Left = 231
+        Top = 3
+        Width = 218
+        Height = 49
+        Caption = 'M'#243'dulo'
+        TabOrder = 3
+        object cbModulo: TRComboBox
+          Left = 10
+          Top = 18
+          Width = 200
+          Height = 22
+          Style = csOwnerDrawFixed
+          TabOrder = 0
+          OnClick = cbModuloClick
+          MandatoryField = False
+          PersistentField = False
+          BlankField = False
+          IDFieldName = 'Modulo'
+          DescriptionFieldName = 'Modulo'
+        end
+      end
+    end
+  end
+  inherited ErrorProvider1: TErrorProvider
+    Left = 8
+    Top = 496
+  end
+  object ppRotinas: TPopupMenu
+    Left = 760
+    Top = 216
+    object Descrio1: TMenuItem
+      Caption = 'Descri'#231#227'o'
+      OnClick = Descrio1Click
+    end
+    object FocoemPermissesCrtlSetaparaBaixo1: TMenuItem
+      Caption = 'Foco em Permiss'#245'es (Crtl + Seta para Baixo)'
+      OnClick = FocoemPermissesCrtlSetaparaBaixo1Click
+    end
+  end
+  object ppPermissoesRotina: TPopupMenu
+    Left = 712
+    Top = 420
+    object Descrio2: TMenuItem
+      Caption = 'Descri'#231#227'o'
+      OnClick = Descrio2Click
+    end
+    object FoconasRotinasCrtlSetaparacima1: TMenuItem
+      Caption = 'Foco nas Rotinas (Crtl + Seta para cima)'
+      OnClick = FoconasRotinasCrtlSetaparacima1Click
+    end
+  end
+end

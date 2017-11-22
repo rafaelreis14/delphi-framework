@@ -1,0 +1,11 @@
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\TestDBConnect\bin\Release\TestDBConnect.exe.config
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\TestDBConnect\bin\Release\TestDBConnect.exe
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\TestDBConnect\bin\Release\TestDBConnect.pdb
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\TestDBConnect\bin\Release\DBConnectSIATD.dll
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\TestDBConnect\bin\Release\DBConnectSIATD.pdb
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\TestDBConnect\obj\Release\TestDBConnect.csprojResolveAssemblyReference.cache
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\TestDBConnect\obj\Release\TestDBConnect.Form1.resources
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\TestDBConnect\obj\Release\TestDBConnect.Properties.Resources.resources
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\TestDBConnect\obj\Release\TestDBConnect.csproj.GenerateResource.Cache
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\TestDBConnect\obj\Release\TestDBConnect.exe
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\TestDBConnect\obj\Release\TestDBConnect.pdb

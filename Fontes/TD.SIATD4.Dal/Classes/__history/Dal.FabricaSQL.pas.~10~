@@ -1,0 +1,141 @@
+unit Dal.FabricaSQL;
+
+interface
+uses SysUtils,ComObj, Provider,DB,DbClient, Classes, typinfo,  Lib.Base, System.Rtti,
+  Lib.Persistable, Lib.Enumeradores, Lib.ClasseBase, Lib.Parametro;
+type
+    TFabricaSQL = class
+    private
+        FBase: TClasseBase;
+        FGravaLog: boolean;
+        function VerificarExistenciaCampo(campo: string): boolean;
+        procedure ValidarGeracaoSQL(tipoManutencao: TTipoManutencao);
+    public
+        procedure GerarSqlInsercao(out sql: WideString; out parametros: TParametro);
+        procedure GerarSqlAlteracao(out sql: WideString; out parametros: TParametro; somentePropriedadesAlteradas: boolean = true);
+        procedure GerarSqlExclusao(out sql: WideString; out parametros: TParametro; definitivo: boolean = false);
+        constructor Create(base: TClasseBase; gravaLog: boolean = true);
+  end;
+
+implementation
+
+uses
+  Vcl.Dialogs;
+
+
+{ TFabricaSQL }
+
+constructor TFabricaSQL.Create(base: TClasseBase; gravaLog: boolean);
+begin
+    FBase := base;
+    FGravaLog := gravaLog;
+end;
+
+procedure TFabricaSQL.ValidarGeracaoSQL(tipoManutencao: TTipoManutencao);
+begin
+  if FBase.TabelaReferencia = EmptyStr then
+    raise Exception.Create('Tabela referência não mencionada na classe passada.');
+
+
+  if tipoManutencao in [Alteracao, Exclusao] then
+    if not VerificarExistenciaCampo('R_E_C_N_O_') then
+            raise Exception.Create('A classe não possui a propiedade obrigatoria Recno.');
+
+
+
+end;
+
+procedure TFabricaSQL.GerarSqlAlteracao(out sql: WideString; out parametros: TParametro; somentePropriedadesAlteradas: boolean);
+var
+  campos: TStringList;
+  item: string;
+  sqlCampos:wideString;
+begin
+    try
+        ValidarGeracaoSQL(Alteracao);
+
+        campos := FBase.ObterListaDeCampos(['Recno','Delete'],false,somentePropriedadesAlteradas);
+
+        for item in campos do
+            sqlCampos := sqlCampos + item + ' = :'+item +', ';
+
+        Delete(sqlCampos,length(trim(sqlCampos)),1);
+
+        parametros := FBase.ObjetoParaParametros(somentePropriedadesAlteradas);
+        sql := 'UPDATE '+FBase.TabelaReferencia +' SET '+sqlCampos +' WHERE R_E_C_N_O_ = :R_E_C_N_O_';
+    finally
+        if campos <> nil then
+            FreeAndNil(campos);
+    end;
+end;
+
+procedure TFabricaSQL.GerarSqlExclusao(out sql: WideString; out parametros: TParametro; definitivo: boolean);
+begin
+    try
+        ValidarGeracaoSQL(Exclusao);
+        if not definitivo then
+            sql := 'UPDATE '+FBase.TabelaReferencia +' SET D_E_L_E_T_ = ''*'' WHERE R_E_C_N_O_ = :R_E_C_N_O_'
+        else
+            sql := 'DELETE FROM '+FBase.TabelaReferencia +' WHERE R_E_C_N_O_ = :R_E_C_N_O_';
+
+        parametros := FBase.ObjetoParaParametros(Exclusao);
+    finally
+
+    end;
+
+end;
+
+procedure TFabricaSQL.GerarSqlInsercao(out sql: WideString; out parametros: TParametro);
+var
+  campos: TStringList;
+  param: TStringList;
+begin
+    try
+        ValidarGeracaoSQL(Insercao);
+
+        campos := FBase.ObterListaDeCampos(Insercao, []);
+
+        param := FBase.ObterListaDeCampos(Insercao,[],true);
+
+        parametros := FBase.ObjetoParaParametros(Insercao);
+        sql := 'INSERT INTO '+ FBase.TabelaReferencia +' ('+campos.CommaText+')'+' VALUES('+param.CommaText+')';
+    finally
+        if campos <> nil then
+            FreeAndNil(campos);
+
+        if param <> nil then
+            FreeAndNil(param);
+    end;
+end;
+
+
+function  TFabricaSQL.VerificarExistenciaCampo(campo: string): boolean;
+var
+    context: TRttiContext;
+    Propriedade: TRttiProperty;
+    _ctx: TRttiContext;
+    _typ: TRttiType;
+    _pro: TRttiProperty;
+    oAtt: TCustomAttribute;
+
+begin
+    try
+        result := false;
+        _typ := _ctx.GetType(FBase.ClassType);
+        for _pro in _typ.GetProperties do
+        begin
+            for oAtt in _pro.GetAttributes do
+            begin
+                if oAtt is TPersistable then
+                begin
+                      if TPersistable(oAtt).FieldName = 'R_E_C_N_O_' then
+                          result := true;
+                end;
+            end;
+        end;
+    finally
+
+    end;
+end;
+
+end.

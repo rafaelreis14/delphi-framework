@@ -1,0 +1,17 @@
+unit Listavel;
+
+interface
+
+uses
+    Classes, Lib.Enumeradores, Lib.Parametro, Lib.ResultFilter, Lib.Lista;
+
+type
+    IListavel = interface
+        function Listar(tipoOperacao: TOparationTypes): TResultFilter; overload;
+        function Listar(tipoOperacao: TOparationTypes; MultiSelect: Boolean): TResultFilter; overload;
+    end;
+
+
+implementation
+
+end.

@@ -1,0 +1,221 @@
+unit UI.Base.ConsultaPadrao;
+
+interface
+
+uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+    System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Framework.UI.FormBase, Vcl.StdCtrls,
+    Vcl.Buttons,  Vcl.ExtCtrls, Data.DB, Vcl.Grids, Vcl.DBGrids, Vcl.ComCtrls,
+    DbClient, UI.Base.CadastroPadrao, UntErrorProvider, Vcl.Imaging.jpeg, RGrid,
+    Lib.Enumeradores, System.RTTI, Lib.Aguarde, Lib.Base,
+    Lib.Parametro, Vcl.Menus, Biz.UsuarioLogado,
+    Lib.ResultFilter;
+
+type
+    TFrmConsultaPadrao = class(TFrmBase)
+        pnlApresentacao: TPanel;
+        pnlBotoes: TPanel;
+        PnlGrade: TPanel;
+        grDados: TRGrid;
+    lblLetreiro: TLabel;
+        StatusBar1: TStatusBar;
+        gbInformacoesCadastrais: TGroupBox;
+        btnPesquisar: TBitBtn;
+        Bevel1: TBevel;
+        pnTotalRegistros: TPanel;
+        lbTotal: TLabel;
+        lblTotalDeRegistros: TLabel;
+        Label2: TLabel;
+        Image1: TImage;
+        popOperacoes: TPopupMenu;
+        GerarExcel1: TMenuItem;
+        Imprimir1: TMenuItem;
+        pnlContainerBotoes: TPanel;
+        btnAlterar: TBitBtn;
+        btnInserir: TBitBtn;
+        btnOperacoes: TBitBtn;
+        btnVisualizar: TBitBtn;
+        btnExcluir: TBitBtn;
+        btnSair: TBitBtn;
+        procedure btnSairClick(Sender: TObject);
+        procedure btnOperacoesClick(Sender: TObject);
+        procedure GerarExcel1Click(Sender: TObject);
+        procedure Imprimir1Click(Sender: TObject);
+        procedure FormCreate(Sender: TObject);
+        procedure FormDestroy(Sender: TObject);
+
+    private
+        FValidarPermissoes: boolean;
+        // Esta rotina varre as permissões do component popOperacoes verificando as suas permissões
+        // para que o sistema consiga fazer essa validação, e necessário que o programador, coloque no HINT do item do popup
+        // o nome da permissão para aquele operação.
+        procedure ValidarPermissoesDasOperacoes;
+        procedure ValidarPermissoesDosBotoes;
+
+        procedure SetValidarPermissoes(const Value: boolean);
+
+    public
+        property ValidarPermissoes: boolean read FValidarPermissoes write SetValidarPermissoes;
+        function obterTamanhoPopup: integer;
+
+    protected
+        usuarioPermissao: TUsuarioLogado;
+        function ValidarPermissaoPorOperacao(menuItem: TMenuItem): boolean;
+
+
+
+    end;
+
+var
+    FrmConsultaPadrao: TFrmConsultaPadrao;
+
+implementation
+
+{$R *.dfm}
+
+uses Lib.Biblioteca, Lib.Erro, Framework.Interfaces.CRUD, Biz.ParametroSistema;
+
+procedure TFrmConsultaPadrao.btnOperacoesClick(Sender: TObject);
+var
+    p: Tpoint;
+begin
+    p.X := btnOperacoes.Left;
+    p.Y := btnOperacoes.Top - obterTamanhoPopup - (popOperacoes.Items.Count + 6);
+    p := pnlContainerBotoes.ClientToScreen(p);
+    popOperacoes.Popup(p.X, p.Y);
+end;
+
+
+
+procedure TFrmConsultaPadrao.FormCreate(Sender: TObject);
+begin
+    inherited;
+    ValidarPermissoes := true;
+
+    usuarioPermissao := nil;
+    if ValidarPermissoes then
+    begin
+        ValidarPermissoesDosBotoes;
+        ValidarPermissoesDasOperacoes;
+    end;
+
+    if TParametroSistema.ObterParametroSistema('HOMOLOGA') = 'SIM' then
+        pnlApresentacao.Color := clRed;
+end;
+
+procedure TFrmConsultaPadrao.FormDestroy(Sender: TObject);
+begin
+    inherited;
+    if usuarioPermissao <> nil then
+        FreeAndNil(usuarioPermissao);
+end;
+
+procedure TFrmConsultaPadrao.btnSairClick(Sender: TObject);
+begin
+    inherited;
+    Self.Close();
+end;
+
+procedure TFrmConsultaPadrao.GerarExcel1Click(Sender: TObject);
+begin
+    inherited;
+    try
+        TAguarde.AguardandoFinalizacaoProcesso(Self);
+        grDados.SaveAsExcelFile;
+    finally
+        TAguarde.ProcessoFinalizado;
+    end;
+end;
+
+procedure TFrmConsultaPadrao.Imprimir1Click(Sender: TObject);
+begin
+    inherited;
+    TLib.MensagemInformacao('Opção não implementada');
+end;
+
+function TFrmConsultaPadrao.obterTamanhoPopup: integer;
+var
+    info: tagMENUINFO;
+    I, Y: integer;
+begin
+    FillChar(info, SizeOf(info), 0);
+    info.cbSize := SizeOf(info);
+    info.fMask := MIM_MAXHEIGHT;
+
+    if GetMenuInfo(popOperacoes.Handle, info) and (info.cyMax > 0) then
+        result := info.cyMax
+    else
+    begin
+        Y := Round(GetSystemMetrics(SM_CYMENUCHECK) * 1.4);
+        result := 0;
+        if popOperacoes.Items.Count > 0 then
+        begin
+            for I := 0 to popOperacoes.Items.Count - 1 do
+                if popOperacoes.Items[I].Visible then
+                    Inc(result, Y);
+        end;
+    end;
+end;
+
+procedure TFrmConsultaPadrao.SetValidarPermissoes(const Value: boolean);
+begin
+  FValidarPermissoes := Value;
+end;
+
+procedure TFrmConsultaPadrao.ValidarPermissoesDasOperacoes;
+var
+    I: integer;
+    outroUsurioPodeDarPermissao: boolean;
+    permissao: string;
+begin
+
+    for I := 0 to popOperacoes.Items.Count - 1 do
+        if popOperacoes.Items[I].Hint <> EmptyStr then
+        begin
+            permissao := TLib.ObterPorParametro(popOperacoes.Items[I].Hint, '1', '-');
+            outroUsurioPodeDarPermissao := TLib.IfTernario(TLib.ObterPorParametro(popOperacoes.Items[I].Hint, '2', '-') = EmptyStr, false, true);
+
+            popOperacoes.Items[I].Visible := true;
+            if not outroUsurioPodeDarPermissao then
+                popOperacoes.Items[I].Visible := TUsuarioLogado.ObterInstancia.ChecarPermissaoNaRotina(Self.Name, permissao);
+
+        end;
+    btnOperacoes.Visible := true;;
+end;
+
+function TFrmConsultaPadrao.ValidarPermissaoPorOperacao(menuItem: TMenuItem): boolean;
+var
+    permissao: string;
+    outroUsurioPodeDarPermissao: boolean;
+begin
+    result := true;
+    if menuItem.Hint <> EmptyStr then
+    begin
+        permissao := TLib.ObterPorParametro(menuItem.Hint, '1', '-');
+        outroUsurioPodeDarPermissao := TLib.IfTernario(TLib.ObterPorParametro(menuItem.Hint, '2', '-') = EmptyStr, false, true);
+
+        if (outroUsurioPodeDarPermissao) then
+        begin
+            usuarioPermissao := TUsuarioLogado.Create;
+            if not TUsuarioLogado.ObterInstancia.ChecarPermissaoNaRotina(Self.Name, permissao, true, menuItem.Caption, usuarioPermissao) then
+            begin
+                TLib.MensagemAdvertencia('Usuário digitado não tem permissão para executar este processo.');
+                result := false;
+            end;
+        end;
+    end;
+end;
+
+procedure TFrmConsultaPadrao.ValidarPermissoesDosBotoes;
+begin
+    btnExcluir.Visible := TUsuarioLogado.ObterInstancia.ChecarPermissaoNaRotina(Self.Name, ppExcluir);
+    btnVisualizar.Visible := TUsuarioLogado.ObterInstancia.ChecarPermissaoNaRotina(Self.Name, ppVisualizar);
+    btnAlterar.Visible := TUsuarioLogado.ObterInstancia.ChecarPermissaoNaRotina(Self.Name, ppAlterar);
+    btnInserir.Visible := TUsuarioLogado.ObterInstancia.ChecarPermissaoNaRotina(Self.Name, ppIncluir);
+end;
+
+end.
+
+
+

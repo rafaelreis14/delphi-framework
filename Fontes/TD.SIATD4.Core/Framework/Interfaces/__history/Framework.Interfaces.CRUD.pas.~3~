@@ -1,0 +1,19 @@
+unit Framework.Interfaces.CRUD;
+
+interface
+
+uses
+    Classes, Lib.Enumeradores, Lib.Parametro, Lib.ResultFilter, Lib.Lista,
+    Lib.Base, Framework.Interfaces.CRUDBase, Framework.Interfaces.Consultavel;
+
+type
+    ICRUD<T: class> = interface(IConsultavel<T>)
+        function Inserir: boolean;
+        function Alterar: boolean;
+        function Excluir: boolean;
+        function Listar(tipoOperacao: TOparationTypes; MultiSelect: Boolean): TResultFilter;
+    end;
+
+implementation
+
+end.

@@ -1,0 +1,262 @@
+inherited frmCadRotina: TfrmCadRotina
+  Caption = 'frmCadRotina'
+  ClientHeight = 300
+  ClientWidth = 531
+  ExplicitWidth = 537
+  ExplicitHeight = 329
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited Panel2: TPanel
+    Width = 531
+    ExplicitWidth = 531
+    inherited lblLetreiro: TLabel
+      Width = 165
+      Caption = 'Cadastro de Rotina'
+      ExplicitWidth = 165
+    end
+  end
+  inherited Panel3: TPanel
+    Top = 260
+    Width = 531
+    ExplicitTop = 260
+    ExplicitWidth = 531
+    inherited pnlBotoes: TPanel
+      Left = 332
+      ExplicitLeft = 332
+    end
+  end
+  inherited pgcComponentes: TPageControl
+    Width = 531
+    Height = 223
+    ActivePage = TabSheet1
+    ExplicitWidth = 531
+    ExplicitHeight = 223
+    inherited tbPrincipal: TTabSheet
+      ExplicitLeft = 4
+      ExplicitTop = 24
+      ExplicitWidth = 523
+      ExplicitHeight = 195
+      object GroupBox1: TGroupBox
+        Left = -4
+        Top = 0
+        Width = 526
+        Height = 433
+        Caption = ' Dados da Rotina'
+        TabOrder = 0
+        object Label3: TLabel
+          Left = 12
+          Top = 24
+          Width = 31
+          Height = 13
+          Caption = 'Rotina'
+        end
+        object Label4: TLabel
+          Left = 15
+          Top = 77
+          Width = 68
+          Height = 13
+          Caption = 'A'#231#227'o do Menu'
+        end
+        object Label5: TLabel
+          Left = 227
+          Top = 77
+          Width = 46
+          Height = 13
+          Caption = 'Descri'#231#227'o'
+        end
+        object Label2: TLabel
+          Left = 429
+          Top = 77
+          Width = 32
+          Height = 13
+          Caption = 'Ordem'
+        end
+        object edRotina: TREdit
+          Left = 12
+          Top = 41
+          Width = 508
+          Height = 21
+          CharCase = ecUpperCase
+          TabOrder = 0
+          Text = ''
+          FieldName = 'Rotina'
+          MaskType = mtNone
+          MandatoryField = True
+          PersistentField = True
+          SaveLiteralCharacters = False
+          DecimalPlaces = 2
+        end
+        object edAcaoMenu: TREdit
+          Left = 15
+          Top = 92
+          Width = 205
+          Height = 21
+          TabOrder = 1
+          Text = ''
+          FieldName = 'AcaoMenu'
+          MaskType = mtNone
+          MandatoryField = True
+          PersistentField = True
+          SaveLiteralCharacters = False
+          DecimalPlaces = 2
+        end
+        object rgCategoria: TRRadioGroup
+          Left = 15
+          Top = 130
+          Width = 505
+          Height = 57
+          Caption = ' Categoria'
+          Columns = 3
+          Items.Strings = (
+            'Cadastro'
+            'Processo'
+            'Utilitarios'
+            'Relatorios'
+            'Ajuda')
+          TabOrder = 4
+          FieldName = 'Categoria'
+          MandatoryField = False
+          PersistentField = True
+          ListValue.Strings = (
+            'CADASTRO'
+            'PROCESSO'
+            'UTILITARIOS'
+            'RELATORIOS'
+            'AJUDA')
+        end
+        object edOrdem: TREdit
+          Left = 429
+          Top = 92
+          Width = 91
+          Height = 21
+          TabOrder = 3
+          Text = ''
+          FieldName = 'Ordem'
+          MaskType = mtInteger
+          MandatoryField = True
+          PersistentField = True
+          SaveLiteralCharacters = False
+          DecimalPlaces = 2
+        end
+        object edDescricao: TREdit
+          Left = 224
+          Top = 92
+          Width = 203
+          Height = 21
+          TabOrder = 2
+          Text = ''
+          FieldName = 'Descricao'
+          MaskType = mtNone
+          MandatoryField = True
+          PersistentField = True
+          SaveLiteralCharacters = False
+          DecimalPlaces = 2
+        end
+      end
+    end
+    object TabSheet2: TTabSheet
+      Caption = 'Modulos'
+      ImageIndex = 2
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
+      object cklModulos: TRCheckListBox
+        Left = 0
+        Top = 0
+        Width = 523
+        Height = 195
+        Align = alClient
+        ItemHeight = 13
+        TabOrder = 0
+        MandatoryField = False
+        PersistentField = False
+        IDFieldName = 'Modulo'
+        DescriptionFieldName = 'Modulo'
+        ReadOnly = False
+      end
+    end
+    object TabSheet1: TTabSheet
+      Caption = 'Permiss'#245'es da Rotina'
+      ImageIndex = 1
+      object gdPermissaoRotina: TRGrid
+        Left = 0
+        Top = 57
+        Width = 523
+        Height = 138
+        Align = alClient
+        ColCount = 2
+        DefaultRowHeight = 18
+        DrawingStyle = gdsClassic
+        RowCount = 2
+        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goRowSelect]
+        TabOrder = 0
+        MultiSelect = False
+        MasterDetailType = mdMaster
+        ColWidths = (
+          15
+          64)
+        RowHeights = (
+          18
+          18)
+      end
+      object Panel1: TPanel
+        Left = 0
+        Top = 0
+        Width = 523
+        Height = 57
+        Align = alTop
+        TabOrder = 1
+        OnClick = Panel1Click
+        object Label8: TLabel
+          Left = 5
+          Top = 8
+          Width = 53
+          Height = 13
+          Caption = 'Permiss'#245'es'
+        end
+        object btnAdicionar: TBitBtn
+          Left = 389
+          Top = 23
+          Width = 64
+          Height = 25
+          Caption = 'Adicionar'
+          TabOrder = 1
+          OnClick = btnAdicionarClick
+        end
+        object srcRotinaItem: TRSearch
+          Left = 5
+          Top = 25
+          Width = 381
+          Height = 21
+          Hint = 'Pressione F3 para pesquisar'
+          BevelOuter = bvNone
+          Caption = 'srcRotinaItem'
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 0
+          TabStop = True
+          OnClick = srcRotinaItemClick
+          IDFieldName = 'Permissao'
+          DescriptionFieldName = 'Descricao'
+          MandatoryField = False
+          PersistentField = False
+          IDFieldWidth = 110
+        end
+        object btnExcluir: TBitBtn
+          Left = 454
+          Top = 23
+          Width = 64
+          Height = 25
+          Caption = 'Excluir'
+          TabOrder = 2
+          OnClick = btnExcluirClick
+        end
+      end
+    end
+  end
+  inherited ErrorProvider1: TErrorProvider
+    Left = 112
+    Top = 376
+  end
+end

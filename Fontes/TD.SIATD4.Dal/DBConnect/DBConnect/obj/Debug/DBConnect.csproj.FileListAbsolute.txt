@@ -1,0 +1,10 @@
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\DBConnect\bin\Debug\DBConnect.dll
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\DBConnect\bin\Debug\DBConnect.pdb
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\DBConnect\obj\Debug\DBConnect.dll
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\DBConnect\obj\Debug\DBConnect.pdb
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\DBConnect\obj\Debug\DBConnect.csprojResolveAssemblyReference.cache
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\DBConnect\bin\Debug\DBConnect.dll
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\DBConnect\bin\Debug\DBConnect.pdb
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\DBConnect\obj\Debug\DBConnect.csprojResolveAssemblyReference.cache
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\DBConnect\obj\Debug\DBConnect.dll
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\DBConnect\obj\Debug\DBConnect.pdb

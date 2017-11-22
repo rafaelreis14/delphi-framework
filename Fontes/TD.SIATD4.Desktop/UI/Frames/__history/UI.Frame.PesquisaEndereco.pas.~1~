@@ -1,0 +1,94 @@
+unit UntPesquisaEndereco;
+
+interface
+
+uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
+    Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Buttons,
+    Vcl.Mask, REdit, ClsEndereco, ClsEnumeradores, ClsResultFilter;
+
+type
+    TfrmPesquisaEndereco = class(TFrame)
+        Label2: TLabel;
+        btnConsultaEndereco: TBitBtn;
+        Label1: TLabel;
+        Label3: TLabel;
+        Label4: TLabel;
+        Label5: TLabel;
+        edLogradouro: TREdit;
+        edCEP: TREdit;
+        edBairro: TREdit;
+        edCidade: TREdit;
+        edEstado: TREdit;
+        procedure btnConsultaEnderecoClick(Sender: TObject);
+    private
+        FEndereco: TEndereco;
+        procedure SetEndereco(const Value: TEndereco);
+        procedure popularEndereco;
+        { Private declarations }
+
+    public
+        property Endereco: TEndereco read FEndereco write SetEndereco;
+        procedure Construir;
+        procedure Destruir;
+        procedure LimparCampos;
+    end;
+
+implementation
+
+{$R *.dfm}
+
+procedure TfrmPesquisaEndereco.btnConsultaEnderecoClick(Sender: TObject);
+var
+    result: TResultFilter;
+begin
+    try
+        if not assigned(Endereco) then
+            exit;
+
+        result := Endereco.Listar(otSelect, False);
+        if (assigned(result)) and (result.List.Count > 0) then
+        begin
+            Endereco.PreencherObjeto(result.List[0]);
+            popularEndereco;
+        end;
+    finally
+        if result <> nil then
+            FreeAndNil(result);
+    end;
+end;
+
+procedure TfrmPesquisaEndereco.Construir;
+begin
+    Endereco := TEndereco.Create;
+end;
+
+procedure TfrmPesquisaEndereco.Destruir;
+begin
+    FreeAndNil(FEndereco);
+end;
+
+procedure TfrmPesquisaEndereco.LimparCampos;
+begin
+    edLogradouro.Clear;
+    edCEP.Clear;
+    edCidade.Clear;
+    edEstado.Clear;
+    edBairro.Clear;
+end;
+
+procedure TfrmPesquisaEndereco.popularEndereco;
+begin
+    edLogradouro.Value := Endereco.Logradouro;
+    edCEP.Value := Endereco.CEP;
+    edCidade.Value := Endereco.Cidade;
+    edEstado.Value := Endereco.UF;
+    edBairro.Value := Endereco.Bairro;
+end;
+
+procedure TfrmPesquisaEndereco.SetEndereco(const Value: TEndereco);
+begin
+    FEndereco := Value;
+end;
+
+end.

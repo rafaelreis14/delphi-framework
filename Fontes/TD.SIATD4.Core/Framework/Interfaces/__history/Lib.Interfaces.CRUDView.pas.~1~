@@ -1,0 +1,16 @@
+unit Lib.Interfaces.CRUDView;
+
+interface
+
+uses
+    Classes, Lib.Enumeradores, Lib.Parametro, Lib.ResultFilter, Lib.Lista;
+
+type
+    ICRUDView<T: class> = interface
+        function ObterInstanciaObjeto: T;
+    end;
+
+
+implementation
+
+end.

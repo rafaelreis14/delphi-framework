@@ -1,0 +1,18 @@
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\TestWebService\obj\Release\TestWebService.csprojResolveAssemblyReference.cache
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\TestWebService\bin\Config.ini
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\TestWebService\bin\TestWebService.dll.config
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\TestWebService\bin\TestWebService.dll
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\TestWebService\bin\TestWebService.pdb
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\TestWebService\bin\DBConnectSIATD.dll
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\TestWebService\bin\DBConnectSIATD.pdb
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\TestWebService\obj\Release\TestWebService.dll
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\TestWebService\obj\Release\TestWebService.pdb
+C:\FONTES SIATD\3.0\DDL BANCO DE DADOS\DBConnect\TestWebService\bin\Config.ini
+C:\FONTES SIATD\3.0\DDL BANCO DE DADOS\DBConnect\TestWebService\bin\TestWebService.dll.config
+C:\FONTES SIATD\3.0\DDL BANCO DE DADOS\DBConnect\TestWebService\bin\TestWebService.dll
+C:\FONTES SIATD\3.0\DDL BANCO DE DADOS\DBConnect\TestWebService\bin\TestWebService.pdb
+C:\FONTES SIATD\3.0\DDL BANCO DE DADOS\DBConnect\TestWebService\bin\DBConnectSIATD.dll
+C:\FONTES SIATD\3.0\DDL BANCO DE DADOS\DBConnect\TestWebService\bin\DBConnectSIATD.pdb
+C:\FONTES SIATD\3.0\DDL BANCO DE DADOS\DBConnect\TestWebService\obj\Release\TestWebService.csprojResolveAssemblyReference.cache
+C:\FONTES SIATD\3.0\DDL BANCO DE DADOS\DBConnect\TestWebService\obj\Release\TestWebService.dll
+C:\FONTES SIATD\3.0\DDL BANCO DE DADOS\DBConnect\TestWebService\obj\Release\TestWebService.pdb

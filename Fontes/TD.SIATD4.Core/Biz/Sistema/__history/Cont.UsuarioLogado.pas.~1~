@@ -1,0 +1,593 @@
+unit Cont.UsuarioLogado;
+
+interface
+
+
+uses Cont.Usuario, Lib.Lista, Cont.Filial, Cont.Grupo, Cont.Modulo, Cont.Rotina,
+    Lib.Enumeradores, Vcl.Forms, DateUtils, Biz.UsuarioDAL;
+
+type
+
+
+    // Esta classe implementa o padrão de projeto singleton, e só pode ser instanciada uma vez
+    // e só será destruida quando o sistema for finalizado.
+    TUsuarioLogado = class(TUsuario)
+    private
+        FCodigoFilial: String;
+        FFilial: TFilial;
+        FModulosAcesso: TLista<TModulo>;
+        FModuloLogado: TModulo;
+        FRotinasAcesso: TLista<TRotina>;
+        FAutenticado: boolean;
+        FSenhaAlterada: boolean;
+        FSenhaExpirada: boolean;
+        FTentativasAcesso: integer;
+        FNumeroBloqueio: integer;
+        FDataBloqueio: TDateTime;
+        FUsuarioWindows: string;
+
+        UsuarioDAL: TUsuarioDAL;
+
+
+
+        class var FUsuarioLogado: TUsuarioLogado;
+
+        procedure SetCodigoFilial(const Value: string);
+        procedure SetFilial(const Value: TFilial);
+        procedure SetModuloLogado(const Value: TModulo);
+        procedure SetSenhaAlterada(const Value: boolean);
+        procedure SetSenhaExpirada(const Value: boolean);
+        procedure SetDataBloqueio(const Value: TDateTime);
+        procedure SetNumeroBloqueio(const Value: integer);
+        procedure SetTentativasAcesso(const Value: integer);
+
+
+    procedure SetUsuarioWindows(const Value: string);
+
+        // class var _UsuarioLogado: TUsuarioLogado;
+        // FCanFree: boolean;
+        // class procedure InternalFree;
+    public
+        property SenhaExpirada: boolean read FSenhaExpirada write SetSenhaExpirada;
+        property SenhaAlterada: boolean read FSenhaAlterada write SetSenhaAlterada;
+        property CodigoFilial: string read FCodigoFilial write SetCodigoFilial;
+
+        property Filial: TFilial read FFilial write SetFilial;
+        property ModulosAcesso: TLista<TModulo> read FModulosAcesso;
+        property ModuloLogado: TModulo read FModuloLogado write SetModuloLogado;
+        property RotinasAcesso: TLista<TRotina> read FRotinasAcesso;
+        property Autenticado: boolean read FAutenticado;
+        property TentativasAcesso: integer read FTentativasAcesso write SetTentativasAcesso;
+        property NumeroBloqueio: integer read FNumeroBloqueio write SetNumeroBloqueio;
+        property DataBloqueio: TDateTime read FDataBloqueio write SetDataBloqueio;
+        property UsuarioWindows: string read FUsuarioWindows write SetUsuarioWindows;
+
+
+        procedure ObterModulosDeAcesso;
+        procedure ObterRotinasDeAcesso;
+        function ChecarPermissaoNaRotina(rotina: string; permissao: string; chamarTelaAutorizacao: boolean = false; autorizacao: string = '')
+            : boolean; overload;
+        function ChecarPermissaoNaRotina(rotina: string; permissao: string; chamarTelaAutorizacao: boolean; autorizacao: string;
+            out usuarioAutorizacao: TUsuarioLogado): boolean; overload;
+        function ChecarPermissaoNaRotina(rotina: string; permissao: TPermissoesPadroes; chamarTelaAutorizacao: boolean = false;
+            autorizacao: string = ''): boolean; overload;
+
+        procedure Autenticar(login: string; senha: string);
+        procedure BloquearUsuarioTemporariamente;
+        procedure LiberarBloqueioTemporario;
+        function AutorizarProcesso(rotina, permissao, tituloAutorizacao: string; out usuarioAutorizacao: TUsuarioLogado): boolean;
+        function ConfirmarUsuarioLogado: boolean;
+
+        procedure LogOff;
+
+        constructor Create;
+        destructor Destroy; override;
+
+        //este método deverá ser utilizado para criar a instancia do objeto, desse forma mantemos o padrão singleton
+        class function ObterInstancia:TUsuarioLogado;
+
+        // class function NewInstance: tObject; override;
+        // procedure FreeInstance; override;
+    end;
+
+implementation
+
+uses
+    System.SysUtils, Vcl.Dialogs, ClsParametro, ClsLib, ClsPermissao, Datasnap.DBClient,
+    UntAutorizacaoProcesso, UntTrocaSenha, ProcessList;
+
+{ TUsuarioLogado }
+
+procedure TUsuarioLogado.SetCodigoFilial(const Value: string);
+begin
+    FCodigoFilial := Value;
+end;
+
+
+procedure TUsuarioLogado.SetDataBloqueio(const Value: TDateTime);
+begin
+  FDataBloqueio := Value;
+end;
+
+procedure TUsuarioLogado.SetFilial(const Value: TFilial);
+begin
+    FFilial := Value;
+end;
+
+procedure TUsuarioLogado.SetModuloLogado(const Value: TModulo);
+begin
+    FModuloLogado := Value;
+end;
+
+procedure TUsuarioLogado.SetNumeroBloqueio(const Value: integer);
+begin
+  FNumeroBloqueio := Value;
+end;
+
+procedure TUsuarioLogado.SetSenhaAlterada(const Value: boolean);
+begin
+    FSenhaAlterada := Value;
+end;
+
+procedure TUsuarioLogado.SetSenhaExpirada(const Value: boolean);
+begin
+    FSenhaExpirada := Value;
+end;
+
+procedure TUsuarioLogado.SetTentativasAcesso(const Value: integer);
+begin
+  FTentativasAcesso := Value;
+end;
+
+procedure TUsuarioLogado.SetUsuarioWindows(const Value: string);
+begin
+  FUsuarioWindows := Value;
+end;
+
+function TUsuarioLogado.AutorizarProcesso(rotina, permissao, tituloAutorizacao: string; out usuarioAutorizacao: TUsuarioLogado): boolean;
+var
+    login, senha: string;
+begin
+    try
+        result := false;
+        // usuarioAutorizacao := TUsuarioLogado.Create;
+        application.CreateForm(TfrmAutorizacaoProcesso, frmAutorizacaoProcesso);
+        frmAutorizacaoProcesso.lblTiTuloAutorizacao.Caption := tituloAutorizacao;
+        frmAutorizacaoProcesso.ShowModal;
+
+        if frmAutorizacaoProcesso.RetornoFormulario = rfOK then
+        begin
+            login := frmAutorizacaoProcesso.edLogin.Value;
+            senha := frmAutorizacaoProcesso.edSenha.Value;
+            usuarioAutorizacao.Autenticar(login, senha);
+            if usuarioAutorizacao.Autenticado then
+            begin
+                Self.Filial.CopiarPara(usuarioAutorizacao.Filial);
+                Self.ModuloLogado.CopiarPara(usuarioAutorizacao.ModuloLogado);
+                usuarioAutorizacao.ObterGruposAcessoPorUsuario;
+                usuarioAutorizacao.ObterRotinasDeAcesso;
+                if usuarioAutorizacao.ChecarPermissaoNaRotina(rotina, permissao) then
+                begin
+                    tlib.GravarTrace('', 'AUTORIZACAO', rotina, 'TRACE', tituloAutorizacao, usuarioAutorizacao.login);
+                    result := true;
+                end;
+            end;
+        end;
+    finally
+        if frmAutorizacaoProcesso <> nil then
+            FreeAndNil(frmAutorizacaoProcesso);
+    end;
+end;
+
+procedure TUsuarioLogado.BloquearUsuarioTemporariamente;
+var
+    parametro: TParametro;
+begin
+    parametro := TParametro.Create;
+    parametro.Add('', 'S01_LOGIN', Self.Login);
+        //
+    BaseLib.ExecutaTarefa('BloquearTemporariamente', 'TUsuarioLogado', parametro, '', Self.ClienteSocket);
+end;
+
+procedure TUsuarioLogado.LiberarBloqueioTemporario;
+var
+    parametro: TParametro;
+begin
+    parametro := TParametro.Create;
+    parametro.Add('', 'S01_LOGIN', Self.Login);
+        //
+    BaseLib.ExecutaTarefa('LiberarBloqueioTemporario', 'TUsuarioLogado', parametro, '', Self.ClienteSocket);
+end;
+
+procedure TUsuarioLogado.Autenticar(login: string; senha: string);
+var
+    ParametroPoliticaSenha, parametroDadosCliente, parametroAutenticacao, ParametroSRA, ParametroValidaAfastamento: TParametro;
+    Dataset, DatasetPoliticaSenha, DatasetSRA, DatasetAfastamento: TClientDataSet;
+    usuarioLogado: TUsuarioLogado;
+    listaProcessos: TProcesses;
+begin
+    inherited;
+    try
+        try
+            FAutenticado := false;
+
+            if Self.login  <>  login then
+                Self.TentativasAcesso := 0;
+
+             inc(FTentativasAcesso);
+
+            //
+            Self.Login := login;
+            parametroAutenticacao := TParametro.Create;
+            parametroAutenticacao.Add('', 'S01_LOGIN', Self.Login);
+//            parametroAutenticacao.Add('', 'S01_SENHA', tlib.Encriptar( senha);
+            parametroAutenticacao.Add('', 'VERSAOSERVER', tlib.ObterVersaoAutorizadaServidor);
+            parametroAutenticacao.Add('', 'VERSAOCLIENTE', tlib.ObterVersao);
+            parametroAutenticacao.Add('', 'TIPO', tlib.Tipo);
+            Dataset := BaseLib.XmlToDataset(BaseLib.ExecutaTarefa('Autenticacao', 'TUsuarioLogado', parametroAutenticacao, '', Self.ClienteSocket));
+            //
+            if Dataset.IsEmpty then
+            begin
+                tlib.MensagemAdvertencia('Usuário inválido, Favor verificar!');
+                // cbfil.Items.Clear();
+            end
+            else
+            begin
+                if Dataset.FieldByName('S01_BLOQUEADO').AsString = 'S' then
+                begin
+                    tlib.MensagemAdvertencia('O Usuário encontra-se bloqueado!');
+                    exit;
+                end
+                else
+                begin
+
+                    if Self.TentativasAcesso >=  strtoint(tlib.ObterParametroSistema('NUMTENTAT')) then
+                    begin
+                        tlib.MensagemAdvertencia('Você excedeu o número de tentativas permitido, o usuário ficará bloqueado por '+tlib.ObterParametroSistema('TEMPOBLOQ')+' minutos!');
+                        Self.BloquearUsuarioTemporariamente;
+                        Self.TentativasAcesso := 0;
+                        exit;
+                    end;
+
+                    Self.NumeroBloqueio := Dataset.FieldByName('S01_NUMEROBLOQUEIO').AsInteger;
+
+                    if Dataset.FieldByName('S01_DATABLOQUEIO').AsString <> EmptyStr then
+                        Self.DataBloqueio := Dataset.FieldByName('S01_DATABLOQUEIO').AsDateTime;
+
+                    if  Now < IncMinute(Self.DataBloqueio, strtoint(tlib.ObterParametroSistema('TEMPOBLOQ'))) then
+                    begin
+                        tlib.MensagemAdvertencia('Usuário bloqueado por '+ tlib.ObterParametroSistema('TEMPOBLOQ')+' minutos');
+                        exit;
+                    end;
+
+                    if senha <> tlib.Desencriptar(Dataset.FieldByName('S01_SENHA').AsString) then
+                    begin
+                        tlib.MensagemAdvertencia('Senha inválida, Favor verificar!');
+                        exit;
+                    end;
+
+                    ParametroPoliticaSenha := TParametro.Create;
+                    ParametroPoliticaSenha.Add('', 'S23_S01_LOGIN', login);
+                    ParametroPoliticaSenha.Add('', 'S23_SENHA', senha);
+                    DatasetPoliticaSenha := BaseLib.XmlToDataset(BaseLib.ExecutaTarefa('ValidaExpiracaoSenha', 'TUsuarioLogado',
+                        ParametroPoliticaSenha));
+                    //
+                    if DatasetPoliticaSenha.RecordCount > 0 then
+                    begin
+                        if DatasetPoliticaSenha.FieldByName('DATA_EXPIRACAO').AsString < tlib.ObterDataAtual() then
+                            Self.SenhaExpirada := true; // senha expirada
+                    end;
+                end;
+                //
+                if Dataset.FieldByName('S01_EXTERNO').AsString = 'S' then
+                begin
+                    // sem regras de SRA
+                end
+                else
+                begin
+                    // REGRAS DE FOLHA
+                    ParametroSRA := TParametro.Create;
+                    ParametroSRA.Add('', 'RA_EMP', Dataset.FieldByName('S01_SRA_EMPRESA').AsString);
+                    ParametroSRA.Add('', 'RA_FILIAL', Dataset.FieldByName('S01_SRA_FILIAL').AsString);
+                    ParametroSRA.Add('', 'RA_MAT', Dataset.FieldByName('S01_SRA_MAT').AsString);
+                    DatasetSRA := BaseLib.XmlToDataset(BaseLib.ExecutaTarefa('ValidaSRA', 'TUsuarioLogado', ParametroSRA));
+                    //
+                    if DatasetSRA.FieldByName('RA_SITFOLH').AsString = 'D' then
+                    begin
+                        tlib.MensagemAdvertencia('Usuário encontra-se demitido'#13 + 'Causa: Usuário com status "D" no SRA');
+                        exit;
+                    end
+                    else if DatasetSRA.FieldByName('RA_SITFOLH').AsString <> '' then
+                    begin
+                        ParametroValidaAfastamento := TParametro.Create;
+                        ParametroValidaAfastamento.Add('', 'RA_EMP', Dataset.FieldByName('S01_SRA_EMPRESA').AsString);
+                        ParametroValidaAfastamento.Add('', 'RA_FILIAL', Dataset.FieldByName('S01_SRA_FILIAL').AsString);
+                        ParametroValidaAfastamento.Add('', 'RA_MAT', Dataset.FieldByName('S01_SRA_MAT').AsString);
+                        DatasetAfastamento := BaseLib.XmlToDataset(BaseLib.ExecutaTarefa('ValidaAfastamentoUsuario', 'TUsuarioLogado',
+                            ParametroValidaAfastamento));
+
+                        if not(DatasetAfastamento.IsEmpty) then
+                        begin
+                            tlib.MensagemAdvertencia('Colaborador encontra-se em ausência da empresa por motivo de ' +
+                                DatasetAfastamento.FieldByName('X5_DESCRI').AsString + ' pelo período de ' +
+                                tlib.DataString(DatasetAfastamento.FieldByName('R8_DATAINI').AsString, 'DF') + ' a ' +
+                                tlib.DataString(DatasetAfastamento.FieldByName('R8_DATAFIM').AsString, 'DF') + #13 +
+                                'O Sistema bloqueia automaticamente a conta do usuário durante o período a cima.');
+                            // exit;
+                        end;
+                    end
+                end;
+                //
+                Self.login := UpperCase(Dataset.FieldByName('S01_LOGIN').AsString);
+                Self.Nome := UpperCase(Dataset.FieldByName('S01_NOME').AsString);
+                Self.senha := UpperCase(Dataset.FieldByName('S01_SENHA').AsString);
+                Self.Bloqueado := UpperCase(Dataset.FieldByName('S01_BLOQUEADO').AsString);
+                Self.MudaSenha := UpperCase(Dataset.FieldByName('S01_MUDASENHA').AsString);
+                Self.AlteraSenha := UpperCase(Dataset.FieldByName('S01_ALTERASENHA').AsString);
+                Self.SRAEmpresa := UpperCase(Dataset.FieldByName('S01_SRA_EMPRESA').AsString); // dados folha pagto microsiga
+                Self.SRAFilial := UpperCase(Dataset.FieldByName('S01_SRA_FILIAL').AsString); // dados folha pagto microsiga
+                Self.SRAMat := UpperCase(Dataset.FieldByName('S01_SRA_MAT').AsString); // dados folha pagto microsiga
+                Self.Cracha := UpperCase(Dataset.FieldByName('S01_CRACHA').AsString);
+                Self.MudaData := UpperCase(Dataset.FieldByName('S01_MUDADATA').AsString);
+                Self.ObrigaTrocaSenha := UpperCase(Dataset.FieldByName('S01_OBSTROCSENHA').AsString);
+                Self.TpObSenha := Dataset.FieldByName('S01_TPOBSENHA').AsInteger;
+                Self.DtAltSenha := UpperCase(Dataset.FieldByName('S01_DTALTSENHA').AsString);
+                Self.AcessoFull := UpperCase(Dataset.FieldByName('S01_ACESSO_FULL').AsString);
+                Self.Externo := UpperCase(Dataset.FieldByName('S01_EXTERNO').AsString);
+                Self.BancoMS := UpperCase(Dataset.FieldByName('S01_BANCO_MS').AsString);
+                Self.Vendedor := UpperCase(Dataset.FieldByName('RA_VEND').AsString);
+                Self.MultiplasInstancias := UpperCase(Dataset.FieldByName('S01_MULTIPLAINSTANCIA').AsString);
+                Self.UsuarioWindows := tlib.ObterVarAmbiente(vaUsuarioWindows);
+
+//                if UpperCase(tlib.ObterVarAmbiente(vaClienteTS)) = '' then
+//                    Self.Conexao.ServidorTS := tlib.ObterVarAmbiente(vaServidorTS)
+//                else
+//                    Self.Conexao.ClienteTS := tlib.ObterVarAmbiente(vaClienteTS);
+//                Self.Conexao.UsuarioWindows := tlib.ObterVarAmbiente(vaUsuarioWindows);
+
+                if listaProcessos = nil then
+                    listaProcessos := TProcesses.Create;
+
+                if not Self.MultiplasInstancias_ then
+                begin
+                    listaProcessos.ReadSystem;
+                    if listaProcessos.IsRunning(application.Title, Self.UsuarioWindows) then
+                        raise Exception.Create('Usuário não habilitado para acessar multiplas instâncias');
+
+                end;
+
+                //
+                FAutenticado := true;
+                Self.TentativasAcesso := 0;
+                Self.LiberarBloqueioTemporario;
+            end;
+        except
+            on e: Exception do
+            begin
+                FAutenticado := false;
+                tlib.MensagemErro('Erro ao autenticar o usuário', e.Message);
+            end;
+        end;
+    finally
+
+
+        FreeAndNil(parametroDadosCliente);
+        FreeAndNil(parametroAutenticacao);
+        FreeAndNil(ParametroSRA);
+        FreeAndNil(ParametroValidaAfastamento);
+        FreeAndNil(Dataset);
+        FreeAndNil(DatasetSRA);
+        FreeAndNil(DatasetAfastamento);
+        FreeAndNil(DatasetPoliticaSenha);
+
+        if listaProcessos <> nil then
+            FreeAndNil(listaProcessos);
+    end;
+end;
+
+function TUsuarioLogado.ChecarPermissaoNaRotina(rotina, permissao: string; chamarTelaAutorizacao: boolean; autorizacao: string): boolean;
+var
+    usuarioNulo: TUsuarioLogado;
+begin
+    try
+        usuarioNulo := TUsuarioLogado.Create;
+        result := ChecarPermissaoNaRotina(rotina, permissao, chamarTelaAutorizacao, autorizacao, usuarioNulo);
+
+    finally
+        FreeAndNil(usuarioNulo);
+    end;
+
+end;
+
+function TUsuarioLogado.ChecarPermissaoNaRotina(rotina: string; permissao: TPermissoesPadroes; chamarTelaAutorizacao: boolean;
+    autorizacao: string): boolean;
+var
+    perm: string;
+begin
+    perm := TConverteEnum<TPermissoesPadroes>.ToString(permissao);
+    perm := UpperCase(copy(perm, 3, length(perm)));
+    result := ChecarPermissaoNaRotina(rotina, perm, chamarTelaAutorizacao, autorizacao);
+end;
+
+function TUsuarioLogado.ConfirmarUsuarioLogado: boolean;
+var
+    login, senha: string;
+begin
+    try
+        application.CreateForm(TfrmAutorizacaoProcesso, frmAutorizacaoProcesso);
+        frmAutorizacaoProcesso.ShowModal;
+        frmAutorizacaoProcesso.lblTiTuloAutorizacao.Caption := 'Liberação para abrir o caixa.';
+        result := false;
+        if frmAutorizacaoProcesso.RetornoFormulario = rfOK then
+        begin
+
+            login := frmAutorizacaoProcesso.edLogin.Value;
+            senha := frmAutorizacaoProcesso.edSenha.Value;
+
+            if Self.Autenticado then
+            begin
+                if (Self.login = login) and (tlib.Desencriptar(Self.senha) = senha) then
+                    result := true
+                else
+                    tlib.MensagemInformacao('Usuário não autorizado');
+
+            end;
+        end;
+    finally
+        if frmAutorizacaoProcesso <> nil then
+            FreeAndNil(frmAutorizacaoProcesso);
+    end;
+end;
+
+constructor TUsuarioLogado.Create;
+begin
+    inherited Create;
+    FFilial := TFilial.Create;
+    FModuloLogado := TModulo.Create;
+    FRotinasAcesso := TLista<TRotina>.Create;
+    TentativasAcesso := 0;
+end;
+
+destructor TUsuarioLogado.Destroy;
+begin
+    FreeAndNil(FFilial);
+    FreeAndNil(FModuloLogado);
+    FreeAndNil(FRotinasAcesso);
+    inherited;
+end;
+
+
+
+
+// procedure TUsuarioLogado.FreeInstance;
+// begin
+// if FCanFree then
+// begin
+// inherited;
+// end;
+// end;
+//
+//
+// class procedure TUsuarioLogado.InternalFree;
+// begin
+// if Assigned(_UsuarioLogado) then
+// begin
+// _UsuarioLogado.FCanFree := True;
+// _UsuarioLogado.Free;
+// end;
+// end;
+
+procedure TUsuarioLogado.LogOff;
+begin
+
+end;
+
+// class function TUsuarioLogado.NewInstance: tObject;
+// begin
+// if _UsuarioLogado = nil then
+// _UsuarioLogado := TUsuarioLogado(inherited NewInstance);
+//
+// result := _UsuarioLogado
+// end;
+
+class function TUsuarioLogado.ObterInstancia: TUsuarioLogado;
+begin
+    if not assigned(FUsuarioLogado) then
+        Self.FUsuarioLogado := TUsuarioLogado.Create;
+
+    Result := Self.FUsuarioLogado;
+end;
+
+procedure TUsuarioLogado.ObterModulosDeAcesso;
+var
+    parametro: TParametro;
+begin
+    try
+        if not Self.Filial.Preenchido then
+            raise Exception.Create('Error ao obter modulos');
+
+        parametro := TParametro.Create();
+        parametro.Add('', 'S04_S01_LOGIN', Self.login);
+        parametro.Add('', 'EMPRESA', Self.Filial.Empresa);
+        FModulosAcesso := BaseLib.XmlToObject<TModulo>(BaseLib.ExecutaTarefa('ObterModulosPorUsuario', 'TUsuarioLogado', parametro));
+    finally
+        FreeAndNil(parametro);
+    end;
+end;
+
+procedure TUsuarioLogado.ObterRotinasDeAcesso;
+var
+    parametro: TParametro;
+    grupos, modulo, tipoRotina: string;
+begin
+    try
+        if (Self.GruposAcesso.Count = 0) or (not Self.ModuloLogado.Preenchido) then
+            raise Exception.Create('Error ao obter rotinas');
+
+        parametro := TParametro.Create();
+        grupos := Self.GruposAcesso.ToDelimiterList('Grupo', true);
+        modulo := Self.ModuloLogado.modulo;
+        tipoRotina := tlib.IfTernario(tlib.mobile, 'MOBILE', 'DESKTOP');
+
+        parametro.Add('', 'S09_S02_GRUPO', grupos);
+        parametro.Add('', 'S09_S08_MODULO', modulo);
+        parametro.Add('', 'S05_TIPOROTINA', tipoRotina);
+        FRotinasAcesso := BaseLib.XmlToObject<TRotina>(BaseLib.ExecutaTarefa('ObterRotinaPorGrupoEModulo', 'TUsuarioLogado', parametro));
+    finally
+        FreeAndNil(parametro);
+    end;
+end;
+
+function TUsuarioLogado.ChecarPermissaoNaRotina(rotina: string; permissao: string; chamarTelaAutorizacao: boolean; autorizacao: string;
+    out usuarioAutorizacao: TUsuarioLogado): boolean;
+var
+    listaPerm: TLista<TPermissao>;
+    perm: TPermissao;
+    grupo: TGrupo;
+begin
+    try
+        for grupo in Self.GruposAcesso do
+        begin
+            listaPerm := grupo.ObterPermissoesPorGrupoERotina(UpperCase(rotina));
+            for perm in listaPerm do
+            begin
+                if perm.permissao = permissao then
+                begin
+                    result := true;
+                    if autorizacao <> '' then
+                        tlib.GravarTrace('', 'AUTORIZACAO', rotina, 'TRACE', autorizacao, Self.login);
+                    exit;
+                end;
+            end;
+        end;
+
+        if chamarTelaAutorizacao then
+        begin
+            if Self.AutorizarProcesso(rotina, permissao, autorizacao, usuarioAutorizacao) then
+            begin
+                result := true;
+                exit;
+            end;
+        end;
+
+        // tlib.MensagemInformacao('Usuário não tem permissao para este processo');
+        result := false;
+
+    finally
+        if listaPerm <> nil then
+            FreeAndNil(listaPerm);
+    end;
+end;
+
+initialization
+
+// TUsuarioLogado._UsuarioLogado := nil;
+
+finalization
+
+// TUsuarioLogado.InternalFree;
+
+end.
+
+
+

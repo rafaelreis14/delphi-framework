@@ -1,0 +1,82 @@
+unit UntCadastroPadraoMobile;
+
+interface
+
+uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+    System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,
+    Vcl.Buttons,
+    Vcl.ExtCtrls, Data.DB, Datasnap.DBClient, Vcl.Mask, ClsLib, Vcl.DBCtrls,
+    Vcl.CheckLst, UntErrorProvider, Vcl.ComCtrls, ClsParametro, UntFormBase,
+    UntCadastro, ClsEnumeradores, ClsProduto;
+
+type
+
+    TFrmCadastroPadraoMobile = class(TFrmCadastro)
+    PageControl1: TPageControl;
+    pnlBotoes: TPanel;
+    btnCancelar: TBitBtn;
+    btnConfirmar: TBitBtn;
+    tbPrincipal: TTabSheet;
+    procedure btnCancelarClick(Sender: TObject);
+    procedure btnConfirmarClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    private
+    protected
+        { Private declarations }
+    public
+        { Public declarations }
+    end;
+
+var
+    FrmCadastroPadraoMobile: TFrmCadastroPadraoMobile;
+
+implementation
+
+{$R *.dfm}
+
+uses ClsBase;
+
+procedure TFrmCadastroPadraoMobile.btnConfirmarClick(Sender: TObject);
+begin
+    inherited;
+    try
+        if ValidaCamposObrigatorios(ErrorProvider1) then exit;
+
+        CarregaObjeto;
+
+        if AcaoJanela = acAlteracao then
+           TBase(Objeto).Alterar
+        else
+        if AcaoJanela = acInsercao then
+           TBase(Objeto).Inserir;
+
+        RetornoFormulario := rfOK;
+        close;
+    except
+        RetornoFormulario := rfComErro;
+        raise;
+        close;
+    end;
+end;
+
+procedure TFrmCadastroPadraoMobile.btnCancelarClick(Sender: TObject);
+begin
+    inherited;
+    Self.Close();
+end;
+
+procedure TFrmCadastroPadraoMobile.FormShow(Sender: TObject);
+begin
+    inherited;
+    self.Width := MobileWidth;
+    self.Height := MobileHeight;
+    if AcaoJanela in [acAlteracao, acVisualizacao] then
+    begin
+        CarregaComponentes;
+        btnConfirmar.Enabled := Tlib.IfTernario(AcaoJanela = acVisualizacao,false,true);
+    end;
+end;
+
+end.

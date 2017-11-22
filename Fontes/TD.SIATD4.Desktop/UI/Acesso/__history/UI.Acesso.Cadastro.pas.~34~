@@ -1,0 +1,390 @@
+unit UI.Acesso.Cadastro;
+
+interface
+
+uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, UI.Base.CadastroPadrao, UntErrorProvider, Vcl.ComCtrls, Vcl.StdCtrls, Vcl.Buttons, Vcl.ExtCtrls,
+    UI.Base.Controlador.CadastroDesktop, Biz.PermissaoAcesso, RComboBox, Vcl.CheckLst, RCheckListBox, UI.AcessoPermissao.Cadastro,
+    Biz.Grupo, Biz.Modulo, Biz.Rotina, Biz.Acesso, RGRID, Vcl.Menus;
+
+type
+    //TfrmCadAcessos = class(TFrmCadastroPadrao)
+    TfrmCadAcessos = class(TControladorCadastroDesktop<TPermissaoAcesso>)
+        PageControl1: TPageControl;
+        TabSheet3: TTabSheet;
+        RChckLstBxRotinaPermissoes: TRCheckListBox;
+        TabSheet4: TTabSheet;
+        cklAcessoPermissoes: TRCheckListBox;
+        GroupBox2: TGroupBox;
+        GroupBox3: TGroupBox;
+        cklModuloRotina: TRCheckListBox;
+        ppRotinas: TPopupMenu;
+        ppPermissoesRotina: TPopupMenu;
+        Descrio1: TMenuItem;
+        FocoemPermissesCrtlSetaparaBaixo1: TMenuItem;
+        Descrio2: TMenuItem;
+        FoconasRotinasCrtlSetaparacima1: TMenuItem;
+        GroupBox1: TGroupBox;
+        cbTipo: TRComboBox;
+        cbModulo: TRComboBox;
+        procedure FormCreate(Sender: TObject);
+        procedure cbModuloClick(Sender: TObject);
+        procedure cklModuloRotinaClick(Sender: TObject);
+        procedure cklModuloRotinaClickCheck(Sender: TObject);
+        procedure cklAcessoPermissoesClickCheck(Sender: TObject);
+        procedure Descrio2Click(Sender: TObject);
+        procedure Descrio1Click(Sender: TObject);
+        procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure FocoemPermissesCrtlSetaparaBaixo1Click(Sender: TObject);
+        procedure FoconasRotinasCrtlSetaparacima1Click(Sender: TObject);
+        procedure cbTipoClick(Sender: TObject);
+    private
+        Grupo: TGrupo;
+        Alterou: boolean;
+        index, indexTipo: integer;
+
+
+        procedure ExecutarEventoMostrarFormulario(Sender: TObject); override;
+        procedure ExecutarEventoConfirmar(sender: TObject); override;
+        procedure ExecutarEventoCancelar(Sender: TObject); override;
+        procedure AtualizarInfomacoes;
+        procedure ManterAcessos;
+        procedure ManterPermissoesAcesso;
+        procedure CarregarPermissaoRotina(moduloRotina: TModuloRotina);
+        procedure CarregarRotina(modulo: TModulo);
+        procedure CarregarAcesso(modulo: TModulo; tipoRotina: string);
+        procedure CarregarPermissaoAcesso(acesso: TAcesso);
+        procedure CarregarPermissoes;
+        procedure MudarTipoModulo;
+    public
+        { Public declarations }
+    end;
+
+var
+    frmCadAcessos: TfrmCadAcessos;
+
+implementation
+
+uses
+    Lib.Parametro,
+    Lib.Biblioteca, Lib.Enumeradores, Biz.PermissaoRotina;
+
+{$R *.dfm}
+
+procedure TfrmCadAcessos.cbModuloClick(Sender: TObject);
+begin
+    MudarTipoModulo;
+end;
+
+procedure TfrmCadAcessos.cbTipoClick(Sender: TObject);
+begin
+  MudarTipoModulo;
+end;
+
+procedure TfrmCadAcessos.cklAcessoPermissoesClickCheck(Sender: TObject);
+begin
+    ManterPermissoesAcesso;
+end;
+
+procedure TfrmCadAcessos.cklModuloRotinaClick(Sender: TObject);
+begin
+    CarregarPermissoes;
+    AtualizarInfomacoes;
+end;
+
+procedure TfrmCadAcessos.cklModuloRotinaClickCheck(Sender: TObject);
+begin
+    ManterAcessos;
+
+    if cklModuloRotina.IsSelectedItemChecked then
+        cklAcessoPermissoes.Enabled := true
+    else
+        cklAcessoPermissoes.Enabled := false;
+end;
+
+procedure TfrmCadAcessos.Descrio1Click(Sender: TObject);
+var
+    moduloRotina: TModuloRotina;
+begin
+    moduloRotina := cklModuloRotina.GetObject<TModuloRotina>;
+    if not moduloRotina.Rotina_.Preenchido then
+        moduloRotina.Rotina_.Obter(moduloRotina.Rotina);
+
+    tlib.MensagemInformacao(moduloRotina.Rotina_.Descricao);
+end;
+
+procedure TfrmCadAcessos.Descrio2Click(Sender: TObject);
+var
+    permissao: TPermissaoRotina;
+begin
+    permissao := cklAcessoPermissoes.GetObject<TPermissaoRotina>;
+    if not permissao.Permissao_.Preenchido then
+        permissao.Permissao_.Obter(permissao.Permissao);
+
+    tlib.MensagemInformacao(permissao.Permissao_.Descricao);
+end;
+
+procedure TfrmCadAcessos.ExecutarEventoCancelar(Sender: TObject);
+begin
+
+end;
+
+procedure TfrmCadAcessos.ExecutarEventoConfirmar(sender: TObject);
+var
+    acesso: TAcesso;
+begin
+    Alterou := false;
+
+    Grupo.ManterAcessos(cbModulo.GetObject<TModulo>, cbTipo.Value);
+
+    if tlib.MensagemPergunta('Salvo com sucesso. Deseja ajustar mais algum acesso?','Atenção') = mrNo then
+        close;
+
+end;
+
+
+procedure TfrmCadAcessos.ExecutarEventoMostrarFormulario(Sender: TObject);
+var
+    Modulo: TModulo;
+begin
+    try
+        Grupo := TGrupo(Objeto);
+        lblLetreiro.Caption := lblLetreiro.Caption + ' [ '+Grupo.Grupo+' ]';
+        Modulo := TModulo.Create;
+        cbModulo.DataSource := Modulo.ObterTodosModulos.ToList;
+        cbModulo.DataBind;
+        cbTipo.DataBind;
+        Alterou := false;
+        MudarTipoModulo;
+    finally
+        if Modulo <> nil then
+            FreeAndNil(Modulo);
+    end;
+end;
+
+procedure TfrmCadAcessos.FocoemPermissesCrtlSetaparaBaixo1Click(Sender: TObject);
+begin
+  inherited;
+  if cklAcessoPermissoes.Enabled then
+  begin
+    cklAcessoPermissoes.SetFocus;
+  end;
+end;
+
+procedure TfrmCadAcessos.FoconasRotinasCrtlSetaparacima1Click(Sender: TObject);
+begin
+  inherited;
+  cklModuloRotina.SetFocus
+end;
+
+procedure TfrmCadAcessos.FormCreate(Sender: TObject);
+begin
+    inherited;
+    Inicializar;
+end;
+
+procedure TfrmCadAcessos.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  inherited;
+   if (Shift = [ssCtrl]) then
+    begin
+        case Key of
+            38:
+                begin
+                    if cklAcessoPermissoes.Focused then
+                    begin
+                        if cklAcessoPermissoes.ItemIndex = cklAcessoPermissoes.Count-1 then
+                            cklAcessoPermissoes.ItemIndex := cklAcessoPermissoes.Count-1
+                        else
+                            cklAcessoPermissoes.ItemIndex := cklAcessoPermissoes.ItemIndex + 1;
+                        cklModuloRotina.SetFocus;
+                    end;
+                end;
+            40:
+                begin
+                    if cklModuloRotina.Focused then
+                    begin
+                        if cklModuloRotina.Count >= 0 then
+                            cklModuloRotina.ItemIndex := cklModuloRotina.ItemIndex -1;
+
+                        if cklAcessoPermissoes.Enabled then cklAcessoPermissoes.SetFocus;
+
+                    end;
+
+
+                end;
+        end;
+    end;
+end;
+
+
+
+procedure TFrmCadAcessos.AtualizarInfomacoes;
+var
+    moduloRotina: TModuloRotina;
+    acesso: TAcesso;
+    modulo: TModulo;
+begin
+    try
+        moduloRotina := cklModuloRotina.GetObject<TModuloRotina>;
+        Modulo := cbModulo.GetObject<TModulo>;
+
+        cklModuloRotina.DataSource := cbModulo.GetObject<TModulo>.RotinasModulo.ToList;
+        cklModuloRotina.DataBind;
+        cklModuloRotina.Value := Grupo.Acessos.ToDelimiterList('Rotina');
+
+
+        if moduloRotina <> nil then
+        begin
+
+            cklAcessoPermissoes.DataSource := moduloRotina.PermissoesRotina.ToList;
+            cklAcessoPermissoes.DataBind;
+
+            acesso := grupo.ObterAcesso(moduloRotina.Modulo, moduloRotina.Rotina);
+            if acesso <> nil then
+                cklAcessoPermissoes.Value := acesso.PermissoesAcesso.ToDelimiterList('Permissao');
+
+        end
+        else
+            cklAcessoPermissoes.Clear;
+
+        if cklModuloRotina.IsSelectedItemChecked then
+            cklAcessoPermissoes.Enabled := true
+        else
+            cklAcessoPermissoes.Enabled := false;
+    finally
+    end;
+end;
+
+procedure TfrmCadAcessos.ManterAcessos;
+var
+    moduloRotina: TModuloRotina;
+    acesso: TAcesso;
+begin
+    if not cklModuloRotina.IsSelectedItemChecked then
+    begin
+        moduloRotina := cklModuloRotina.GetObject<TModuloRotina>;
+        acesso := Grupo.ObterAcesso(moduloRotina.Modulo, moduloRotina.Rotina);
+        Grupo.DeletarAcesso(acesso);
+        cklAcessoPermissoes.Enabled := false;
+    end
+    else
+    begin
+        moduloRotina := cklModuloRotina.GetObject<TModuloRotina>;
+        if moduloRotina <> nil then
+        begin
+            acesso := TAcesso.Create;
+            acesso.Grupo := Grupo.Grupo;
+            acesso.Modulo := moduloRotina.Modulo;
+            acesso.Rotina := moduloRotina.Rotina;
+            acesso.TipoRotina := cbTipo.Value;
+            Grupo.Acessos.Add(acesso);
+            cklAcessoPermissoes.Enabled := true;
+            cklAcessoPermissoes.SetFocus;
+        end;
+    end;
+    Alterou := true;
+end;
+
+procedure TfrmCadAcessos.ManterPermissoesAcesso;
+var
+    moduloRotina: TModuloRotina;
+    acesso: TAcesso;
+    permissaoAcesso: TPermissaoAcesso;
+begin
+    if not cklAcessoPermissoes.IsSelectedItemChecked then
+    begin
+        moduloRotina := cklModuloRotina.GetObject<TModuloRotina>;
+        acesso := Grupo.ObterAcesso(moduloRotina.Modulo, moduloRotina.Rotina);
+        permissaoAcesso := acesso.ObterPermissaoAcesso(cklAcessoPermissoes.GetSelectedItemValue);
+        acesso.DeletarPermissaoAcesso(permissaoAcesso);
+    end
+    else
+    begin
+        moduloRotina := cklModuloRotina.GetObject<TModuloRotina>;
+        acesso := Grupo.ObterAcesso(moduloRotina.Modulo, moduloRotina.Rotina);
+        if acesso <> nil then
+        begin
+            permissaoAcesso := TPermissaoAcesso.Create;
+            permissaoAcesso.Grupo := Grupo.Grupo;
+            permissaoAcesso.Modulo := moduloRotina.Modulo;
+            permissaoAcesso.Rotina := moduloRotina.Rotina;
+            permissaoAcesso.Permissao := cklAcessoPermissoes.GetSelectedItemValue;
+            acesso.AdicionarPermissoesAcesso(permissaoAcesso);
+        end;
+    end;
+    Alterou := true;
+end;
+
+procedure TfrmCadAcessos.CarregarPermissaoAcesso(acesso: TAcesso);
+begin
+    if not acesso.Carregou then
+        acesso.CarregarPermissoesAcesso(cbTipo.Value);
+
+    acesso.Carregou := true;
+end;
+
+procedure TfrmCadAcessos.CarregarPermissoes;
+var
+    moduloRotina: TModuloRotina;
+    acesso: TAcesso;
+begin
+    moduloRotina := nil;
+    moduloRotina := cklModuloRotina.GetObject<TModuloRotina>;
+    if moduloRotina <> nil then
+    begin
+        CarregarPermissaoRotina(moduloRotina);
+        acesso := Grupo.ObterAcesso(moduloRotina.Modulo, moduloRotina.Rotina);
+        if acesso <> nil then
+        begin
+            CarregarPermissaoAcesso(acesso);
+        end;
+    end;
+end;
+
+procedure TfrmCadAcessos.MudarTipoModulo;
+begin
+  if Alterou = true then
+    if Tlib.MensagemPergunta('As manutenções de acesso para este módulo e tipo de rotina não foram salvas, Deseja realmente mudar sem salvar?', 'Atenção') = mrNo then
+    begin
+      cbModulo.ItemIndex := index;
+      cbTipo.ItemIndex := indexTipo;
+      exit;
+    end;
+  Grupo.LimparAcesso;
+  CarregarRotina(cbModulo.GetObject<TModulo>);
+  CarregarAcesso(cbModulo.GetObject<TModulo>, cbTipo.Value);
+  AtualizarInfomacoes;
+  index := cbModulo.ItemIndex;
+  indexTipo := cbTipo.ItemIndex;
+  cklModuloRotina.SetFocus;
+  CarregarPermissoes;
+  AtualizarInfomacoes;
+  Alterou := false;
+  Grupo.Carregou := false;
+end;
+
+procedure TfrmCadAcessos.CarregarPermissaoRotina(moduloRotina: TModuloRotina);
+begin
+    if moduloRotina.PermissoesRotina.Count = 0 then
+        moduloRotina.CarregarPermissoesRotina;
+end;
+
+procedure TfrmCadAcessos.CarregarRotina(modulo: TModulo);
+begin
+    if modulo.RotinasModulo.Count = 0 then
+        modulo.CarregarRotinasModulo;
+end;
+
+procedure TfrmCadAcessos.CarregarAcesso(modulo: TModulo; tipoRotina: string);
+begin
+    if not Grupo.Carregou then
+        Grupo.CarregarAcessos(modulo.Modulo, tipoRotina);
+
+    Grupo.Carregou := true;
+end;
+
+
+
+end.

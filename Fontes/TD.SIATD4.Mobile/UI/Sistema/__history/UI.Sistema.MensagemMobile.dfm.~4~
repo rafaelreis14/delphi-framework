@@ -1,0 +1,121 @@
+inherited FrmMensagemMobile: TFrmMensagemMobile
+  Caption = 'FrmMensagemMobile'
+  ClientHeight = 340
+  ClientWidth = 256
+  OnShow = FormShow
+  ExplicitWidth = 272
+  ExplicitHeight = 379
+  PixelsPerInch = 96
+  TextHeight = 13
+  object Label1: TLabel [0]
+    Left = 8
+    Top = 8
+    Width = 62
+    Height = 13
+    Caption = 'Mensagem'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object BtBtnSim: TBitBtn [1]
+    Left = 88
+    Top = 290
+    Width = 55
+    Height = 45
+    Anchors = [akRight, akBottom]
+    Caption = 'Sim'
+    TabOrder = 0
+    Visible = False
+    OnClick = BtBtnSimClick
+    ExplicitLeft = 91
+  end
+  object BtBtnNao: TBitBtn [2]
+    Left = 143
+    Top = 290
+    Width = 55
+    Height = 45
+    Anchors = [akRight, akBottom]
+    Caption = 'N'#227'o'
+    TabOrder = 1
+    Visible = False
+    OnClick = BtBtnNaoClick
+    ExplicitLeft = 146
+  end
+  object BtBtnOK: TBitBtn [3]
+    Left = 198
+    Top = 290
+    Width = 55
+    Height = 45
+    Anchors = [akRight, akBottom]
+    Caption = 'OK'
+    TabOrder = 2
+    Visible = False
+    OnClick = BtBtnOKClick
+    ExplicitLeft = 201
+  end
+  object Panel1: TPanel [4]
+    Left = 4
+    Top = 22
+    Width = 248
+    Height = 265
+    BevelKind = bkFlat
+    BevelOuter = bvNone
+    TabOrder = 3
+    object lblDescricao: TLabel
+      Left = 0
+      Top = 0
+      Width = 244
+      Height = 232
+      Align = alClient
+      AutoSize = False
+      Font.Charset = ANSI_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+      WordWrap = True
+      ExplicitLeft = 5
+      ExplicitTop = 19
+      ExplicitWidth = 242
+      ExplicitHeight = 246
+    end
+    object pnMensagemErro: TPanel
+      Left = 0
+      Top = 232
+      Width = 244
+      Height = 29
+      Align = alBottom
+      BevelKind = bkFlat
+      BevelOuter = bvNone
+      TabOrder = 0
+      Visible = False
+      object mmErro: TMemo
+        Left = 0
+        Top = 25
+        Width = 240
+        Height = 0
+        BevelInner = bvNone
+        BevelOuter = bvNone
+        BiDiMode = bdRightToLeftReadingOnly
+        ParentBiDiMode = False
+        TabOrder = 0
+      end
+      object btnErro: TButton
+        Left = 0
+        Top = 0
+        Width = 240
+        Height = 25
+        Align = alTop
+        BiDiMode = bdLeftToRight
+        Caption = '>> ERRO'
+        ParentBiDiMode = False
+        TabOrder = 1
+        OnClick = btnErroClick
+      end
+    end
+  end
+end

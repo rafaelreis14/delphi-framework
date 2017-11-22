@@ -1,0 +1,677 @@
+unit ClsEnderecoArmazem;
+
+interface
+
+uses
+    Classes, System.SysUtils, Dialogs, ClsBase, ClsParametro, ClsEnumeradores,
+    ClsPersistable, ClsFilial, ClsTipoEndereco, ClsProduto,
+    ClsArmazem, ClsLista, ClsResultFilter, Generics.Collections;
+
+type
+
+    TLado = (ldEsquerdo, ldDireito);
+
+    TEnderecoArmazem = class(TBase)
+    private
+        FPrioridade: string;
+        FUltimaAlteracao: string;
+        FDescricaoBloqueio: string;
+        FCodigoEndereco: string;
+        FCodigoTipoEndereco: string;
+        FDelet: string;
+        FCodigoProduto: string;
+        FCodigoFilial: string;
+        FUnidadeMedida: string;
+        FBloqueado: string;
+        FCapacidade: double;
+        FQuantidadeReservada: double;
+        FRecno: integer;
+        FQuantidade: double;
+        FFilial: TFilial;
+        FTipoEndereco: TTipoEndereco;
+        FProduto: TProduto;
+        FLado: string;
+        FApartamento: String;
+        FNivel: String;
+        FArmazem: TArmazem;
+        FModulo: String;
+        FRua: String;
+        FCodigoArmazem: String;
+        procedure SetBloqueado(const Value: string);
+        procedure SetCapacidade(const Value: double);
+        procedure SetCodigoEndereco(const Value: string);
+        procedure SetCodigoFilial(const Value: string);
+        procedure SetCodigoProduto(const Value: string);
+        procedure SetCodigoTipoEndereco(const Value: string);
+        procedure SetDelet(const Value: string);
+        procedure SetDescricaoBloqueio(const Value: string);
+        procedure SetPrioridade(const Value: string);
+        procedure SetQuantidade(const Value: double);
+        procedure SetQuantidadeReservada(const Value: double);
+        procedure SetRecno(const Value: integer);
+        procedure SetUltimaAlteracao(const Value: string);
+        procedure SetUnidadeMedida(const Value: string);
+        procedure SetFilial(const Value: TFilial);
+        procedure SetTipoEndereco(const Value: TTipoEndereco);
+        procedure SetProduto(const Value: TProduto);
+        procedure SetArmazem(const Value: TArmazem);
+        procedure SetLado(const Value: string);
+        procedure SetApartamento(const Value: String);
+        procedure SetCodigoArmazem(const Value: String);
+        procedure SetModulo(const Value: String);
+        procedure SetNivel(const Value: String);
+        procedure SetRua(const Value: String);
+        function GetCodigoEndereco: string;
+        function GetBloqueado: string;
+        function GetNivel: String;
+        function GetModulo: String;
+        function GetLado: string;
+        function GetRua: String;
+        function GetArmazem: String;
+        function GetApartamento: String;
+        procedure AtualizaCodigoEndereco;
+    public
+
+        ///	<summary>
+        ///	  Metodo que faz a inserção da ClasseBase
+        ///	</summary>
+        function Inserir: integer; override;
+
+        ///	<summary>
+        ///	  Metodo que faz a alteração da ClasseBase
+        ///	</summary>
+        function Alterar: integer; override;
+
+        ///	<summary>
+        ///	  Métido que faz a Deleção da ClasseBase
+        ///	</summary>
+        ///	<param name="ID">
+        ///	  Chave  primária da tabela
+        ///	</param>
+        function Deletar(ID:string): integer; override;
+
+        ///	<summary>
+        ///	  Método que chama a tela de filtro
+        ///	</summary>
+        ///	<param name="tipoOperacao">
+        ///	  Tipo da operação, se é somente filtro, ou seleção de registro
+        ///	</param>
+        function Listar(tipoOperacao: TOparationTypes; multiSelect: boolean): TResultFilter; override;
+
+
+        ///	<summary>
+        ///	  retorna uma lista de endereços de acordo com parametros passado
+        ///	</summary>
+        ///	<param name="parametros">
+        ///	  parametros consulta
+        ///	</param>
+        function Consultar(parametros: TParametro): TList; override;
+
+        ///	<summary>
+        ///	  Método que retorna um objeto preenchido
+        ///	</summary>
+        ///	<param name="ID">
+        ///	  Chave primária da tabela
+        ///	</param>
+        function Obter(ID: string): TObject; overload; override;
+
+        ///	<summary>
+        ///	  Método que retorna um objeto preenchido
+        ///	</summary>
+        ///	<param name="parametros">
+        ///	  Parametros para a consulta do objeto a ser preenchido
+        ///	</param>
+        function Obter(parametros:TParametro): TObject; overload;
+
+        ///	<summary>
+        ///	  Método que preenche a instância do Objeto
+        ///	</summary>
+        ///	<param name="ClasseBase">
+        ///	  objeto de parametro para preenchimento da instância
+        ///	</param>
+        procedure PopularObjeto(EnderecoArmazem: TEnderecoArmazem);
+
+        ///	<summary>
+        ///	  Função responsável por bloquear o endereço
+        ///	</summary>
+        procedure BloquearEndereco;
+
+        ///	<summary>
+        ///	  Função responsável por Desbloquear o endereço
+        ///	</summary>
+        procedure DesbloquearEndereco;
+
+
+        function ObterEnderecosPorCodigosEnderecos(codigos: string): Tlista<TEnderecoArmazem>;
+
+        [TPersistable(fgReadOnly, 'CodigoArmazem')]
+        property CodigoArmazem: String read GetArmazem write SetCodigoArmazem;
+
+        property Armazem: TArmazem read FArmazem write SetArmazem;
+
+        [TPersistable(fgReadOnly, 'CodigoRua')]
+        property CodigoRua: String read GetRua write SetRua;
+
+        [TPersistable(fgReadOnly, 'CodigoLado')]
+        property CodigoLado: string read GetLado write SetLado;
+
+        [TPersistable(fgReadOnly, 'CodigoModulo')]
+        property CodigoModulo: String read GetModulo write SetModulo;
+
+        [TPersistable(fgReadOnly, 'CodigoNivel')]
+        property CodigoNivel: String read GetNivel write SetNivel;
+
+        [TPersistable(fgReadOnly, 'CodigoApartamento')]
+        property CodigoApartamento: String read GetApartamento write SetApartamento;
+
+        [TPersistable(fgPersistable, 'Z02_ENDER')]
+        property CodigoEndereco: string read GetCodigoEndereco write SetCodigoEndereco;
+
+        [TPersistable(fgPersistable, 'Z02_FILIAL')]
+        property CodigoFilial: string read FCodigoFilial write SetCodigoFilial;
+
+        property Filial: TFilial read FFilial write SetFilial;
+
+        [TPersistable(fgPersistable, 'Z02_TIPO')]
+        property CodigoTipoEndereco: string read FCodigoTipoEndereco write SetCodigoTipoEndereco;
+
+        property TipoEndereco: TTipoEndereco read FTipoEndereco write SetTipoEndereco;
+
+        [TPersistable(fgPersistable, 'Z02_UM')]
+        property UnidadeMedida: string read FUnidadeMedida write SetUnidadeMedida;
+
+        [TPersistable(fgPersistable, 'Z02_CAPAC')]
+        property Capacidade: double read FCapacidade write SetCapacidade;
+
+        [TPersistable(fgPersistable, 'Z02_PRODUTO')]
+        property CodigoProduto: string read FCodigoProduto write SetCodigoProduto;
+
+        property Produto: TProduto read FProduto write SetProduto;
+
+        [TPersistable(fgPersistable, 'Z02_DATA')]
+        property UltimaAlteracao: string read FUltimaAlteracao write SetUltimaAlteracao;
+
+        [TPersistable(fgPersistable, 'Z02_QTDE')]
+        property Quantidade: double read FQuantidade write SetQuantidade;
+
+        [TPersistable(fgUpdateable, 'Z02_QTDER')]
+        property QuantidadeReservada: double read FQuantidadeReservada write SetQuantidadeReservada;
+
+        [TPersistable(fgUpdateable, 'Z02_BLOQ')]
+        property Bloqueado: string read GetBloqueado write SetBloqueado;
+
+        [TPersistable(fgUpdateable, 'Z02_DESCBL')]
+        property DescricaoBloqueio: string read FDescricaoBloqueio write SetDescricaoBloqueio;
+
+        [TPersistable(fgPersistable, 'Z02_PRIORID')]
+        property Prioridade: string read FPrioridade write SetPrioridade;
+
+        [TPersistable(fgUpdateable, 'D_E_L_E_T_')]
+        property Delet: string read FDelet write SetDelet;
+
+        [TPersistable(fgUpdateable, 'R_E_C_N_O_')]
+        property Recno: integer read FRecno write SetRecno;
+    end;
+
+implementation
+
+{ TEnderecoArmazem }
+
+uses ClsFilter,ClsLib, ClsFieldFilter, Filter;
+
+{$REGION 'Métodos CRUD'}
+
+function TEnderecoArmazem.Inserir: integer;
+begin
+     BaseLib.ExecutaTarefa('InserirEnderecoArmazem', 'TEnderecoArmazem', BaseLib.ObjectToParameters(Self,acInsercao));
+    // ###Validar retorno da função
+     result := 0;
+end;
+
+function TEnderecoArmazem.Alterar: integer;
+begin
+    BaseLib.ExecutaTarefa('AlterarEnderecoArmazem', 'TEnderecoArmazem' , BaseLib.ObjectToParameters(Self,acAlteracao));
+    // ###Validar retorno da função
+    result := 0;
+end;
+
+function TEnderecoArmazem.Deletar(ID: string): integer;
+var
+    parametro: TParametro;
+begin
+     try
+        parametro := TParametro.Create;
+        parametro.Add('', 'R_E_C_N_O_', ID);
+
+        BaseLib.ExecutaTarefa('DeletarEnderecoArmazem', 'TEnderecoArmazem', parametro);
+
+     //###Validar retorno da função
+        result := 0;
+     finally
+        parametro.Free;
+     end;
+end;
+
+function TEnderecoArmazem.Listar(tipoOperacao: TOparationTypes; multiSelect: boolean): TResultFilter;
+var
+    campoFiltro: TFieldFilter;
+    filtro: TFilter<TEnderecoArmazem>;
+    // parametro : TParametro;
+    lista:TLista<TArmazem>;
+begin
+    inherited;
+    try
+        Lista := BaseLib.XmlToObject<TArmazem>( BaseLib.ExecutaTarefa('ConsultarArmazem', 'TEnderecoArmazem', nil));
+
+        filtro := TFilter<TEnderecoArmazem>.Create();
+
+        filtro.ScreenName := 'Filtro de Endereço';
+        filtro.OperationType := TipoOperacao;
+        filtro.MultiSelect := multiSelect;
+        filtro.Task := 'ConsultarEnderecoArmazem';
+        filtro.AddIndex(1, 'CodigoArmazem=CodigoArmazem, ' +
+                           'CodigoRua=CodigoRua, ' +
+                           'CodigoLado=CodigoLado, ' +
+                           'CodigoModulo=CodigoModulo, ' +
+                           'CodigoNivel=CodigoNivel, ' +
+                           'CodigoApartamento=CodigoApartamento, '+
+                           'Bloqueado=Z02_BLOQ ',
+                           'Armazem + Rua + Lado + Modulo + Nivel + Apartamento + Bloqueado');
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Armazem';
+        campoFiltro.Name := 'CodigoArmazem';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdDataListCombo;
+        campoFiltro.IDFieldName := 'Codigo';
+        campoFiltro.DescriptionFieldName := 'Descricao';
+        campoFiltro.DataSource := lista.ToList;
+        campoFiltro.ChildField := 'CodigoRua';
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Rua';
+        campoFiltro.Name := 'CodigoRua';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdListCombo;
+        campoFiltro.IDFieldName := 'CodigoRua';
+        campoFiltro.DescriptionFieldName := 'CodigoRua';
+        campoFiltro.MethodName := 'ObterRuas';
+        campoFiltro.ParentFields := 'CodigoArmazem';
+      //  campoFiltro.ChildField := 'CodigoModulo';
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Lado';
+        campoFiltro.Name := 'CodigoLado';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdListCombo;
+        campoFiltro.ListValue.add('Esquerdo=1');
+        campoFiltro.ListValue.add('Direito=2');
+        campoFiltro.ChildField := 'CodigoModulo';
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Módulo';
+        campoFiltro.Name := 'CodigoModulo';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdListCombo;
+        campoFiltro.IDFieldName := 'CodigoModulo';
+        campoFiltro.DescriptionFieldName := 'CodigoModulo';
+        campoFiltro.MethodName := 'ObterModulos';
+        campoFiltro.ParentFields := 'CodigoArmazem, CodigoRua, CodigoLado';
+        campoFiltro.ChildField := 'CodigoNivel';
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Nível';
+        campoFiltro.Name := 'CodigoNivel';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdListCombo;
+        campoFiltro.IDFieldName := 'CodigoNivel';
+        campoFiltro.DescriptionFieldName := 'CodigoNivel';
+        campoFiltro.MethodName := 'ObterNiveis';
+        campoFiltro.ParentFields := 'CodigoArmazem, CodigoRua, CodigoLado, CodigoModulo';
+        campoFiltro.ChildField := 'CodigoApartamento';
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Apartamento';
+        campoFiltro.Name := 'CodigoApartamento';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdListCombo;
+        campoFiltro.IDFieldName := 'CodigoApartamento';
+        campoFiltro.DescriptionFieldName := 'CodigoApartamento';
+        campoFiltro.MethodName := 'ObterApartamentos';
+        campoFiltro.ParentFields := 'CodigoArmazem, CodigoRua, CodigoLado, CodigoModulo, CodigoNivel';
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Bloqueado';
+        campoFiltro.Name := 'Bloqueado';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdListCombo;
+        campoFiltro.ListValue.add('Desbloqueado=S');
+        campoFiltro.ListValue.add('Bloqueado=N');
+        filtro.AddField(campoFiltro);
+
+        Result := Filtro.Execute;
+
+    finally
+        Lista.free;
+    end;
+end;
+
+
+function TEnderecoArmazem.Obter(parametros: TParametro): TObject;
+var
+    lista: TLista<TEnderecoArmazem>;
+begin
+    try
+        lista := BaseLib.XmlToObject<TEnderecoArmazem>(BaseLib.ExecutaTarefa('ConsultaEnderecoArmazem', 'TEnderecoArmazem', parametros));
+
+        if lista.Count = 1 then
+        begin
+            PopularObjeto(lista[0]);
+            result := Self;
+        end
+        else
+        begin
+            MessageDlg('Nenhum registro encontrado.', mtError, [mbOk], 0);
+            result := nil;
+        end;
+    finally
+        lista.free;
+    end;
+end;
+
+function TEnderecoArmazem.ObterEnderecosPorCodigosEnderecos(codigos: string): Tlista<TEnderecoArmazem>;
+var
+    parametro: TParametro;
+    lista : Tlista<TEnderecoArmazem>;
+begin
+    parametro := TParametro.Create;
+    try
+        parametro.Add('', 'Z02_ENDER', codigos);
+        lista :=  BaseLib.XmlToObject<TEnderecoArmazem>(BaseLib.ExecutaTarefa('ConsultarEnderecoArmazem', 'TEnderecoArmazem', parametro));
+        if lista.Count > 0 then
+        begin
+            result := lista;
+        end
+        else
+        begin
+            MessageDlg('Nenhum registro encontrado.', mtError, [mbOk], 0);
+            result := nil;
+        end;
+    finally
+        lista.free;
+        FreeAndNil(parametro);
+    end;
+end;
+
+function TEnderecoArmazem.Obter(ID: string): TObject;
+var
+    parametros: TParametro;
+begin
+    try
+        parametros := TParametro.Create;
+        parametros.Add('', 'COLOCAR_CAMPO_ID_AQUI', ID);
+        result := Obter(parametros);
+    finally
+        FreeAndNil(parametros);
+    end;
+end;
+
+procedure TEnderecoArmazem.AtualizaCodigoEndereco;
+begin
+ FCodigoEndereco := FCodigoArmazem+FRua+FLado+FModulo+FNivel+FApartamento;
+end;
+
+procedure TEnderecoArmazem.BloquearEndereco;
+begin
+    Self.Bloqueado := 'S';
+    BaseLib.ExecutaTarefa('AlterarEnderecoArmazem', 'TEnderecoBloquear' , BaseLib.ObjectToParameters(Self,acAlteracao));
+end;
+
+
+function TEnderecoArmazem.Consultar(parametros: TParametro): TList;
+begin
+    Result := BaseLib.XmlToObject<TEnderecoArmazem>(BaseLib.ExecutaTarefa('ConsultarEnderecoArmazem', 'TEnderecoArmazem', parametros)).toList;
+end;
+
+procedure TEnderecoArmazem.DesbloquearEndereco;
+begin
+    Self.Bloqueado := 'N';
+    BaseLib.ExecutaTarefa('AlterarEnderecoArmazem', 'TEnderecoDesbloquear' , BaseLib.ObjectToParameters(Self,acAlteracao));
+end;
+
+{$ENDREGION}
+
+{$REGION 'Regras de Negócio'}
+
+procedure TEnderecoArmazem.PopularObjeto(EnderecoArmazem: TEnderecoArmazem);
+begin
+    Self.Recno := EnderecoArmazem.Recno;
+    Self.CodigoFilial := EnderecoArmazem.CodigoFilial;
+    Self.CodigoTipoEndereco := EnderecoArmazem.CodigoTipoEndereco;
+    Self.CodigoEndereco := EnderecoArmazem.CodigoEndereco;
+    Self.UnidadeMedida := EnderecoArmazem.UnidadeMedida;
+    Self.Capacidade := EnderecoArmazem.Capacidade;
+    Self.CodigoProduto := EnderecoArmazem.CodigoProduto;
+    Self.UltimaAlteracao := EnderecoArmazem.UltimaAlteracao;
+    Self.Quantidade := EnderecoArmazem.Quantidade;
+    Self.QuantidadeReservada := EnderecoArmazem.QuantidadeReservada;
+    Self.Bloqueado := EnderecoArmazem.Bloqueado;
+    Self.DescricaoBloqueio := EnderecoArmazem.DescricaoBloqueio;
+    Self.Prioridade := EnderecoArmazem.Prioridade;
+    Self.Delet := EnderecoArmazem.Delet;
+end;
+
+{$ENDREGION}
+
+{$REGION 'Métodos de Propriedades'}
+
+procedure TEnderecoArmazem.SetApartamento(const Value: String);
+begin
+  FApartamento := Value;
+  AtualizaCodigoEndereco;
+end;
+
+procedure TEnderecoArmazem.SetArmazem(const Value: TArmazem);
+begin
+    FArmazem := Value;
+    AtualizaCodigoEndereco;
+end;
+
+procedure TEnderecoArmazem.SetBloqueado(const Value: string);
+begin
+    FBloqueado := Value;
+end;
+
+procedure TEnderecoArmazem.SetCapacidade(const Value: double);
+begin
+    FCapacidade := Value;
+end;
+
+procedure TEnderecoArmazem.SetCodigoArmazem(const Value: String);
+begin
+  FCodigoArmazem := Value;
+  AtualizaCodigoEndereco;
+end;
+
+procedure TEnderecoArmazem.SetCodigoEndereco(const Value: string);
+begin
+    FCodigoEndereco := Value;
+end;
+
+procedure TEnderecoArmazem.SetCodigoFilial(const Value: string);
+begin
+    FCodigoFilial := Value;
+end;
+
+procedure TEnderecoArmazem.SetCodigoProduto(const Value: string);
+begin
+    FCodigoProduto := Value;
+end;
+
+procedure TEnderecoArmazem.SetCodigoTipoEndereco(const Value: string);
+begin
+    FCodigoTipoEndereco := Value;
+end;
+
+procedure TEnderecoArmazem.SetDelet(const Value: string);
+begin
+    FDelet := Value;
+end;
+
+procedure TEnderecoArmazem.SetDescricaoBloqueio(const Value: string);
+begin
+    FDescricaoBloqueio := Value;
+end;
+
+procedure TEnderecoArmazem.SetFilial(const Value: TFilial);
+begin
+    FFilial := Value;
+end;
+
+procedure TEnderecoArmazem.SetLado(const Value: string);
+begin
+    FLado := Value;
+    AtualizaCodigoEndereco;
+end;
+
+procedure TEnderecoArmazem.SetModulo(const Value: String);
+begin
+  FModulo := Value;
+  AtualizaCodigoEndereco;
+end;
+
+procedure TEnderecoArmazem.SetNivel(const Value: String);
+begin
+  FNivel := Value;
+  AtualizaCodigoEndereco;
+end;
+
+procedure TEnderecoArmazem.SetPrioridade(const Value: string);
+begin
+    FPrioridade := Value;
+end;
+
+procedure TEnderecoArmazem.SetProduto(const Value: TProduto);
+begin
+    FProduto := Value;
+end;
+
+procedure TEnderecoArmazem.SetQuantidade(const Value: double);
+begin
+    FQuantidade := Value;
+end;
+
+procedure TEnderecoArmazem.SetQuantidadeReservada(const Value: double);
+begin
+    FQuantidadeReservada := Value;
+end;
+
+procedure TEnderecoArmazem.SetRecno(const Value: integer);
+begin
+    FRecno := Value;
+end;
+
+procedure TEnderecoArmazem.SetRua(const Value: String);
+begin
+  FRua := Value;
+  AtualizaCodigoEndereco;
+end;
+
+procedure TEnderecoArmazem.SetTipoEndereco(const Value: TTipoEndereco);
+begin
+    FTipoEndereco := Value;
+end;
+
+procedure TEnderecoArmazem.SetUltimaAlteracao(const Value: string);
+begin
+    FUltimaAlteracao := Value;
+end;
+
+procedure TEnderecoArmazem.SetUnidadeMedida(const Value: string);
+begin
+    FUnidadeMedida := Value;
+
+end;
+
+function TEnderecoArmazem.GetApartamento: String;
+begin
+   if FApartamento = EmptyStr then
+       FApartamento := copy(FCodigoEndereco,9,2);
+
+   result := FApartamento;
+end;
+
+function TEnderecoArmazem.GetArmazem: String;
+begin
+    if FCodigoArmazem = EmptyStr then
+       FCodigoArmazem := copy(FCodigoEndereco,1,2);
+
+   result := FCodigoArmazem;
+end;
+
+function TEnderecoArmazem.GetBloqueado: string;
+begin
+  if FBloqueado = EmptyStr then
+    FBloqueado := 'N';
+
+  result := FBloqueado;
+end;
+
+function TEnderecoArmazem.GetCodigoEndereco: string;
+begin
+  if FCodigoEndereco = EmptyStr then
+    FCodigoEndereco := FCodigoArmazem+FRua+FLado+FModulo+FNivel+FApartamento;
+
+  result := FCodigoEndereco;
+end;
+
+function TEnderecoArmazem.GetLado: string;
+begin
+   if FLado = EmptyStr then
+       FLado := copy(FCodigoEndereco,5,1);
+
+   result := FLado;
+end;
+
+function TEnderecoArmazem.GetModulo: String;
+begin
+    if FModulo = EmptyStr then
+       FModulo := copy(FCodigoEndereco,6,2);
+
+   result := FModulo;
+end;
+
+function TEnderecoArmazem.GetNivel: String;
+begin
+   if FNivel = EmptyStr then
+       FNivel := copy(FCodigoEndereco,8,1);
+
+   result := FNivel;
+end;
+
+function TEnderecoArmazem.GetRua: String;
+begin
+  if FRua = EmptyStr then
+       FRua := copy(FCodigoEndereco,3,2);
+
+   result := FRua;
+end;
+
+
+
+{$ENDREGION}
+
+end.

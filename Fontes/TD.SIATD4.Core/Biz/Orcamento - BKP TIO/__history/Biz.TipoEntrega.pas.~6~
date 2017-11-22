@@ -1,0 +1,188 @@
+unit Biz.TipoEntrega;
+
+interface
+
+uses
+    Classes, System.SysUtils, Dialogs, Lib.Base, Lib.Parametro, Lib.Enumeradores,
+    Lib.Persistable, Lib.Lista, Lib.ResultFilter, Lib.Interfaces.CRUD,  Lib.Interfaces.CRUDGenerico,
+    Dal.CondicaoConsulta, Dal.ControleDados, Dal.FabricaSQL, Biz.UsuarioLogado;
+
+type
+    TTipoEntrega = class(TBase)
+    private
+        FTipoOrcamento: string;
+        FTipoEntrega: string;
+        FReserva: string;
+        FLocalEntrega: string;
+        FDescricao: string;
+        FCodigo: integer;
+        FCodigoFilial: string;
+        FMarcar: string;
+        FLocalNota: string;
+
+        class var dao: TControleDados<TLista<TTipoEntrega>,TListaDAO<TTipoEntrega>>;
+
+        procedure SetCodigo(const Value: integer);
+        procedure SetCodigoFilial(const Value: string);
+        procedure SetDescricao(const Value: string);
+        procedure SetLocalEntrega(const Value: string);
+        procedure SetMarcar(const Value: string);
+        procedure SetReserva(const Value: string);
+        procedure SetTipoEntrega(const Value: string);
+        procedure SetTipoOrcamento(const Value: string);
+        procedure SetLocalNota(const Value: string);
+
+    public
+
+        ///	<summary>
+        ///	  retorna uma lista de tipo de entregas por tipo de venda
+        ///	</summary>
+        function ObterListaTipoEntregaPorTipoVenda(tipoVenda: TTipoVenda): TLista<TTipoEntrega>;
+
+        ///	<summary>
+        ///	  Método que preenche a instância do Objeto
+        ///	</summary>
+        ///	<param name="TipoEntrega">
+        ///	  objeto de parametro para preenchimento da instância
+        ///	</param>
+        procedure PreencherObjeto(TipoEntrega: TTipoEntrega);
+
+        [TPersistable(fgPersistable, 'Z07_FILIAL')]
+        property CodigoFilial: string read FCodigoFilial write SetCodigoFilial;
+
+        [TPersistable(fgPersistable, 'Z07_ENTREGA')]
+        property TipoEntrega: string read FTipoEntrega write SetTipoEntrega;
+
+        [TPersistable(fgPersistable, 'Z07_ORCLIB')]
+        property TipoOrcamento: string read FTipoOrcamento write SetTipoOrcamento;
+
+        [TPersistable(fgPersistable, 'Z07_DESCRI')]
+        property Descricao: string read FDescricao write SetDescricao;
+
+        [TPersistable(fgPersistable, 'Z07_RESERVA')]
+        property Reserva: string read FReserva write SetReserva;
+
+        [TPersistable(fgPersistable, 'Z07_MARCAR')]
+        property Marcar: string read FMarcar write SetMarcar;
+
+        [TPersistable(fgPersistable, 'Z07_LOCAL')]
+        property LocalEntrega: string read FLocalEntrega write SetLocalEntrega;
+
+        [TPersistable(fgPersistable, 'Z07_RECNO')]
+        property  Codigo: integer read FCodigo write SetCodigo;
+
+        [TPersistable(fgPersistable, 'Z07_NFCD')]
+        property LocalNota: string read FLocalNota write SetLocalNota;
+
+
+    end;
+
+implementation
+
+
+{ TTipoEntrega }
+
+uses Lib.Filter, Lib.Biblioteca;
+
+{$REGION 'Métodos CRUD'}
+{$ENDREGION}
+
+{$REGION 'Regras de Negócio'}
+
+procedure TTipoEntrega.PreencherObjeto(TipoEntrega: TTipoEntrega);
+begin
+    TipoEntrega.CopiarPara(Self);
+    FPreenchido := true;
+end;
+
+
+function TTipoEntrega.ObterListaTipoEntregaPorTipoVenda(tipoVenda: TTipoVenda): TLista<TTipoEntrega>;
+var
+    param: TParametro;
+    query: String;
+    campos: TStringList;
+begin
+    try
+        param := TParametro.Create;
+        param.Add('', 'Z07_FILIAL', tusu);
+
+        campos := Self.ObterListaDeCampos(Consulta);
+
+        if tipoVenda <> tvVendaRapida then
+        begin
+            query := campos.CommaText +
+                      ' FROM '+Self.TabelaReferencia +
+                      ' WHERE Z07_FILIAL =  :Z07_FILIAL AND D_E_L_E_T_ = '' '' AND (Z07_MARCAR = ''S'' OR Z07_ORCLIB = ''6-FUT'' OR Z07_ORCLIB = ''9-CSG'') ';
+        end
+        else
+        begin
+            query := campos.CommaText +
+                      ' FROM '+Self.TabelaReferencia +
+                      ' WHERE Z07_FILIAL =  :Z07_FILIAL AND D_E_L_E_T_ = '' '' AND Z07_MARCAR = ''S'' AND Z07_ORCLIB NOT IN (''9-ECO'', ''9-ECD'') ';
+
+        end;
+
+        result := dao.Consultar(query,param);
+    finally
+        if param <> nil then
+            FreeAndNil(param);
+
+        if campos <> nil then
+            FreeAndNil(campos);
+    end;
+end;
+
+{$ENDREGION}
+
+{$REGION 'Métodos de Propriedades'}
+
+procedure TTipoEntrega.SetCodigo(const Value: integer);
+begin
+  FCodigo := Value;
+end;
+
+procedure TTipoEntrega.SetCodigoFilial(const Value: string);
+begin
+  FCodigoFilial := Value;
+end;
+
+procedure TTipoEntrega.SetDescricao(const Value: string);
+begin
+  FDescricao := Value;
+end;
+
+procedure TTipoEntrega.SetLocalEntrega(const Value: string);
+begin
+  FLocalEntrega := Value;
+end;
+
+procedure TTipoEntrega.SetLocalNota(const Value: string);
+begin
+  FLocalNota := Value;
+end;
+
+procedure TTipoEntrega.SetMarcar(const Value: string);
+begin
+  FMarcar := Value;
+end;
+
+procedure TTipoEntrega.SetReserva(const Value: string);
+begin
+  FReserva := Value;
+end;
+
+procedure TTipoEntrega.SetTipoEntrega(const Value: string);
+begin
+  FTipoEntrega := Value;
+end;
+
+procedure TTipoEntrega.SetTipoOrcamento(const Value: string);
+begin
+  FTipoOrcamento := Value;
+end;
+
+
+{$ENDREGION}
+
+end.
+

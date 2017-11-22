@@ -1,0 +1,51 @@
+unit ClsCRUDFactory;
+
+interface
+
+uses clsBase, classes, ClsCoresSelfColor;
+
+type
+    TCRUDFactory = class
+    public
+    var
+        class function Factory(CRUDType: String):TBase;
+end;
+
+implementation
+
+
+{ TCRUDFactory<T> }
+
+uses ClsFilial, ClsVendedor, ClsCliente, ClsProduto,
+  ClsGrupo, ClsRotina, ClsEmpresa, ClsUsuario, ClsModulo,
+  ClsParametroSistema, ClsPermissao, System.SysUtils, ClsDicionarioTabela, ClsLogEvento, ClsAuditoria,
+  ClsFuncionario, ClsNotaSaida, ClsOrcamento, ClsControleVersao, ClsLeitorPreco;
+
+class function TCRUDFactory.Factory(CRUDType: String):TBase;
+begin
+    if CRUDType = 'TFilial'            then Result  := TFilial.Create   else
+    if CRUDType = 'TEmpresa'           then Result  := TEmpresa.Create  else
+    if CRUDType = 'TUsuario'           then Result  := TUsuario.Create  else
+    if CRUDType = 'TVendedor'          then Result  := TVendedor.Create else
+    if CRUDType = 'TCliente'           then Result  := TCliente.Create  else
+    if CRUDType = 'TProduto'           then Result  := TProduto.Create  else
+    if CRUDType = 'TRotina'            then Result  := TRotina.Create   else
+    if CRUDType = 'TGrupo'             then Result  := TGrupo.Create   else
+    if CRUDType = 'TModulo'            then Result  := TModulo.Create   else
+    if CRUDType = 'TParametroSistema'  then Result  := TParametroSistema.Create   else
+    if CRUDType = 'TPermissao'         then Result  := TPermissao.Create   else
+    if CRUDType = 'TDicionarioTabela'  then Result  := TDicionarioTabela.Create   else
+    if CRUDType = 'TAuditoria'  then Result  := TAuditoria.Create   else
+    if CRUDType = 'TLogEvento'  then Result  := TLogEvento.Create   else
+    if CRUDType = 'TFuncionario'  then Result  := TFuncionario.Create   else
+    if CRUDType = 'TNotaSaida'  then Result  := TNotaSaida.Create else
+    if CRUDType = 'TOrcamento'  then Result  := TOrcamento.Create else
+    if CRUDType = 'TControleVersao'  then Result  := TControleVersao.Create else
+    if CRUDType = 'TLeitorPreco'  then Result  := TLeitorPreco.Create else
+    if CRUDType = 'TCoresSelfColor'  then Result := TCoresSelfColor.Create else
+
+      raise Exception.Create('Classe não instanciada na Classe CRUDFactory.');
+    //Coloque aqui as classes para inicialização
+end;
+
+end.

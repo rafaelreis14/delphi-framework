@@ -1,0 +1,379 @@
+{ *Created by @ReisCodeGenerator* }
+unit Biz.Modulo;
+
+interface
+
+uses
+    Classes, System.SysUtils, Dialogs, Lib.ClasseBase, Lib.Parametro, Lib.Enumeradores,
+    Lib.Persistable, Lib.ResultFilter, Lib.Lista, Dal.ControleDados, Dal.CondicaoConsulta,
+    Framework.Interfaces.CRUD, Dal.FabricaSQL,  Biz.Acesso, Biz.Rotina;
+
+type
+
+    [TReferenceTable('SIATD_S08_01')]
+    TModulo = class(TClasseBase, ICRUD<TModulo>)
+    private
+        FDescricao: string;
+        FDelet: string;
+        FRecno: integer;
+        FModulo: string;
+        FRotinasModulo: TLista<TModuloRotina>;
+        procedure SetDelet(const Value: string);
+        procedure SetDescricao(const Value: string);
+        procedure SetModulo(const Value: string);
+        procedure SetRecno(const Value: integer);
+        procedure SetRotinasModulo(const Value: TLista<TModuloRotina>);
+    public
+        class var dao: TControleDados<TLista<TModulo>, TListaDAO<TModulo>>;
+        /// <summary>
+        /// Metodo que faz a inserção da Modulo
+        /// </summary>
+        function Inserir: integer;
+        /// <summary>
+        /// Metodo que faz a alteração da Modulo
+        /// </summary>
+        function Alterar: boolean;
+
+        /// <summary>
+        /// Métido que faz a Deleção da Modulo
+        /// </summary>
+        function Excluir: boolean;
+
+        /// <summary>
+        /// Método que chama a tela de filtro
+        /// </summary>
+        /// <param name="tipoOperacao">
+        /// Tipo da operação, se é somente filtro, ou seleção de registro
+        /// </param>
+        function Listar(tipoOperacao: TOparationTypes; multselect: boolean): TResultFilter;
+
+        /// <summary>
+        /// Método que retorna um objeto preenchido
+        /// </summary>
+        /// <param name="ID">
+        /// Chave primária da tabela
+        /// </param>
+        function Obter(ID: string): TModulo; overload;
+
+        /// <summary>
+        /// Método que retorna um objeto preenchido
+        /// </summary>
+        /// <param name="parametros">
+        /// Parametros para a consulta do objeto a ser preenchido
+        /// </param>
+        function Obter(parametros: TParametro): TModulo; overload;
+
+        /// <summary>
+        /// Método que retonar uma lista com varios objetos de acordo com parametro passado
+        /// </summary>
+        /// <param name="parametros">
+        /// Parametros para a consulta do objeto a ser preenchido
+        /// </param>
+        function Consultar(parametros: TParametro): TLista<TModulo>;
+
+        /// <summary>
+        /// Método que preenche a instância do Objeto
+        /// </summary>
+        /// <param name="Modulo">
+        /// objeto de parametro para preenchimento da instância
+        /// </param>
+        procedure PreencherObjeto(Modulo: TModulo);
+
+
+        function ObterModulosDeAcesso(login, empresa: string): TLista<TModulo>;
+        function ObterTodosModulos: TLista<TModulo>;
+
+        procedure CarregarRotinasModulo;
+
+
+
+        [TPersistable(fgPersistable, 'S08_MODULO')]
+        [TMaxLenght(20)]
+        property Modulo: string read FModulo write SetModulo;
+
+        [TPersistable(fgPersistable, 'S08_DESC')]
+        [TMaxLenght(60)]
+        property Descricao: string read FDescricao write SetDescricao;
+
+        [TPersistable(fgPersistable, 'D_E_L_E_T_')]
+        [TMaxLenght(1)]
+        property Delet: string read FDelet write SetDelet;
+
+        [TPersistable(fgUpdateable, 'R_E_C_N_O_')]
+        property Recno: integer read FRecno write SetRecno;
+
+
+        property RotinasModulo:TLista<TModuloRotina> read FRotinasModulo write SetRotinasModulo;
+
+        constructor Create;
+        destructor Destroy; override;
+
+    end;
+
+implementation
+
+{ TModulo }
+
+uses Lib.Filter, Lib.Biblioteca, Biz.UsuarioLogado, Biz.GrupoUsuario;
+
+{$REGION 'Métodos CRUD'}
+
+function TModulo.Inserir: integer;
+begin
+    try
+        try
+            result := dao.Inserir(Self);
+        except
+            on e: exception do
+                raise exception.Create('Erro ao inserir Modulo' + #13 + e.Message);
+        end;
+    finally
+    end;
+end;
+
+function TModulo.Alterar: boolean;
+begin
+    try
+        try
+            result := dao.Alterar(Self);
+        except
+            on e: exception do
+                raise exception.Create('Erro ao alterar Modulo' + #13 + e.Message);
+        end;
+    finally
+    end;
+end;
+
+function TModulo.Excluir: boolean;
+begin
+    try
+        try
+            result := dao.Excluir(Self);;
+        except
+            on e: exception do
+                raise exception.Create('Erro ao excluir Modulo' + #13 + e.Message);
+        end;
+    finally
+    end;
+end;
+
+
+function TModulo.Consultar(parametros: TParametro): TLista<TModulo>;
+var
+    query: string;
+    condicao: TCondicaoConsulta;
+begin
+    try
+        condicao := TCondicaoConsulta.Create(parametros);
+        condicao.Adiciona('S08_MODULO', ccLike, lgAnd);
+        condicao.Adiciona('S08_DESC', ccLike, lgAnd);
+        condicao.Adiciona('D_E_L_E_T_', ccIgual, lgAnd);
+        condicao.Adiciona('R_E_C_N_O_', ccIgual, lgAnd);
+
+        query := 'SELECT ' + Self.ObterCamposSeparadosPorVirgula(Consulta, []) + ' FROM ' + Self.TabelaReferencia + ' WHERE D_E_L_E_T_ = '''' ' +
+          condicao.ToString(true);
+
+        result := dao.Consultar(query, parametros);
+    finally
+        condicao.Free;
+    end;
+end;
+
+procedure TModulo.CarregarRotinasModulo;
+var
+    parametro: TParametro;
+    ModuloRotina: TModuloRotina;
+begin
+    try
+        parametro := TParametro.Create;
+        ModuloRotina := TModuloRotina.Create;
+        parametro.Add('','S09_S08_MODULO', Self.Modulo);
+        FRotinasModulo := ModuloRotina.Consultar(parametro);
+    finally
+        if parametro <> nil then
+            FreeAndNil(parametro);
+
+        if ModuloRotina <> nil then
+            FreeAndNil(ModuloRotina);
+    end;
+end;
+
+
+constructor TModulo.Create;
+begin
+    inherited;
+    FRotinasModulo := TLista<TModuloRotina>.Create;
+end;
+
+destructor TModulo.Destroy;
+begin
+    if FRotinasModulo <> nil then
+        FreeAndNil(FRotinasModulo);
+
+    inherited;
+end;
+
+function TModulo.Listar(tipoOperacao: TOparationTypes; multselect: boolean): TResultFilter;
+var
+    campoFiltro: TFieldFilter;
+    filtro: TFilter<TModulo>;
+    // parametro : TParametro;
+    // lista:TLista<TModulo>
+begin
+    try
+        filtro := TFilter<TModulo>.Create;
+        filtro.ScreenName := 'Filtro de Modulo';
+        filtro.OperationType := tipoOperacao;
+        filtro.MultiSelect := multselect;
+        filtro.AddIndex(1, 'Modulo=S08_MODULO', 'Modulo');
+        filtro.AddIndex(2, 'Descricao=S08_DESC', 'Descricao');
+        filtro.AddIndex(3, 'Delet=D_E_L_E_T_', 'Delet');
+        filtro.AddIndex(4, 'Recno=R_E_C_N_O_', 'Recno');
+        // ###Criar os Índices do filtro
+        // filtro.AddIndex(99, 'Empresa=S01_EMP, Filial=S01_FILIAL, Descricao=S01_DESC', 'Empresa + Filial + Descrição');
+
+{$REGION 'Campo Filtro'}
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Modulo';
+        campoFiltro.Name := 'Modulo';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Descricao';
+        campoFiltro.Name := 'Descricao';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Delet';
+        campoFiltro.Name := 'Delet';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Recno';
+        campoFiltro.Name := 'Recno';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+{$ENDREGION}
+        result := filtro.Execute;
+    finally
+        // FreeAndNil(parametro);
+        // FreeAndNil(lista);
+    end;
+end;
+
+function TModulo.Obter(parametros: TParametro): TModulo;
+var
+    Lista: TLista<TModulo>;
+begin
+    try
+        Lista := Self.Consultar(parametros);
+
+        if Lista.Count = 1 then
+        begin
+            PreencherObjeto(Lista[0]);
+            result := Self;
+        end
+        else
+        begin
+            TLib.MensagemAdvertencia('Nenhum registro encontrado.', 'Aviso');
+            result := nil;
+        end;
+    finally
+        Lista.Destroy;
+    end;
+end;
+
+function TModulo.Obter(ID: string): TModulo;
+var
+    parametros: TParametro;
+
+begin
+    try
+        parametros := TParametro.Create;
+        parametros.Add('', 'S08_MODULO', ID);
+        result := Obter(parametros);
+    finally
+        FreeAndNil(parametros);
+    end;
+end;
+
+
+function TModulo.ObterTodosModulos: TLista<TModulo>;
+begin
+    result := Self.Consultar(nil);
+end;
+
+
+
+function TModulo.ObterModulosDeAcesso(login, empresa: string): TLista<TModulo>;
+var
+    Parametro: TParametro;
+    query: string;
+begin
+    try
+        Parametro := TParametro.Create();
+        Parametro.Add('', 'S04_S01_LOGIN', login);
+        Parametro.Add('', 'EMPRESA', empresa);
+
+        query := 'SELECT S08.S08_MODULO, S08.S08_DESC, S08.D_E_L_E_T_, S08.R_E_C_N_O_ FROM '+Self.TabelaReferencia+' S08 WHERE S08.S08_MODULO IN( ' +
+          'SELECT DISTINCT S20_S09_S08_MODULO FROM '+TAcesso.TabelaReferencia+' WHERE S20_S02_GRUPO IN (SELECT S03_S02_GRUPO FROM '+TGrupoUsuario.TabelaReferencia+
+          ' WHERE S03_S01_LOGIN = :S04_S01_LOGIN AND D_E_L_E_T_ = '''') ' + ' AND D_E_L_E_T_ = '''' )';
+        result := dao.Consultar(query, Parametro);
+    finally
+        if Parametro <> nil then
+            FreeAndNil(Parametro);
+    end;
+end;
+
+{$ENDREGION}
+{$REGION 'Regras de Negócio'}
+
+procedure TModulo.PreencherObjeto(Modulo: TModulo);
+begin
+    Modulo.CopiarPara(Self);
+    FPreenchido := true;
+end;
+
+
+procedure TModulo.SetDelet(const Value: string);
+begin
+    FDelet := Value;
+end;
+
+procedure TModulo.SetDescricao(const Value: string);
+begin
+    FDescricao := Value;
+end;
+
+procedure TModulo.SetModulo(const Value: string);
+begin
+    FModulo := Value;
+end;
+
+procedure TModulo.SetRecno(const Value: integer);
+begin
+    FRecno := Value;
+end;
+
+procedure TModulo.SetRotinasModulo(const Value: TLista<TModuloRotina>);
+begin
+      FRotinasModulo := Value;
+end;
+
+{$ENDREGION}
+{$REGION 'Métodos de Propriedades'}
+{$ENDREGION}
+
+end.

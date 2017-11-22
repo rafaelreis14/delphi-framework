@@ -1,0 +1,266 @@
+unit Lib.Parametro;
+
+interface
+
+uses SysUtils, Generics.Collections;
+
+Type
+  TItemParametro = class
+  private
+    FValor: string;
+    FChave: string;
+    FProcesso: string;
+    FValorAnterior: string;
+    FLinha: string;
+    procedure SetChave(const Value: string);
+    procedure SetProcesso(const Value: string);
+    procedure SetValor(const Value: string);
+    procedure SetValorAnterior(const Value: string);
+    procedure SetLinha(const Value: string);
+  public
+    property ValorAnterior: string read FValorAnterior write SetValorAnterior;
+    property Processo: string read FProcesso write SetProcesso;
+    property Chave: string read FChave write SetChave;
+    property Valor: string read FValor write SetValor;
+    property Linha: string read FLinha write SetLinha;
+    constructor MontaParametro(pChave, pValor: string; pProcesso: string = 'Padrao'; pLinha: string = '');
+  end;
+
+  TParametro = class
+  private
+    FProcesso: string;
+    FCount: integer;
+    FItem: TObjectList<TItemParametro>;
+    procedure SetCount(const Value: integer);
+    procedure SetItem(const Value: TObjectList<TItemParametro>);
+  public
+    constructor Create();overload;
+    constructor Create(pProcesso, pChave: string; pValor: string; pLinha: string = '');overload;
+    destructor Destroy; override;
+    property Processo: string read FProcesso;
+    property Count: integer read FCount write SetCount;
+    property Item: TObjectList<TItemParametro> read FItem write SetItem;
+    procedure Add(pProcesso, pChave: string; pValor: string; pLinha: string = '');  overload;
+    procedure Add(itemParametro: TItemParametro); overload;
+
+    function ObterParametrosPorProcesso(processo: string; mensagemErro: boolean = true): TParametro;
+    function ObterParametroPorLinha(linha: string): TParametro;
+    function ObterValorParamentro(chave: string): string;
+    function ObterItemParamentroPorNome(nome:string; disparaExcecao: boolean = true): TItemParametro; overload;
+    function ObterItemParamentroPorNome(nome, processo:string; disparaExcecao: boolean = true): TItemParametro; overload;
+
+  end;
+
+  TGrupoParametro = class
+  private
+    FItem: TObjectList<TParametro>;
+  public
+    constructor Create;
+    destructor Destroy; override;
+    property Item: TObjectList<TParametro> read FItem;
+    procedure Add(const pParametro: TParametro);
+
+
+  end;
+
+implementation
+
+uses
+  Dialogs;
+
+{ TItemParametro }
+
+constructor TItemParametro.MontaParametro(pChave, pValor, pProcesso: string;
+  pLinha: string);
+begin
+  Self.Chave := pChave;
+  Self.Valor := pValor;
+  Self.Processo := pProcesso;
+  Self.Linha := pLinha;
+end;
+
+procedure TItemParametro.SetChave(const Value: string);
+begin
+  FChave := Value;
+end;
+
+procedure TItemParametro.SetLinha(const Value: string);
+begin
+  FLinha := Value;
+end;
+
+procedure TItemParametro.SetProcesso(const Value: string);
+begin
+  FProcesso := Value;
+end;
+
+procedure TItemParametro.SetValor(const Value: string);
+begin
+  FValor := Value;
+end;
+
+procedure TItemParametro.SetValorAnterior(const Value: string);
+begin
+  FValorAnterior := Value;
+end;
+
+{ TParametro }
+
+procedure TParametro.Add(pProcesso, pChave, pValor: string;
+  pLinha: string = '');
+begin
+  Inc(FCount);
+  Self.FProcesso := pProcesso;
+  FItem.Add(TItemParametro.MontaParametro(pChave, pValor, pProcesso, pLinha));
+end;
+
+constructor TParametro.Create;
+begin
+  FItem := TObjectList<TItemParametro>.Create;
+end;
+
+procedure TParametro.Add(itemParametro: TItemParametro);
+begin
+    Add(itemParametro.Processo, itemParametro.Chave,itemParametro.Valor, itemParametro.Linha);
+end;
+
+constructor TParametro.Create(pProcesso, pChave, pValor, pLinha: string);
+begin
+  Create();
+  Inc(FCount);
+  Self.FProcesso := pProcesso;
+  FItem.Add(TItemParametro.MontaParametro(pChave, pValor, pProcesso, pLinha));
+end;
+
+destructor TParametro.Destroy;
+begin
+    if FItem <> nil then
+      FreeAndNil(FItem);
+    inherited;
+end;
+
+function TParametro.ObterItemParamentroPorNome(nome: string; disparaExcecao: boolean): TItemParametro;
+begin
+    result := Self.ObterItemParamentroPorNome(nome, EmptyStr, disparaExcecao);
+end;
+
+function TParametro.ObterItemParamentroPorNome(nome, processo: string; disparaExcecao: boolean): TItemParametro;
+var
+    itemPar: TItemParametro;
+begin
+    result := nil;
+    for itemPar in Self.Item do
+    begin
+        if (itemPar.Chave = nome) and ((itemPar.Processo = processo) or (processo = EmptyStr)) then
+        begin
+            result := itemPar;
+            exit;
+        end;
+    end;
+    if disparaExcecao then
+       raise Exception.Create('Parâmetro '+nome+' não encontrado');
+end;
+
+function TParametro.ObterParametroPorLinha(linha: string): TParametro;
+var
+    parametro: TParametro;
+    itemPar: TItemParametro;
+begin
+    parametro := TParametro.Create;
+
+    if self.Item <> nil then
+    begin
+      for itemPar in Self.Item do
+      begin
+        if itemPar.Linha = linha then
+          parametro.Add(itemPar);
+      end;
+    end;
+
+    if parametro.Item.Count = 0 then
+    begin
+        FreeAndNil(parametro);
+        raise Exception.Create('Erro ao obter parametro por linha');
+    end
+    else
+      result := parametro;
+end;
+
+function TParametro.ObterParametrosPorProcesso(processo: string; mensagemErro: boolean): TParametro;
+var
+    parametro: TParametro;
+    processoAtual: string;
+    itemPar: TItemParametro;
+begin
+    result := nil;
+    parametro := TParametro.Create;
+
+    if self.Item <> nil then
+    begin
+      for itemPar in Self.Item do
+      begin
+        if itemPar.Processo = processo then
+        begin
+          parametro.Add(itemPar);
+        end;
+      end;
+    end;
+
+    if parametro.Item.Count = 0 then
+    begin
+        FreeAndNil(parametro);
+        if mensagemErro then
+            raise Exception.Create('Erro ao obter parametro por processo');
+    end
+    else
+      result := parametro;
+end;
+
+function TParametro.ObterValorParamentro(chave: string): string;
+var
+    item: TItemParametro;
+begin
+    if self.Item <> nil then
+    begin
+        for item in self.Item do
+        begin
+            if UpperCase(item.Chave) = UpperCase(chave) then
+            begin
+                result := item.Valor;
+                exit;
+            end;
+        end;
+    end;
+    result := EmptyStr;
+end;
+
+procedure TParametro.SetCount(const Value: integer);
+begin
+  FCount := Value;
+end;
+
+procedure TParametro.SetItem(const Value: TObjectList<TItemParametro>);
+begin
+  FItem := Value;
+end;
+
+{ TGrupoParametro }
+
+procedure TGrupoParametro.Add(const pParametro: TParametro);
+begin
+  FItem.Add(pParametro);
+end;
+
+constructor TGrupoParametro.Create;
+begin
+  FItem := TObjectList<TParametro>.Create;
+end;
+
+destructor TGrupoParametro.Destroy;
+begin
+  FItem.Free;
+  inherited;
+end;
+
+
+end.

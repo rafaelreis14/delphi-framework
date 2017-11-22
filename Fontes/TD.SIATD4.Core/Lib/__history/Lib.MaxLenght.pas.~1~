@@ -1,0 +1,30 @@
+unit ClsMaxLenght;
+
+interface
+
+type
+  TMaxLenght = class(TCustomAttribute)
+  private
+    FMaxLenght: integer;
+    procedure SetMaxLenght(const Value: integer);
+  public
+    property MaxLenght: integer read FMaxLenght write SetMaxLenght;
+    constructor Create(maxLenght: integer);
+  end;
+
+
+implementation
+
+{ TMaxLenght }
+
+constructor TMaxLenght.Create(maxLenght: integer);
+begin
+    FMaxLenght := maxLenght;
+end;
+
+procedure TMaxLenght.SetMaxLenght(const Value: integer);
+begin
+  FMaxLenght := Value;
+end;
+
+end.

@@ -1,0 +1,13 @@
+unit Framework.Interfaces.CRUDGenerico;
+
+interface
+uses Lib.Enumeradores, Lib.ResultFilter, Lib.ClasseBase,
+  Framework.Interfaces.Listavel;
+type
+    ICRUDGenerico = interface(IListavel)
+        function ObterBase(ID: string): TClasseBase;
+    end;
+
+implementation
+
+end.

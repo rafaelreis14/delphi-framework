@@ -1,0 +1,18 @@
+unit Lib.Interfaces.CRUDFormConsulta;
+
+interface
+
+uses
+    Classes, Lib.Enumeradores, Lib.Parametro, Lib.ResultFilter, Lib.Lista;
+
+type
+    ICRUDFormConsulta = interface
+        procedure DoDeletar;
+        procedure ObterInstanciaObjeto;
+        function DoListar: TResultFilter;
+    end;
+
+
+implementation
+
+end.

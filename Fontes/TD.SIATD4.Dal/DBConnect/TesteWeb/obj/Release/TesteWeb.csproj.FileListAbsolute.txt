@@ -1,0 +1,9 @@
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\TesteWeb\bin\TesteWeb.dll.config
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\TesteWeb\bin\TesteWeb.dll
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\TesteWeb\bin\TesteWeb.pdb
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\TesteWeb\obj\Release\TesteWeb.dll
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\TesteWeb\obj\Release\TesteWeb.pdb
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\TesteWeb\bin\DBConnectSIATD.dll
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\TesteWeb\bin\DBConnectSIATD.pdb
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\TesteWeb\obj\Release\TesteWeb.csprojResolveAssemblyReference.cache
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\TesteWeb\bin\Config.ini

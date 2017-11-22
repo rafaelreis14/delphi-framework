@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2015/02/04 15:22:38.000.884,=C:\Users\james\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2015/02/04 15:23:21.000.392,C:\Users\james\Documents\RAD Studio\Projects\Unit1.pas=C:\FONTES SIATD\Prototipo DDL banco de dados\Testedelphi\UntPrincipal.pas</Transaction>
+    <Transaction>2015/02/04 15:23:21.000.392,C:\Users\james\Documents\RAD Studio\Projects\Unit1.dfm=C:\FONTES SIATD\Prototipo DDL banco de dados\Testedelphi\UntPrincipal.dfm</Transaction>
+    <Transaction>2015/02/04 15:23:31.000.650,C:\Users\james\Documents\RAD Studio\Projects\Project1.dproj=C:\FONTES SIATD\Prototipo DDL banco de dados\Testedelphi\TesteDBConnectDelphi.dproj</Transaction>
+    <Transaction>2015/02/04 15:47:44.000.475,=C:\FONTES SIATD\Prototipo DDL banco de dados\TypeLibrary\DBConnect_TLB.pas</Transaction>
+    <Transaction>2015/02/04 15:47:54.000.824,=C:\FONTES SIATD\Prototipo DDL banco de dados\TypeLibrary\mscorlib_TLB.pas</Transaction>
+    <Transaction>2015/02/04 16:23:33.000.897,C:\FONTES SIATD\Prototipo DDL banco de dados\TypeLibrary\DBConnect_TLB.pas=</Transaction>
+    <Transaction>2015/02/04 16:23:33.000.867,C:\FONTES SIATD\Prototipo DDL banco de dados\TypeLibrary\mscorlib_TLB.pas=</Transaction>
+    <Transaction>2015/02/04 16:25:50.000.563,=C:\FONTES SIATD\Prototipo DDL banco de dados\TypeLibrary\DBConnect_TLB.pas</Transaction>
+    <Transaction>2015/02/04 16:26:13.000.637,=C:\FONTES SIATD\Prototipo DDL banco de dados\TypeLibrary\mscorlib_TLB.pas</Transaction>
+    <Transaction>2015/02/05 15:36:47.000.242,C:\FONTES SIATD\Prototipo DDL banco de dados\TypeLibrary\mscorlib_TLB.pas=</Transaction>
+    <Transaction>2015/02/05 15:36:47.000.221,C:\FONTES SIATD\Prototipo DDL banco de dados\TypeLibrary\DBConnect_TLB.pas=</Transaction>
+    <Transaction>2015/02/05 15:41:14.000.456,=C:\FONTES SIATD\Prototipo DDL banco de dados\TypeLibrary\DBConnectSIATD_TLB.pas</Transaction>
+    <Transaction>2015/02/05 15:41:48.000.624,=C:\FONTES SIATD\Prototipo DDL banco de dados\TypeLibrary\mscorlib_TLB.pas</Transaction>
+    <Transaction>2015/02/05 16:14:33.000.401,=C:\FONTES SIATD\Prototipo DDL banco de dados\TypeLibrary\DBConnectSIATD_TLB.pas</Transaction>
+    <Transaction>2015/02/05 16:15:37.000.658,=C:\FONTES SIATD\Prototipo DDL banco de dados\TypeLibrary\mscorlib_TLB.pas</Transaction>
+  </Transactions>
+	<ProjectSortOrder AutoSort="0" SortType="0">
+    <File Path="..\..\DDL BANCO DE DADOS"/>
+    <File Path="..\TypeLibrary"/>
+    <File Path="..\TypeLibrary\DBConnectSIATD_TLB.pas"/>
+    <File Path="..\TypeLibrary\mscorlib_TLB.pas"/>
+    <File Path="UntPrincipal.pas"/>
+    <File Path="UntPrincipal.dfm"/>
+  </ProjectSortOrder>
+</BorlandProject>

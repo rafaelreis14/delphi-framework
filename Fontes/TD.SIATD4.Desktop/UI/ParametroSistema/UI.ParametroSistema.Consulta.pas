@@ -1,0 +1,42 @@
+{*Created by @ReisCodeGenerator*}
+unit UI.ParametroSistema.Consulta;
+
+interface
+
+uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, UntErrorProvider,
+    Vcl.ComCtrls, Vcl.Imaging.jpeg, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.Grids, RGrid,
+    Vcl.Buttons, Vcl.Menus, RTTI, UI.Base.Controlador.ConsultaDesktop,
+	Biz.ParametroSistema, UI.Base.ConsultaPadrao;
+
+type
+    //TfrmConParametroSistema = class(TFrmConsultaPadrao)
+	TfrmConParametroSistema = class(TControladorConsultaDesktop<TParametroSistema>)
+        procedure FormCreate(Sender: TObject);
+    private
+        { Private declarations }
+    public
+        { Public declarations }
+    end;
+
+var
+    frmConParametroSistema: TfrmConParametroSistema;
+
+implementation
+
+{$R *.dfm}
+
+uses UI.ParametroSistema.Cadastro;
+
+
+procedure TfrmConParametroSistema.FormCreate(Sender: TObject);
+begin
+    inherited;
+    grDados.AddCol('CodigoFilial', 'Filial', 50, RGrid.mtString);
+    grDados.AddCol('Nome', 'Nome', 100, RGrid.mtString);
+    grDados.AddCol('Valor', 'Valor', 250, RGrid.mtString);
+    Inicializar(TfrmCadParametroSistema);
+end;
+
+end.

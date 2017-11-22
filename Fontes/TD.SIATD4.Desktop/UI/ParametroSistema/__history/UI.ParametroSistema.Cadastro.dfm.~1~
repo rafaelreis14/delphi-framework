@@ -1,0 +1,137 @@
+inherited frmCadParametroSistema: TfrmCadParametroSistema
+  Caption = 'frmCadParametroSistema'
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited Panel2: TPanel
+    Width = 640
+    ExplicitWidth = 640
+    inherited lblLetreiro: TLabel
+      Width = 149
+      Caption = 'Cadastro de ParametroSistema'
+      ExplicitWidth = 149
+    end
+  end
+  inherited pgcComponentes: TPageControl
+    inherited tbPrincipal: TTabSheet	
+      ExplicitLeft = 4
+      ExplicitTop = 24
+      ExplicitWidth = 620
+      ExplicitHeight = 255
+
+      object lblCodigoEmpresa: TLabel
+        Left = 12
+        Top = 16
+        Width = 31
+        Height = 13
+        Caption = 'CodigoEmpresa'
+      end
+      object edCodigoEmpresa: TREdit
+        Left = 12
+        Top = 32
+        Width = 52
+        Height = 21
+        CharCase = ecUpperCase 
+        TabOrder = 0
+        FieldName = 'CodigoEmpresa'
+        MaskType = mtString
+        MaxLength = 52
+        MandatoryField = False
+        PersistentField = true
+        SaveLiteralCharacters = False
+        DecimalPlaces = 2
+      end
+
+      object lblCodigoFilial: TLabel
+        Left = 12
+        Top = 56
+        Width = 31
+        Height = 13
+        Caption = 'CodigoFilial'
+      end
+      object edCodigoFilial: TREdit
+        Left = 12
+        Top = 72
+        Width = 52
+        Height = 21
+        CharCase = ecUpperCase 
+        TabOrder = 1
+        FieldName = 'CodigoFilial'
+        MaskType = mtString
+        MaxLength = 52
+        MandatoryField = False
+        PersistentField = true
+        SaveLiteralCharacters = False
+        DecimalPlaces = 2
+      end
+
+      object lblNome: TLabel
+        Left = 12
+        Top = 96
+        Width = 31
+        Height = 13
+        Caption = 'Nome'
+      end
+      object edNome: TREdit
+        Left = 12
+        Top = 112
+        Width = 60
+        Height = 21
+        CharCase = ecUpperCase 
+        TabOrder = 2
+        FieldName = 'Nome'
+        MaskType = mtString
+        MaxLength = 60
+        MandatoryField = False
+        PersistentField = true
+        SaveLiteralCharacters = False
+        DecimalPlaces = 2
+      end
+
+      object lblValor: TLabel
+        Left = 12
+        Top = 136
+        Width = 31
+        Height = 13
+        Caption = 'Valor'
+      end
+      object edValor: TREdit
+        Left = 12
+        Top = 152
+        Width = 150
+        Height = 21
+        CharCase = ecUpperCase 
+        TabOrder = 3
+        FieldName = 'Valor'
+        MaskType = mtString
+        MaxLength = 150
+        MandatoryField = False
+        PersistentField = true
+        SaveLiteralCharacters = False
+        DecimalPlaces = 2
+      end
+
+      object lblRecno: TLabel
+        Left = 12
+        Top = 176
+        Width = 31
+        Height = 13
+        Caption = 'Recno'
+      end
+      object edRecno: TREdit
+        Left = 12
+        Top = 192
+        Width = 50
+        Height = 21
+        CharCase = ecUpperCase 
+        TabOrder = 4
+        FieldName = 'Recno'
+        MaskType = mtInteger
+        MaxLength = 50
+        MandatoryField = False
+        PersistentField = true
+        SaveLiteralCharacters = False
+        DecimalPlaces = 2
+      end
+    end
+  end
+end

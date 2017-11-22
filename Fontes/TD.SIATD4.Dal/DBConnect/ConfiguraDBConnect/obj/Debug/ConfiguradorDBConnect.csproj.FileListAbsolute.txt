@@ -1,0 +1,10 @@
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\ConfiguraDBConnect\bin\Debug\ConfiguradorDBConnect.exe
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\ConfiguraDBConnect\bin\Debug\ConfiguradorDBConnect.pdb
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\ConfiguraDBConnect\bin\Debug\DBConnect.dll
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\ConfiguraDBConnect\bin\Debug\DBConnect.pdb
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\ConfiguraDBConnect\obj\Debug\ConfiguradorDBConnect.csprojResolveAssemblyReference.cache
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\ConfiguraDBConnect\obj\Debug\ConfiguraDBConnect.FormConfigurador.resources
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\ConfiguraDBConnect\obj\Debug\ConfiguradorDBConnect.Properties.Resources.resources
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\ConfiguraDBConnect\obj\Debug\ConfiguradorDBConnect.csproj.GenerateResource.Cache
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\ConfiguraDBConnect\obj\Debug\ConfiguradorDBConnect.exe
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\ConfiguraDBConnect\obj\Debug\ConfiguradorDBConnect.pdb

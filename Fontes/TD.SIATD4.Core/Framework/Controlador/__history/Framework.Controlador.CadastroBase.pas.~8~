@@ -1,0 +1,228 @@
+unit Framework.Controlador.CadastroBase;
+
+interface
+
+uses
+    UI.Base.CadastroPadrao, System.Rtti, System.Classes, UntErrorProvider, Vcl.Forms, Lib.Biblioteca, Lib.Enumeradores,
+  Vcl.Buttons, Framework.UI.FormBase;
+
+type
+    TControladorConsultaDesktop<T: Class> = class
+    private       
+        procedure ForcarValoresOriginais(form: TFrmBase);
+    public
+        procedure ExecutarSalvar(objeto: T; form: TFrmBase; erroProvider: TErrorProvider; acaoJanela: TAcaoJanela);
+        procedure ExecutarMostrarFormulario(objeto: T; form: TFrmBase; acaoJanela: TAcaoJanela; btnConfirmar: TBitBtn);
+        procedure ExecutarCancelar(form: TFrmBase);
+
+        function ValidaCamposObrigatorios(errorProvider: TErrorProvider; form: TScrollingWinControl): boolean; overload;
+        procedure CarregarComponentes(objeto: T; form: TScrollingWinControl; acaoJanela: TAcaoJanela); overload;
+        procedure CarregarObjeto(objeto:T; form: TScrollingWinControl); overload;
+        function VerificarComponentes(componente: Tcomponent): boolean;
+    end;
+
+implementation
+
+uses
+  Vcl.Controls, System.SysUtils, Lib.Parametro, Framework.Interfaces.CRUD,
+  REdit, RComboBox, RSearch, RCheckBox, RCheckListBox, Lib.Base;
+
+{ TControladorConsultaDesktop<T> }
+
+procedure TControladorConsultaDesktop<T>.ExecutarCancelar(form: TFrmBase);
+begin
+    form.Close;
+end;
+
+procedure TControladorConsultaDesktop<T>.ExecutarMostrarFormulario(objeto: T; form: TFrmBase; acaoJanela: TAcaoJanela; btnConfirmar: TBitBtn);
+begin
+    if AcaoJanela in [acAlteracao, acVisualizacao] then
+    begin
+        if AcaoJanela = acAlteracao then
+        begin
+            if Objeto <> nil then
+                TBase(objeto).LimparPropriedadesAlteradas;
+        end;
+
+        CarregarComponentes(objeto, form, acaoJanela);
+        btnConfirmar.Enabled := Tlib.IfTernario(AcaoJanela = acVisualizacao,false,true);
+
+        if acaoJanela = acAlteracao then
+            ForcarValoresOriginais(form);
+    end;
+end;
+
+procedure TControladorConsultaDesktop<T>.ExecutarSalvar(objeto: T; form: TFrmBase; erroProvider: TErrorProvider; acaoJanela: TAcaoJanela);
+var
+    par:TParametro;
+begin
+    inherited;
+    try
+        if ValidaCamposObrigatorios(erroProvider, form) then exit;
+
+        CarregarObjeto(objeto, form);
+
+        if AcaoJanela = acAlteracao then
+             ICRUD<T>(objeto).Alterar
+        else
+        if AcaoJanela = acInsercao then
+             ICRUD<T>(objeto).Inserir;
+
+        form.RetornoFormulario := rfOK;
+
+    except
+        form.RetornoFormulario := rfComErro;
+        raise;
+    end;
+
+    form.close;
+end;
+
+
+function TControladorConsultaDesktop<T>.ValidaCamposObrigatorios(errorProvider: TErrorProvider; form: TScrollingWinControl): boolean;
+var
+    componente: TComponent;
+    context: TRttiContext;
+    prop, propComp: TRttiProperty;
+begin
+    Result := false;
+    for componente in form do
+    begin
+       if VerificarComponentes(componente) then
+       begin
+            propComp := context.GetType(componente.ClassType).GetProperty('MandatoryField');
+            if propComp.GetValue(componente).ToString = 'True' then
+            begin
+                propComp := context.GetType(componente.ClassType).GetProperty('Value');
+                if Trim(propComp.GetValue(componente).ToString) = EmptyStr then
+                begin
+                   ErrorProvider.SetError(TControl(componente),'Campo Obrigatório');
+                   Result := true;
+                end;
+            end;
+       end
+       else
+        begin
+            if (componente is TFrame) then
+                // esta validação é feita pois caso ja exista um item no form principal obrigatorio vazio, e no frame nao tenha, não sobreponha
+                if ValidaCamposObrigatorios(errorProvider, TFrame(componente)) then
+                    Result := true;
+        end;
+
+    end;
+    errorProvider.FFirst := false;
+end;
+
+
+procedure TControladorConsultaDesktop<T>.CarregarComponentes(objeto: T; form: TScrollingWinControl; acaoJanela: TAcaoJanela);
+var
+    context: TRttiContext;
+    prop, propComp: TRttiProperty;
+    Texto : string;
+    I: integer;
+    desabilitaComponente: boolean;
+    val: TValue;
+    componente:TComponent;
+begin
+    for componente in form do
+    begin
+        if VerificarComponentes(componente) then
+        begin
+            try
+                propComp := context.GetType(componente.ClassType).GetProperty('PersistentField');
+                if propComp.GetValue(componente).ToString <> 'True' then Continue;
+
+                propComp := context.GetType(componente.ClassType).GetProperty('FieldName');
+                Texto := propComp.GetValue(componente).ToString;
+                prop := context.GetType(TBase(Objeto).ClassType).GetProperty(propComp.GetValue(componente).ToString);
+
+                propComp := context.GetType(componente.ClassType).GetProperty('Value');
+                propComp.SetValue(componente, prop.GetValue(TBase(Objeto)).ToString);
+
+                propComp := context.GetType(componente.ClassType).GetProperty('Enabled');
+                desabilitaComponente := TLib.IfTernario(acaoJanela = acVisualizacao,false, true);
+                val := val.From(desabilitaComponente);
+                propComp.SetValue(componente, val);
+            except
+               raise Exception.Create('Erro ao tentar acessar a propriedade do componente '+componente.Name+' - '+Texto+'. Verifique Configuração');
+            end;
+        end
+        else
+        begin
+            if (componente is TFrame) then
+                CarregarComponentes(Objeto, TFrame(componente), acaoJanela);
+
+        end;
+    end;
+end;
+
+procedure TControladorConsultaDesktop<T>.CarregarObjeto(objeto:T; form: TScrollingWinControl);
+var
+    context: TRttiContext;
+    prop, propComp: TRttiProperty;
+    Texto, text1: string;
+    I: integer;
+    componente: Tcomponent;
+begin
+    for componente in form do
+    begin
+        if VerificarComponentes(componente) then
+        begin
+            try
+                propComp := context.GetType(componente.ClassType).GetProperty('PersistentField');
+                texto := propComp.GetValue(componente).ToString;
+
+                if propComp.GetValue(componente).ToString <> 'True' then Continue;
+
+                propComp := context.GetType(componente.ClassType).GetProperty('FieldName');
+                Texto := propComp.GetValue(componente).ToString;
+                prop := context.GetType(TBase(objeto).ClassType).GetProperty(propComp.GetValue(componente).ToString);
+
+                propComp := context.GetType(componente.ClassType).GetProperty('Value');
+                Tlib.ConverteEPopularValorPropriedade(prop, objeto, propComp.GetValue(componente).ToString);
+            except
+               raise Exception.Create('Erro ao tentar acessar a propriedade do campo '+Texto+'. Verifique Configuração');
+            end;
+        end
+        else
+        begin
+            if (componente is TFrame) then
+                CarregarObjeto(objeto, TFrame(componente));
+
+        end;
+    end;
+end;
+
+
+
+function TControladorConsultaDesktop<T>.VerificarComponentes(componente: Tcomponent): boolean;
+begin
+    Result := (componente is TREdit) or
+              (componente is TRComboBox) or
+              (componente is TRSearch)or
+              (componente is TRCheckBox)or
+              (componente is TRCheckListBox);
+end;
+
+procedure TControladorConsultaDesktop<T>.ForcarValoresOriginais(form: TFrmBase);
+var
+    componente:TComponent;
+begin
+    for componente in form do
+    begin
+        if VerificarComponentes(componente) then
+        begin
+           // tem que ser tirado essa validação tnedo em vista que o metodo acima ja faz a mesma coisa
+           if (componente is TREdit) then
+           begin
+               (componente as TRedit).ForceOriginalValue;
+           end;
+        end;
+    end;
+end;
+
+
+
+
+
+end.

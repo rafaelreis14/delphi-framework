@@ -1,0 +1,4 @@
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\DBConnect\bin\Release\DBConnect.dll
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\DBConnect\bin\Release\DBConnect.pdb
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\DBConnect\obj\Release\DBConnect.dll
+C:\FONTES SIATD\Prototipo DDL banco de dados\DBConnect\DBConnect\obj\Release\DBConnect.pdb

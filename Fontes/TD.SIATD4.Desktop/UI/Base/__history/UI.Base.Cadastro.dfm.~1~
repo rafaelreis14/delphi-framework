@@ -1,0 +1,12 @@
+inherited FrmCadastro: TFrmCadastro
+  Caption = 'FrmCadastro'
+  OnShow = FormShow
+  ExplicitWidth = 464
+  ExplicitHeight = 296
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited ErrorProvider1: TErrorProvider
+    Left = 32
+    Top = 160
+  end
+end

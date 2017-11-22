@@ -1,0 +1,17 @@
+unit Lib.Interfaces.CRUDView;
+
+interface
+
+uses
+    Classes, Lib.Enumeradores, Lib.Parametro, Lib.ResultFilter, Lib.Lista;
+
+type
+    ICRUDView<T: class> = interface
+    ['{8F1D8B3B-87DE-47DC-9B06-B1EDE89ABEF5}']
+        function DoListar: TResultFilter;
+    end;
+
+
+implementation
+
+end.

@@ -1,0 +1,148 @@
+unit Framework.Controlador.ConsultaBase;
+
+interface
+
+uses RGrid, Forms, Framework.Interfaces.CRUD, Lib.Biblioteca, Lib.Enumeradores,
+    Vcl.StdCtrls, Lib.Base, Lib.Parametro, Lib.ResultFilter,
+    Framework.UI.FormBase, Vcl.Controls;
+
+type
+    TControladorConsultaBase<T: Class> = class
+    private
+        FObjeto: T;
+        procedure SetObjeto(const Value: T);
+    public
+        property Objeto: T read FObjeto write SetObjeto;
+        class procedure ExecutaPesquisar(grid: TRGrid; labelTotal: TLabel; out ResultFilter: TResultFilter); static;
+        class procedure ExecutarInserir(grid: TRGrid; formularioCadastro: TFormClass; labelTotal: TLabel); static;
+        class procedure ExecutarAlterar(grid: TRGrid; formularioCadastro: TFormClass; ResultFilter: TResultFilter); static;
+        class procedure ExecutarExcluir(grid: TRGrid; ResultFilter: TResultFilter); static;
+        class procedure ExecutarVisualizar(grid: TRGrid; formularioCadastro: TFormClass); static;
+    end;
+
+implementation
+
+uses
+    System.Classes, System.SysUtils;
+
+{ TControladorConsultaBase<T> }
+
+class procedure TControladorConsultaBase<T>.ExecutaPesquisar(grid: TRGrid; labelTotal: TLabel; out ResultFilter: TResultFilter);
+begin
+    try
+        Objeto := Tlib.CriaInstancia<T>;
+        ResultFilter := ICRUD<T>(Objeto).Listar(otFilter, false);
+        grid.DataSource := ResultFilter.List;
+        grid.DataBind;
+
+        labelTotal.Caption := IntToStr(grid.GetTotalItens);
+
+        grid.SetFocus;
+    finally
+        if Objeto <> nil then
+            FreeAndNil(Objeto);
+    end;
+end;
+
+class procedure TControladorConsultaBase<T>.ExecutarAlterar(grid: TRGrid; formularioCadastro: TFormClass; ResultFilter: TResultFilter);
+begin
+    try
+        Objeto := nil;
+        try
+            if grid.IsEmpty then
+                raise Exception.Create('Selecione um registro na grid para efetuar esta operação');
+
+            Objeto := grid.GetObject<T>;
+
+            if Tlib.AbrirFormulario(formularioCadastro, acAlteracao, Objeto) = rfOK then
+            begin
+                // grid.DataSource := ICRUD<T>(Objeto).Consultar(resultFilter.Parameters).ToList;
+                // grid.DataBind;
+                // grid.SetFocus;
+            end;
+        except
+            on e: Exception do
+                raise Exception.Create('Erro ao alterar registro' + #13 + e.Message);
+        end;
+    finally
+        if Objeto = nil then
+            Objeto := Tlib.CriaInstancia<T>;
+
+        grid.DataSource := ICRUD<T>(Objeto).Consultar(ResultFilter.Parameters).ToList;
+        grid.DataBind;
+        grid.SetFocus;
+
+        FreeAndNil(Objeto);
+
+    end;
+end;
+
+class procedure TControladorConsultaBase<T>.ExecutarExcluir(grid: TRGrid; ResultFilter: TResultFilter);
+begin
+    try
+        if grid.IsEmpty then
+            raise Exception.Create('Selecione um registro na grid para efetuar esta operação');
+
+        if Tlib.MensagemPergunta('Deseja realmente excluir?', 'Exclusão') = mrYes then
+        begin
+            try
+                Objeto := grid.GetObject<T>;
+                ICRUD<T>(Objeto).Excluir;
+                grid.DataSource := ICRUD<T>(Objeto).Consultar(ResultFilter.Parameters).ToList;
+                grid.DataBind;
+                grid.SetFocus;
+            except
+                on e: Exception do
+                    raise Exception.Create('Erro ao excluir o registro' + #13 + e.Message);
+            end;
+        end;
+    finally
+        if Objeto <> nil then
+            FreeAndNil(Objeto);
+    end;
+end;
+
+class procedure TControladorConsultaBase<T>.ExecutarInserir(grid: TRGrid; formularioCadastro: TFormClass; labelTotal: TLabel);
+begin
+    try
+        Objeto := Tlib.CriaInstancia<T>;
+
+        if Tlib.AbrirFormulario(formularioCadastro, acInsercao, Objeto) = rfOK then
+        begin
+            grid.ClearDataSource;
+
+            if not assigned(grid.DataSource) then
+                grid.DataSource := TList.Create;
+
+            grid.DataSource := ICRUD<T>(Objeto).Consultar(TBase(Objeto).ObjetoParaParametros(Insercao)).ToList;
+            grid.DataBind;
+            grid.Row := grid.RowCount - 1;
+            labelTotal.Caption := IntToStr(grid.GetTotalItens);
+            grid.SetFocus;
+        end;
+    except
+        if Objeto <> nil then
+            FreeAndNil(Objeto);
+    end;
+end;
+
+class procedure TControladorConsultaBase<T>.ExecutarVisualizar(grid: TRGrid; formularioCadastro: TFormClass);
+begin
+    Objeto := nil;
+    try
+        if grid.IsEmpty then
+            raise Exception.Create('Selecione um registro na grid para efetuar esta operação');
+
+        Objeto := grid.GetObject<T>;
+        Tlib.AbrirFormulario(formularioCadastro, acVisualizacao, Objeto);
+    finally
+
+    end;
+end;
+
+procedure TControladorConsultaBase<T>.SetObjeto(const Value: T);
+begin
+    FObjeto := Value;
+end;
+
+end.

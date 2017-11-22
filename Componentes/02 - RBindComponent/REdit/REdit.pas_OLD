@@ -1,0 +1,481 @@
+unit REdit;
+
+interface
+
+uses
+  SysUtils, Classes, Controls, StdCtrls, Mask, Dialogs;
+
+type
+  TMaskTypes = (mtNone, mtString, mtInteger, mtDouble, mtCurrency, mtDate, mtLongTime, mtShortTime, mtPhone, mtCEP, mtCPF, mtCNPJ);
+
+  TREdit = class(TMaskEdit)
+  private
+    FDataSource: TList;
+    FMaskType: TMaskTypes;
+    FSaveLiteralCharacters: boolean;
+    FDecimalPlaces: integer;
+
+    FFieldName: String;
+    FMandatoryField: boolean;
+    FPersistentField:boolean;
+    FValue: string;
+
+    procedure SetDataSource(const Value: TList);
+    procedure SetMaskType(const Value: TMaskTypes);
+    procedure SetSaveLiteralCharacters(const Value: boolean);
+    procedure SetDecimalPlaces(const Value: integer);
+
+
+    procedure SetFieldName(const Value: String);
+    procedure SetMandatoryField(const Value:Boolean);
+    procedure SetPersistentField(const Value: boolean);
+    procedure SetValue(const Value: string);
+    function GetFieldName: String;
+    function GetMandatoryField: boolean;
+    function GetPersistentField: boolean;
+    function GetValue: string;
+
+  { Private declarations }
+  protected
+    procedure DoExit; override;
+    procedure FormatField(edit:TREdit; value: string; mskType:TMaskTypes);
+
+    function validateNumber(number:string): boolean;
+    function validateDate(date:string): boolean;
+    function validateCPFCNPJ(number:string): boolean;
+    function IIf(pCond:Boolean;pTrue,pFalse:Variant): variant;
+    function onlyNumbers(number:string; withDotsAndComas: boolean = true): string;
+    function recordFloat(number:String): string;
+    function recordDate(date:string): string;
+    function ShowDate(date:string): string;
+    function getByParameters(text,sep:String;position:Integer):String;
+
+
+  published
+    property FieldName:String read GetFieldName write SetFieldName;
+    property MaskType: TMaskTypes read FMaskType write SetMaskType;
+    property MandatoryField: boolean read GetMandatoryField write SetMandatoryField;
+    property PersistentField: boolean read GetPersistentField write SetPersistentField;
+    property SaveLiteralCharacters: boolean read FSaveLiteralCharacters write SetSaveLiteralCharacters;
+    property Value:string read GetValue write SetValue;
+    property DecimalPlaces:integer read FDecimalPlaces write SetDecimalPlaces;
+
+  public
+    property DataSource:TList read FDataSource write SetDataSource;
+    function ToDouble: double;
+    function ToInteger: integer;
+    procedure DataBind;
+    constructor Create(AOwner: TComponent); override;
+  end;
+
+procedure Register;
+
+implementation
+
+uses StrUtils;
+
+procedure Register;
+begin
+  RegisterComponents('SIATD', [TREdit]);
+end;
+
+{ TREdit }
+
+procedure TREdit.DataBind;
+begin
+
+end;
+
+procedure TREdit.DoExit;
+var
+   value: string;
+begin
+    value := self.Text;
+    if not(FMaskType in [mtNone, mtShortTime, mtLongTime]) then
+    begin
+        if (FMaskType in [mtDouble, mtCurrency, mtInteger]) then
+        begin
+            if not validateNumber(value) then
+                exit;
+
+        end
+        else if (FMaskType in [mtCPF, mtCNPJ]) then
+        begin
+            if not validateCPFCNPJ(value) then
+                exit;
+        end
+        else if (FMaskType = mtDate) then
+        begin
+            if not validateDate(value) then
+                exit
+
+
+        end;
+    end;
+        if (self.MaskType = mtDouble) or (self.MaskType = mtCurrency) then
+          FormatField(self, recordFloat(value), self.MaskType)
+        else
+          FormatField(self, value, self.MaskType);
+
+
+
+//    FormatField(self, value, self.MaskType);
+    inherited;
+end;
+
+procedure TREdit.FormatField(edit:TREdit; value:string; mskType:TMaskTypes );
+var
+    numeroComVirgula: string;
+begin
+    if not(MskType in [mtNone, mtString,  mtShortTime, mtLongTime]) then
+    begin
+        edit.FValue := IIf(edit.SaveLiteralCharacters, value, onlyNumbers(value));
+        edit.Text := FValue;
+        if (MskType in [mtDouble, mtCurrency]) then
+        begin
+//            if not validateNumber(value) then
+//                exit;
+
+            if value <> EmptyStr then
+            begin
+                    numeroComVirgula := StringReplace(onlyNumbers(value),'.',',', [rfReplaceAll, rfIgnoreCase]);
+
+                edit.Text :=  IIf((MskType = mtCurrency), 'R$ ', EmptyStr) + FormatCurr('###,##0.' + DupeString('0', edit.DecimalPlaces), StrToFloat(numeroComVirgula));
+                edit.FValue := IIf(edit.SaveLiteralCharacters, onlyNumbers(edit.Text) , recordFloat(FormatCurr('###,##0.' + DupeString('0', edit.DecimalPlaces), StrToFloat(numeroComVirgula))));
+            end;
+        end
+        else
+        if (MskType in [mtInteger]) then
+        begin
+            edit.Text :=  onlyNumbers(value);
+            edit.FValue := onlyNumbers(value);
+        end
+        else if (MskType in [mtCPF, mtCNPJ]) then
+        begin
+//            if not validateCPFCNPJ(value) then
+//                exit;
+            edit.FValue := IIf(edit.SaveLiteralCharacters, value, onlyNumbers(value, false));
+            MaskType := mtNone;
+            edit.Text := FValue;
+            MaskType := mskType
+        end
+        else if (MskType = mtDate) then
+        begin
+//            if not validateDate(value) then
+//                exit;
+            edit.FValue := IIf(edit.SaveLiteralCharacters, value, recordDate(value));
+
+            MaskType := mtNone;
+
+            if edit.SaveLiteralCharacters then
+                edit.Text :=  FormatDateTime('ddmmyyyy', strtodate(FValue))
+            else
+                edit.Text := ShowDate(FValue);
+
+            MaskType := mtDate;
+
+        end
+        else if (MskType in [mtPhone]) then
+        begin
+            MaskType := mtNone;
+            edit.Text := onlyNumbers(value);
+            MaskType := mtPhone;
+        end;
+    end
+    else
+    begin
+        FValue := value;
+        edit.Text := value;
+    end;
+
+end;
+
+procedure TREdit.SetDataSource(const Value: TList);
+begin
+  if FDataSource <> Value then
+    FDataSource := Value;
+end;
+
+procedure TREdit.SetFieldName(const Value: String);
+begin
+  if FFieldName <> Value then
+    FFieldName := Value;
+end;
+
+procedure TREdit.SetMandatoryField(const Value: Boolean);
+begin
+ if  FMandatoryField <> Value then
+    FMandatoryField := Value;
+end;
+
+procedure TREdit.SetPersistentField(const Value: boolean);
+begin
+  if FPersistentField <> value then
+    FPersistentField := value;
+end;
+
+procedure TREdit.SetValue(const Value: string);
+var
+  oldMakType: TMaskTypes;
+begin
+  if self.MaskType <> mtNone then
+  begin
+      oldMakType := self.MaskType;
+      self.MaskType := mtNone;
+
+      if (oldMakType = mtDouble) or (oldMakType = mtCurrency) then
+        FormatField(self, recordFloat(value), oldMakType)
+      else
+        FormatField(self, value, oldMakType);
+
+      self.MaskType := oldMakType;
+  end
+  else
+  begin
+    FValue := Value;
+    self.Text := Value;
+  end;
+end;
+
+
+
+function TREdit.GetFieldName: String;
+begin
+    result := FFieldName;
+end;
+
+function TREdit.GetMandatoryField: boolean;
+begin
+  result := FMandatoryField;
+end;
+
+function TREdit.GetPersistentField: boolean;
+begin
+  result := FPersistentField;
+end;
+
+
+function TREdit.GetValue: string;
+begin
+  if (not Self.Enabled) and (FValue = EmptyStr) then
+    DoExit;
+  Result := FValue;
+end;
+
+procedure TREdit.SetMaskType(const Value: TMaskTypes);
+begin
+  if FMaskType <> Value then
+  begin
+    FMaskType := Value;
+
+    case FMaskType of
+      mtNone :  Self.EditMask := EmptyStr;
+      mtDouble :  Self.EditMask := EmptyStr;
+      mtCurrency :  Self.EditMask := EmptyStr;
+      mtCEP : Self.EditMask := '00.000\-000;1;_';
+      mtCPF : Self.EditMask := '000.000.000-00;1;_';
+      mtCNPJ : Self.EditMask :=  '!00.000.000/0000-00;1;_' ;
+      mtPhone : Self.EditMask :=  '!\(99\)0000-0000;1;_';
+      mtDate : Self.EditMask := '!99/99/9999;1;_';
+      mtShortTime : Self.EditMask := '!90:00;1;_';
+      mtLongTime : Self.EditMask := '!90:00:00;1;_';
+    end;
+  end;
+end;
+
+constructor TREdit.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FMaskType := mtNone;
+  self.Text := EmptyStr;
+  DecimalPlaces := 2;
+
+end;
+
+function TREdit.ValidateCPFCNPJ(number: string): boolean;
+Var
+  i,d,b,
+  Digito : Byte;
+  Soma : Integer;
+  CNPJ : Boolean;
+  DgPass,
+  DgCalc : String;
+begin
+  Result := False;
+  number := onlyNumbers(number, false);
+  // Caso o número não seja 11 (CPF) ou 14 (CNPJ), aborta
+  Case Length(number) of
+    11: CNPJ := False;
+    14: CNPJ := True;
+  else Exit;
+  end;
+  // Separa o número do digito
+  DgCalc := '';
+  DgPass := Copy(number,Length(number)-1,2);
+  number := Copy(number,1,Length(number)-2);
+  // Calcula o digito 1 e 2
+  For d := 1 to 2 do begin
+    B := IIF(D=1,2,3); // BYTE
+    SOMA := IIF(D=1,0,STRTOINTDEF(DGCALC,0)*2);
+    for i := Length(number) downto 1 do begin
+      Soma := Soma + (Ord(number[I])-Ord('0'))*b;
+      Inc(b);
+      If (b > 9) And CNPJ Then
+        b := 2;
+    end;
+   Digito := 11 - Soma mod 11;
+   If Digito >= 10 then
+     Digito := 0;
+   DgCalc := DgCalc + Chr(Digito + Ord('0'));
+  end;
+  if DgCalc <> DgPass then
+  begin
+      MessageDlg('CPF ou CNPJ Inválido',mtError,[mbOK],0);
+      Self.SetFocus;
+      Result := false;
+  end
+  else
+    Result := true;
+end;
+
+function TREdit.ValidateDate(date: string): boolean;
+begin
+  Result := true;
+  if date <> '  /  /    ' then
+  begin
+      try
+         StrToDate(date);
+      except
+          on EConvertError do
+          begin
+            Result:=False;
+            MessageDlg('Data Inválida',mtError,[mbOK],0);
+            Self.SetFocus;
+          end;
+      end;
+  end;
+end;
+
+function TREdit.ValidateNumber(number: string): boolean;
+var
+teste:string;
+begin
+
+  if (number <> EmptyStr) then
+  begin
+      Result := true;
+      try
+        teste := StringReplace(onlyNumbers(number),'.','', [rfReplaceAll, rfIgnoreCase]);
+         StrToFloat(teste );
+      except
+          on EConvertError do
+          begin
+            Result:=False;
+            MessageDlg('Número Inválido',mtError,[mbOK],0);
+            Self.SetFocus;
+          end;
+      end;
+  end;
+end;
+
+
+
+procedure TREdit.SetSaveLiteralCharacters(const Value: boolean);
+begin
+  FSaveLiteralCharacters := Value;
+  SetMaskType(MaskType);
+end;
+
+
+function TREdit.onlyNumbers(number: string; withDotsAndComas: boolean): string;
+var
+ i: integer;
+begin
+  Result := '';
+  for i := 1 to Length(number) do
+   if (number[i] in ['1','2','3','4','5','6','7','8','9','0']) or ((number[i] in [',','.']) and (withDotsAndComas = true)) then
+     Result := Result + number[i];
+end;
+
+
+function TREdit.RecordFloat(number:string): String;
+begin
+    result := StringReplace(number,'.','', [rfReplaceAll, rfIgnoreCase]);
+    result := StringReplace(result,',','.', [rfReplaceAll, rfIgnoreCase]);
+//  for i:=1 to length(number) do
+//  begin
+//    if ((number[i] <> '.') and (number[i] <> ',')) then result:=result+number[i];
+//    if number[i] = ',' then result:=result+'.';
+//  end;
+
+end;
+
+
+function TREdit.recordDate(date: string): string;
+begin
+  result :=  GetByParameters(date,'/',3)+GetByParameters(date,'/',2)+GetByParameters(date,'/',1)
+end;
+
+function TREdit.ShowDate(date: string): string;
+begin
+  result :=  copy(date,7,2)+ copy(date,5,2)+ copy(date,1,4)
+end;
+
+
+function TREdit.ToDouble: double;
+begin
+  result := 0;
+  if (Self.MaskType in [mtDouble, mtCurrency]) then
+      result := StrToFloatDef(StringReplace(FValue,'.','', [rfReplaceAll, rfIgnoreCase]),0)
+
+end;
+
+function TREdit.ToInteger: integer;
+begin
+  result := 0;
+  if (Self.MaskType in [mtInteger]) then
+      result := StrToIntDef(FValue,0);
+end;
+
+procedure TREdit.SetDecimalPlaces(const Value: integer);
+begin
+  FDecimalPlaces := Value;
+end;
+
+function TREdit.GetByParameters(text,sep:String;position:Integer):String;
+var nx:Integer;
+    ny:Integer;
+    cAux:String;
+    cRetrun:String;
+begin
+  nx:=1;
+  cAux:=text;
+  cRetrun:='';
+  try
+    for ny:=1 to Length(text) do
+    begin
+      if cAux[ny] = Sep then
+      begin
+        nx:=nx+1;
+      end;
+      if (nx = position) and (cAux[ny] <> sep)  then cRetrun:=cRetrun+cAux[ny];
+    end;
+    result:=trim(cRetrun);
+  except
+    result:='';
+  end;
+end;
+
+
+
+
+function TREdit.IIf(pCond: Boolean; pTrue,
+  pFalse: Variant): variant;
+begin
+  If pCond Then Result := pTrue
+  else Result := pFalse;
+end;
+
+end.
+
+

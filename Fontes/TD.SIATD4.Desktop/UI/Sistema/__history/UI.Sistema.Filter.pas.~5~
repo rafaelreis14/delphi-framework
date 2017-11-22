@@ -1,0 +1,811 @@
+unit UI.Sistema.Filter;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, Grids, DBGrids, ExtCtrls, REdit, RComboBox, StdCtrls, Lib.Filter, ComCtrls, DB, ADODB, Mask,
+  Provider, DBClient, RGrid, RSearch, Vcl.Buttons, Lib.Biblioteca,
+  Lib.Lista, Lib.Base, Lib.Enumeradores,  UntErrorProvider, Vcl.Imaging.jpeg, Lib.Parametro,
+  RCheckListBox, RTTI, Lib.ResultFilter,  Lib.Aguarde, Vcl.Menus, Framework.UI.FormBase,
+  Framework.UI.FilterBase, Dal.ControleDados;
+
+type
+
+  TfrmFilter = class(TForm)
+    grdSearch: TRGrid;
+    pnBotoes: TPanel;
+    Bevel1: TBevel;
+    btnCancelar: TBitBtn;
+    btnFiltrar: TBitBtn;
+    btnSelecionar: TBitBtn;
+    btnImprimir: TBitBtn;
+    Panel2: TPanel;
+    pnInformacoes: TPanel;
+    lbl1: TLabel;
+    Panel4: TPanel;
+    cbComponents: TScrollBox;
+    cbIndexes: TRComboBox;
+    Panel1: TPanel;
+    lblLetreiro: TLabel;
+    ppVisualizar: TPopupMenu;
+    VisualizarCadastro1: TMenuItem;
+    procedure btnFiltrarClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure btnCancelarClick(Sender: TObject);
+    procedure btnSelecionarClick(Sender: TObject);
+    procedure gdSearchExit(Sender: TObject);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
+    procedure cbIndexesClick(Sender: TObject);
+    procedure btnImprimirClick(Sender: TObject);
+    procedure cbComponentsExit(Sender: TObject);
+    procedure grdSearchExit(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+
+    procedure ExitComponent(sender: TObject);
+    procedure cbIndexesExit(Sender: TObject);
+    procedure VisualizarCadastro1Click(Sender: TObject);
+    procedure btnSelecionarExit(Sender: TObject);
+    procedure FormActivate(Sender: TObject);
+
+  protected
+    field:TFieldFilter;
+
+    list: Tlist;
+    Select : Boolean;
+
+    cEdit:TREdit;
+    cCombo:TRComboBox;
+    FIndexes:TStringList;
+
+    procedure CreateComponents;
+    procedure SetComponetsFree;
+    function GetIndexes:String;
+    function MandatoryFieldValidation:boolean;
+    function GetParameters:TParametro;
+    procedure Filtering;
+    procedure Selecting;
+    procedure SetGridRows;
+
+    function GetFieldByComponentName(componentName: string): TFieldFilter;
+    function GetComponentNameByName(childName: string): string;
+    function GetFieldByName(name: string): TFieldFilter;
+  end;
+
+var
+  frmFilter: TfrmFilter;
+
+implementation
+
+
+{$R *.dfm}
+
+procedure TfrmFilter.btnCancelarClick(Sender: TObject);
+begin
+  inherited;
+  close;
+end;
+
+procedure TfrmFilter.btnFiltrarClick(Sender: TObject);
+begin
+   if Filter._FilterType <> ftAlredyFilteredWithParameters then
+      if not MandatoryFieldValidation then exit;
+
+   Filtering;
+end;
+
+procedure TfrmFilter.btnImprimirClick(Sender: TObject);
+var
+  obj:TObject;
+  param: TParametro;
+begin
+  // caso ja tenha parametro
+  //if FFilter._FilterType = ftNormal then
+      param := GetParameters;
+  //else
+  //   param := FFilter._Parametro;
+  //
+  if param = nil then
+  begin
+      tlib.MensagemErro('Erro ao imprimir relatório', 'parâmetros não selecionados.');
+      exit;
+  end;
+  //
+  //REIS VERIFICAR
+ // TRelatorio.ExecutarRelatorio(tiCliente, Filter._Task,param);
+end;
+
+procedure TfrmFilter.btnSelecionarClick(Sender: TObject);
+begin
+  Select := true;
+  Selecting;
+end;
+
+procedure TfrmFilter.btnSelecionarExit(Sender: TObject);
+begin
+  inherited;
+  if (pnInformacoes.Visible) and (tlib.Mobile = false) then
+      cbIndexes.SetFocus
+end;
+
+procedure TfrmFilter.cbComponentsExit(Sender: TObject);
+begin
+   if (tlib.Mobile = false) then
+     btnFiltrar.SetFocus;
+end;
+
+procedure TfrmFilter.cbIndexesClick(Sender: TObject);
+begin
+  SetComponetsFree;
+  CreateComponents;
+  FIndexes.CommaText := cbIndexes.Value;
+end;
+
+procedure TfrmFilter.cbIndexesExit(Sender: TObject);
+begin
+   if (tlib.Mobile = false) then
+   cbComponents.SetFocus;
+end;
+
+procedure TfrmFilter.CreateComponents;
+var
+  indexes:TStringList;
+  I:integer;
+  lbl:TLabel;
+  ed:TREdit;
+  sc: TRSearch;
+  clb: TRCheckListBox;
+  cb:TRComboBox;
+  field:TFieldFilter;
+  lastTop:integer;
+  lastHeight:integer;
+  componentNumber:integer;
+  context: TRttiContext;
+  prop: TRttiProperty;
+  value: string;
+begin
+  try
+  lastTop := 6;
+  componentNumber := 0;
+  for I := 0 to Filter.CountFields-1 do
+  begin
+    field := Filter._FieldsFilter(I);
+    if Pos(field.Name, cbIndexes.Value) > 0 then
+    begin
+      lbl := TLabel.Create(cbComponents);
+      lbl.Top := lastTop+2;
+      lbl.Left := 8;
+      lbl.Width := 123;
+      lbl.Height := 13;
+      lbl.Caption := field.Description+':';
+      lbl.Name := 'lbl'+IntToStr(componentNumber);
+      //lbl.Parent := cbComponents;
+      cbComponents.InsertControl(lbl);
+
+      if field.FieldType = fdNormal then
+      begin
+        ed := TREdit.Create(cbComponents);
+        ed.Left := 151;
+        ed.Top := lastTop;
+        ed.Width := 272;
+        ed.Height := 21;
+        ed.TabOrder := I;
+        ed.Name := 'component'+IntToStr(componentNumber);
+        ed.Text := EmptyStr;
+        ed.FieldName := field.Name;
+        ed.CharCase := ecUpperCase;
+        ed.MaskType :=  REdit.TMaskTypes(field.MaskTypes);
+        ed.OnExit := ExitComponent;
+        field.ComponentName := ed.Name;
+
+        if Filter._FilterType in [ftWithParameters,ftAlredyFilteredWithParametersChangingValues] then
+            ed.Value := Filter._Parametro.ObterValorParamentro(field.Name);
+
+        componentNumber := componentNumber+1;
+        lastHeight := ed.Height;
+        //ed.Parent := cbComponents;
+        cbComponents.InsertControl(ed);
+
+      end
+      else
+      if field.FieldType in [fdListCombo,fdDataListCombo] then
+      begin
+        cb := TRComboBox.Create(cbComponents);
+        cb.Left := 151;
+        cb.Top := lasttop;
+        cb.Width := 272;
+        cb.Height := 22;
+        cb.TabOrder := I;
+        cb.BlankField := true;
+        cb.FieldName := field.Name;
+        cb.CharCase := ecUpperCase;
+        cb.Name := 'component'+IntToStr(componentNumber);
+        cb.OnExit := ExitComponent;
+        componentNumber := componentNumber+1;
+        field.ComponentName := cb.Name;
+
+        lastHeight := cb.Height;
+        //cb.Parent := cbComponents;
+        cbComponents.InsertControl(cb);
+
+        if field.FieldType = fdListCombo then
+        begin
+           if (field.ParentFields <> EmptyStr) then
+           begin
+             cb.Enabled := false;
+           end
+           else
+             cb.ListValue := field.ListValue;
+        end
+        else
+        if field.FieldType = fdDataListCombo then
+        begin
+          cb.DataSource := field.DataSource;
+          cb.IDFieldName := field.IDFieldName;
+          cb.DescriptionFieldName := field.DescriptionFieldName;
+        end;
+
+        cb.DataBind;
+
+        if Filter._FilterType in [ftWithParameters,ftAlredyFilteredWithParametersChangingValues] then
+            cb.Value := Filter._Parametro.ObterValorParamentro(field.Name);
+      end
+      else
+      if field.FieldType = fdSearch then
+      begin
+        sc := TRSearch.Create(cbComponents);
+        sc.Left := 151;
+        sc.Top := lasttop;
+        sc.Width := 272;
+        sc.Height := 22;
+        sc.TabOrder := I;
+//  REIS VERIFICAR
+//        sc.CRUD := field.CRUD;
+        sc.IDFieldName := field.IDFieldName;
+        sc.DescriptionFieldName := field.DescriptionFieldName;
+        sc.Name := 'component'+IntToStr(componentNumber);
+        sc.OnExit := ExitComponent;
+
+        if Filter._FilterType in [ftWithParameters,ftAlredyFilteredWithParametersChangingValues] then
+            sc.Value := Filter._Parametro.ObterValorParamentro(field.Name);
+
+        field.ComponentName := sc.Name;
+        componentNumber := componentNumber+1;
+        lastHeight := sc.Height;
+        //sc.Parent := cbComponents;
+        cbComponents.InsertControl(sc);
+      end
+      else
+      if field.FieldType in [fdCheckList, fdDataCheckList] then
+      begin
+        clb := TRCheckListBox.Create(cbComponents);
+        clb.Left := 151;
+        clb.Top := lasttop;
+        clb.Width := 272;
+        clb.TabOrder := I;
+        clb.Parent := cbComponents;
+        clb.OnExit := ExitComponent;
+
+
+        if field.FieldType = fdCheckList then
+          clb.ListValue := field.ListValue
+        else
+        if field.FieldType = fdDataCheckList then
+          clb.DataSource := field.DataSource;
+
+        clb.IDFieldName := field.IDFieldName;
+        clb.DescriptionFieldName := field.DescriptionFieldName;
+        clb.DataBind;
+
+        if Filter._FilterType in [ftWithParameters,ftAlredyFilteredWithParametersChangingValues] then
+            clb.Value := Filter._Parametro.ObterValorParamentro(field.Name);
+
+        clb.Name := 'component'+IntToStr(componentNumber);
+        field.ComponentName := clb.Name;
+        componentNumber := componentNumber+1;
+        lastHeight := clb.Height;
+        //clb.Parent := cbComponents;
+        cbComponents.InsertControl(clb);
+
+      end;
+      lastTop := lastTop + lastHeight + 8;
+    end;
+  end;
+  finally
+    indexes.Free;
+  end;
+
+end;
+
+procedure TfrmFilter.ExitComponent(sender: TObject);
+var
+  context: TRttiContext;
+  prop: TRttiProperty;
+  value: string;
+  field: TFieldFilter;
+  childField: TFieldFilter;
+  parentField: TFieldFilter;
+  fields: TStringList;
+  I:integer;
+  Dataset : TClientDataSet;
+  parameter: TParametro;
+  dal: TControleDados<TClientDataSet,TDataSetDAO>;
+begin
+prop := context.GetType(sender.ClassType).GetProperty('Value');
+  value := prop.GetValue(sender).ToString;
+
+  field := GetFieldByComponentName(TComponent(sender).Name);
+  field.Value := value;
+
+
+
+  if value <> EmptyStr then
+  begin
+
+      try
+          parameter := TParametro.Create;
+          dal := TControleDados<TClientDataSet,TDataSetDAO>.Create;
+
+          if (field.ChildField  <> EmptyStr) then
+          begin
+                // gets chield fields
+                childField := GetFieldByName(field.ChildField);
+
+                //validate if there is a child field
+                if not assigned(childField) then
+                begin
+                    MessageDlg('Não foi encontrado o componente filho: '+field.ChildField+' do campo: '+field.Name+'. Favor verificar configuração do campo de pesquisa.',mtError,[mbOk],0);
+                    exit;
+                end;
+
+
+                // gets parent fields list
+                fields := TStringList.Create;
+                fields.QuoteChar := ',';
+                fields.DelimitedText := childField.ParentFields;
+
+                //loop into parent fields list
+                for I := 0 to fields.Count-1 do
+                begin
+                    // gets paramets for child field
+                    parentField := GetFieldByName(fields[I]);
+
+                    if Assigned(parentField)then
+                    begin
+                       parameter.Add(EmptyStr, parentField.Name, parentField.Value);
+                    end
+                    else
+                    begin
+                        MessageDlg('Não foi encontrado o componente Pai: '+fields[I]+' do campo: '+childField.Name+'. Favor verificar configuração do campo de pesquisa.',mtError,[mbOk],0);
+                        exit;
+                    end;
+
+                end;
+
+                if (cbComponents.FindComponent(GetComponentNameByName(childField.Name)) is TRComboBox) and
+                   (childField.FieldType = fdListCombo) then
+                begin
+                    // Fill in the combobox using the method name passed by
+                    //REIS VERIFICAR
+                    //Dataset := BaseLib.XmlToDataset(BaseLib.ExecutaTarefa(childField.MethodName,Self.Name,Parameter));
+                    value := GetComponentNameByName(childField.Name);
+                    TRComboBox(cbComponents.FindComponent(value)).ListValue.Clear;
+                    if Dataset.RecordCount > 0 then
+                    begin
+                        Dataset.First;
+                        while not Dataset.Eof do
+                        begin
+                            TRComboBox(cbComponents.FindComponent(GetComponentNameByName(childField.Name))).ListValue.Add(Dataset.FieldByName(childField.IDFieldName).AsString+'='+Dataset.FieldByName(childField.IDFieldName).AsString);
+                            Dataset.Next;
+                        end;
+                    end;
+                    TRComboBox(cbComponents.FindComponent(GetComponentNameByName(childField.Name))).DataBind;
+                    TRComboBox(cbComponents.FindComponent(GetComponentNameByName(childField.Name))).Enabled := True;
+
+                    TRComboBox(cbComponents.FindComponent(GetComponentNameByName(childField.Name))).SetFocus;
+                end;
+          end;
+      finally
+        if dal <> nil then
+            FreeAndNil(dal);
+
+        fields.Free;
+        Dataset.Free;
+        FreeAndNil(parameter);
+      end;
+  end;
+end;
+
+function TfrmFilter.GetFieldByComponentName(componentName: string): TFieldFilter;
+var
+  I: integer;
+begin
+  result := nil;
+  for I := 0 to Filter.CountFields-1 do
+  begin
+    if Filter._FieldsFilter(I).ComponentName = componentName then
+    begin
+        result := Filter._FieldsFilter(I);
+        exit;
+    end;
+  end;
+end;
+
+function TfrmFilter.GetFieldByName(name: string): TFieldFilter;
+var
+  I: integer;
+begin
+  result := nil;
+  for I := 0 to Filter.CountFields-1 do
+  begin
+    if Filter._FieldsFilter(I).Name = name then
+    begin
+        result := Filter._FieldsFilter(I);
+        exit;
+    end;
+  end;
+end;
+
+function TfrmFilter.GetComponentNameByName(childName: string): string;
+var
+  I: integer;
+begin
+  result := EmptyStr;
+  for I := 0 to Filter.CountFields-1 do
+  begin
+    if Filter._FieldsFilter(I).Name = childName then
+    begin
+        result := Filter._FieldsFilter(I).ComponentName;
+        exit;
+    end;
+  end;
+end;
+
+procedure TfrmFilter.Filtering;
+var
+   // list: Tlist;
+    param:TParametro;
+    item, itemRetorno: TItemParametro;
+    tamanho: integer;
+begin
+   try
+     if tlib.Mobile then tamanho := 12
+     else tamanho := 16;
+
+
+     TAguarde.AguardandoFinalizacaoProcesso(Application.mainform,tamanho,'Aguarde filtrando informação.');
+
+     // caso ja tenha parametro
+     //se for ftWithParameters eu tenho que obter os parametro pois eles só server para preencher inicialmente os campos com valor defaltu
+     if Filter._FilterType in [ftNormal, ftWithParameters, ftAlredyFilteredWithParametersChangingValues] then
+     begin
+        param := GetParameters;
+        //adiciono os parametros padrão (verificar melhor pois ele adiciona todos os parametros iniciais passados, ate mesmo os que foram passados para preenchimento inicial, mas que nao fazem diferença se passados para a query)
+        if Filter._Parametro <> nil then
+            for item in Filter._Parametro.Item do
+                param.Add(item);
+
+     end
+     else
+        param := Filter._Parametro;
+
+     list := Filter.Filtering(param);
+     //
+     ResultFilter.Parameters := param;
+     if Filter._OperationType = otFilter then
+     begin
+         ResultFilter.List := list;
+         Close;
+     end
+     else
+     if Filter._OperationType = otSelect then
+     begin
+         grdSearch.DataSource := list;
+         grdSearch.Databind;
+     end;
+   finally
+      if (Filter._OperationType = otSelect)  then
+          grdSearch.SetFocus;
+
+       TAguarde.ProcessoFinalizado;
+      //List.Free;
+   end;
+end;
+
+procedure TfrmFilter.FormActivate(Sender: TObject);
+begin
+    inherited;
+
+    if (grdSearch.Visible) and (not grdSearch.IsEmpty) then
+        grdSearch.SetFocus;
+end;
+
+procedure TfrmFilter.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+   if not (Select) then
+      tlib.LiberarListaMemoria(list);
+   //
+   FIndexes.Free;
+
+//   ResultFilter.Free;
+end;
+
+procedure TfrmFilter.FormKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  inherited;
+   if Key = VK_ESCAPE then
+        close;
+end;
+
+procedure TfrmFilter.FormKeyPress(Sender: TObject; var Key: Char);
+begin
+   if self.Showing then
+       if (Key = #13) then
+       begin
+           SelectNext(ActiveControl, True, True);
+           Key := #0;
+       end;
+end;
+
+procedure TfrmFilter.FormShow(Sender: TObject);
+var
+ i:integer;
+begin
+    //Verifica se nao tem items e se tem dataset para pegar os campos de lá
+//    if Filter.CountFields = 0 then
+//    begin
+//      MessageDlg('Nenhum campo configurado para este filtro',mtError,[mbOK],0);
+//      exit;
+//    end;
+
+    Select := False;
+    ResultFilter := TResultFilter.Create;
+
+    // Preenche o combo com os indices
+    cbIndexes.DescriptionFieldName := 'Description';
+    cbIndexes.IDFieldName := 'Field';
+    cbIndexes.DataSource := Filter.GetIndexs;
+    cbIndexes.BlankField := false;
+    cbIndexes.DataBind;
+
+    // Valida Tipo de Operação
+    if (Filter._OperationType = otFilter) then
+    begin
+      Height := 279;
+      grdSearch.Visible := false;
+      btnSelecionar.Enabled := false;
+  //    btnImprimir.Enabled := false;
+    end
+    else
+    begin
+      Height :=  455;
+      grdSearch.Visible := true;
+      if Filter._MultiSelect then
+        grdSearch.MultiSelect := true;
+
+      btnSelecionar.Enabled := true;
+    end;
+
+    lblLetreiro.Caption  := Filter._ScreenName;
+
+    SetGridRows;
+
+    //Valida tipo de filtro
+    if Filter._FilterType <> ftAlredyFilteredWithParameters then
+    begin
+       CreateComponents;
+       FIndexes := TStringList.Create;
+       FIndexes.CommaText := cbIndexes.Value;
+       cbIndexes.SetFocus;
+    end;
+
+    if Filter._FilterType in [ftAlredyFilteredWithParameters, ftAlredyFilteredWithParametersChangingValues] then
+    begin
+
+        if Filter._FilterType = ftAlredyFilteredWithParameters then
+        begin
+            Height := 300;
+            pnInformacoes.Visible := false;
+            grdSearch.Align := alClient;
+
+        end;
+
+        Filtering;
+
+        if not grdSearch.IsEmpty then
+            grdSearch.SetFocus;
+
+    end;
+
+
+//    cbComponents.SetFocus;
+//    TWinControl(cbComponents.FindComponent('component0')).SetFocus;
+
+end;
+
+procedure TfrmFilter.gdSearchExit(Sender: TObject);
+begin
+  inherited;
+  if (tlib.Mobile = false) then
+  btnSelecionar.SetFocus;
+end;
+
+function TfrmFilter.GetIndexes: String;
+//var
+//  indexes:TStringList;
+begin
+//  indexes := TStringList.Create;
+//  indexes.Delimiter := ';';
+//  indexes.DelimitedText := cbIndexes.Value;
+//  result := indexes;
+end;
+
+function TfrmFilter.GetParameters: TParametro;
+var
+  parametro: TParametro;
+  I: integer;
+  indexes: string;
+  context: TRttiContext;
+  prop: TRttiProperty;
+  value: string;
+  lastFilledIndex: integer;
+  function getLastFilledIndex: integer;
+  var
+    I: integer;
+  begin
+
+
+     for I := 0 to FIndexes.Count-1 do
+     begin
+        if cbComponents.FindComponent('component'+inttostr(I)) is TComponent then
+        begin
+            prop := context.GetType(cbComponents.FindComponent('component'+inttostr(I)).ClassType).GetProperty('Value');
+            value := prop.GetValue(cbComponents.FindComponent('component'+inttostr(I))).ToString;
+            if Value <> EmptyStr then
+               result := I;
+        end;
+     end;
+  end;
+begin
+  parametro := TParametro.Create;
+
+  lastFilledIndex := getLastFilledIndex;
+
+  for I := 0 to FIndexes.Count-1 do
+  begin
+      if cbComponents.FindComponent('component'+inttostr(I)) is TComponent then
+      begin
+          prop := context.GetType(cbComponents.FindComponent('component'+inttostr(I)).ClassType).GetProperty('Value');
+          value := prop.GetValue(cbComponents.FindComponent('component'+inttostr(I))).ToString;
+
+          if (Value = EmptyStr) and (I > lastFilledIndex) then
+             value := 'NULL';
+
+          parametro.Add(EmptyStr,FIndexes.ValueFromIndex[I], value);
+      end;
+
+      indexes := indexes + FIndexes.ValueFromIndex[i]+',';
+  end;
+
+
+  // delete the last coma
+//  Delete(indexes,length(indexes),1);
+//  parametro.Add('', 'INDEX',indexes);
+  result := parametro;
+
+end;
+
+procedure TfrmFilter.grdSearchExit(Sender: TObject);
+begin
+  if (tlib.Mobile = false) then
+  btnSelecionar.SetFocus;
+end;
+
+function TfrmFilter.MandatoryFieldValidation: boolean;
+var
+    I: integer;
+    toValidate: boolean;
+    context: TRttiContext;
+    prop: TRttiProperty;
+    value: string;
+begin
+    toValidate := true;
+    Result := True;
+    for I := 0 to FIndexes.Count-1 do
+    begin
+        if cbComponents.FindComponent('component'+inttostr(I)) is TComponent then
+        begin
+            prop := context.GetType(cbComponents.FindComponent('component'+inttostr(I)).ClassType).GetProperty('Value');
+            value := prop.GetValue(cbComponents.FindComponent('component'+inttostr(I))).ToString;
+            if Value <> EmptyStr then
+            begin
+                toValidate := false;
+                break;
+            end;
+        end;
+    end;
+
+    if toValidate then
+    begin
+        result := false;
+        MessageDlg('É necessário preencher ao menos um dos parâmetros da pesquisa.',mtError,[mbOk],0);
+        cbIndexes.setFocus;
+    end;
+end;
+
+procedure TfrmFilter.Selecting;
+begin
+  try
+      if Filter._MultiSelect then
+      begin
+         if not grdSearch.IsEmpty then
+         begin
+            ResultFilter.List := grdSearch.GetSelectedItems;
+            if ResultFilter.List.Count = 0 then
+                ResultFilter.List.Add(grdSearch.GetObject<TObject>)
+
+         end
+         else
+         begin
+           MessageDlg('Selecione pelo menos um registro.',mtError,[mbOk],0);
+           grdSearch.SetFocus;
+           exit;
+         end;
+      end
+      else
+      begin
+      //   if ResultFilter.List <> nil then
+            ResultFilter.List := TList.Create;
+         ResultFilter.List.Add(grdSearch.GetObject<TObject>);
+      end;
+      Close;
+  finally
+      //list.Free;
+  end;
+end;
+
+procedure TfrmFilter.SetComponetsFree;
+var
+  I:integer;
+begin
+  for I := 0 to Filter.CountFields-1 do
+  begin
+      if assigned(cbComponents.FindComponent('component'+inttostr(I))) then
+          cbComponents.FindComponent('component'+inttostr(I)).Free;
+
+       if assigned(cbComponents.FindComponent('lbl'+inttostr(I))) then
+           cbComponents.FindComponent('lbl'+inttostr(I)).Free;
+  end;
+end;
+
+
+procedure TfrmFilter.SetGridRows;
+var
+    I:integer;
+begin
+    for I := 0 to Filter.CountFields-1 do
+    begin
+        grdSearch.AddCol(Filter._FieldsFilter(I).Name,
+                        Filter._FieldsFilter(I).Description,
+                        Filter._FieldsFilter(I).GridSize,
+                        RGrid.TMaskTypes(Filter._FieldsFilter(I).MaskTypes)
+                       // Filter._FieldsFilter(I).MaskTypes
+                        );
+    end;
+end;
+
+procedure TfrmFilter.VisualizarCadastro1Click(Sender: TObject);
+begin
+  try
+      Tlib.AbrirFormulario(Filter._InputForm,acVisualizacao,grdSearch.GetObject<TObject>)
+  except
+      Tlib.MensagemErro('Erro ao visualizar a tela cadastro', 'Possivelmente o nome da tela não foi programada corretamente no filtro da classe');
+  end;
+end;
+
+
+
+end.
+

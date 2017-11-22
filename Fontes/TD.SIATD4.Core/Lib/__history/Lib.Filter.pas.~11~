@@ -1,0 +1,541 @@
+unit Lib.Filter;
+
+interface
+
+uses Classes, Forms, Dialogs, Lib.Enumeradores, Contnrs, Lib.Lista,  Lib.Parametro, Lib.ResultFilter, Framework.Interfaces.CRUD;
+
+type
+    {$RTTI INHERIT}
+    TIndex = class
+    private
+        FField: String;
+        FOrder: Integer;
+        FDescription: string;
+        procedure SetDescription(const Value: string);
+        procedure SetField(const Value: String);
+        procedure SetOrder(const Value: Integer);
+    published
+        property Order:Integer read FOrder write SetOrder;
+        property Field:String read FField write SetField;
+        property Description:string read FDescription write SetDescription;
+
+        constructor Create(order:Integer;field,description:String);
+    end;
+
+    TFieldFilter = class
+    private
+        FName: string;
+        FDescription: string;
+        FListValue: TStringList;
+        FMaskTypes: TMaskTypes;
+        FValue: String;
+        FDescriptionFieldName: String;
+        FDataSource: TList;
+        FIDFieldName: String;
+        FFieldType: TFieldTypes;
+        FGridSize: integer;
+        FComponentName: string;
+        FChildField: string;
+        FMethodName: string;
+        FParentFields: string;
+        procedure SetListValue(const Value: TStringList);
+        procedure SetDescription(const Value: string);
+        procedure SetName(const Value: string);
+        procedure SeTFieldType(const Value: TFieldTypes);
+        procedure SetValue(const Value: String);
+        procedure AddListProperty;
+        procedure SetDataSource(const Value: TList);
+        procedure SetDescriptionFieldName(const Value: String);
+        procedure SetIDFieldName(const Value: String);
+        procedure SetMaskTypes(const Value: TMaskTypes);
+        procedure SetGridSize(const Value: integer);
+        procedure SetComponentName(const Value: string);
+        procedure SetChildField(const Value: string);
+        procedure SetMethodName(const Value: string);
+        procedure SetParentFields(const Value: string);
+
+    public
+        procedure Clear;
+        property Description:string read FDescription write SetDescription;
+        property Name:string read FName write SetName;
+        property MaskTypes:TMaskTypes read FMaskTypes write SetMaskTypes;
+        property FieldType:TFieldTypes read FFieldType write SetFieldType;
+        property GridSize: integer read FGridSize write SetGridSize;
+
+    //    property Combo: TComboField;
+    //    property Edit:TEditField;
+    //    property Search:TSearchField;
+
+        { List properties}
+        property DataSource : TList read FDataSource write SetDataSource;
+        property IDFieldName:String read FIDFieldName write SetIDFieldName;
+        property DescriptionFieldName:String read FDescriptionFieldName write SetDescriptionFieldName;
+
+        property ListValue:TStringList read FListValue write SetListValue;
+        property ChildField: string read FChildField write SetChildField;
+        property ParentFields: string read FParentFields write SetParentFields;
+        property ComponentName:string read FComponentName write SetComponentName;
+        property MethodName: string read FMethodName write SetMethodName;
+
+
+
+        {Value}
+        property Value:String read FValue write SetValue;
+
+        constructor Create();
+        destructor Destroy();override;
+    end;
+
+
+
+    IFilterable = interface
+       function Filtering(parameters:TParametro) : Tlist;
+       function _OperationType: TOparationTypes;
+       function _FilterType: TFilterType;
+       function _Parametro: TParametro;
+       function CountFields:integer;
+       function _FieldsFilter(index: Integer): TFieldFilter;
+       function _Task: string;
+       function GetIndexs: Tlist;
+       function _MultiSelect: Boolean;
+       function _ScreenName: string;
+       function _InputForm: TFormClass;
+    end;
+
+
+
+
+    TFilter<T : Class> = class(TInterfacedObject, IFilterable)
+    private
+        FFieldsFilterList: TObjectList;
+        FIndex: TObjectList;
+        FMultiSelect: Boolean;
+        FScreenName: string;
+        FOperationType: TOparationTypes;
+        FTask: string;
+        FFilterType: TFilterType;
+        FParametro: TParametro;
+        FInputForm: TFormClass;
+        procedure SetMultiSelect(const Value: Boolean);
+        procedure SetScreenName(const Value: string);
+        procedure SetOperationType(const Value: TOparationTypes);
+        procedure SetTask(const Value: string);
+        function GetIndexes(index: integer): TIndex;
+
+        function _FieldsFilter(index: integer): TFieldFilter;
+        function _OperationType: TOparationTypes;
+        function _FilterType: TFilterType;
+        function _Parametro: TParametro;
+        function _Task: string;
+        function _MultiSelect: Boolean;
+        function _ScreenName: string;
+        function _InputForm: TFormClass;
+        procedure SetFilterType(const Value: TFilterType);
+        procedure SetParametro(const Value: TParametro);
+        procedure SetInputForm(const Value: TFormClass);
+
+    public
+        procedure AddField(Value: TFieldFilter); overload;
+        procedure AddField(description, name, Value: string; maskType: TMaskTypes; listValue: TStringList); overload;
+        procedure AddIndex(order: integer; field, description: String);
+
+        function CountFields: integer;
+        function CountIndexs: integer;
+        function GetFieldByName(name: string): TFieldFilter;
+        function GetIndexs: Tlist;
+        function Filtering(parameters: TParametro): Tlist;
+
+        property ScreenName: string read _ScreenName write SetScreenName;
+        property MultiSelect: Boolean read _MultiSelect write SetMultiSelect;
+        property FieldsFilter[index: integer]: TFieldFilter read _FieldsFilter;
+        property Indexes[index: integer]: TIndex read GetIndexes;
+        property OperationType: TOparationTypes read _OperationType write SetOperationType;
+        property Task: string read _Task write SetTask;
+        property FilterType: TFilterType read FFilterType write SetFilterType;
+        property Parametro: TParametro read FParametro write SetParametro;
+        property InputForm: TFormClass read FInputForm write SetInputForm;
+
+        function Execute: TResultFilter;overload;
+
+        constructor Create();
+
+        destructor Destroy(); override;
+
+    end;
+
+implementation
+
+uses SysUtils, Lib.Biblioteca, Controls, Lib.Base, Framework.UI.FilterBase,
+  Framework.Interfaces.Consultavel, Lib.ClasseBase;
+
+{ TIndex }
+
+constructor TIndex.Create(order: Integer; field, description: String);
+begin
+  self.Order := order;
+  self.Field := field;
+  self.Description := description;
+end;
+
+procedure TIndex.SetDescription(const Value: string);
+begin
+  FDescription := Value;
+end;
+
+procedure TIndex.SetField(const Value: String);
+begin
+  FField := Value;
+end;
+
+procedure TIndex.SetOrder(const Value: Integer);
+begin
+  FOrder := Value;
+end;
+
+
+
+{ TFieldFilter }
+
+procedure TFieldFilter.AddListProperty;
+begin
+
+end;
+
+procedure TFieldFilter.Clear;
+begin
+  Description:= EmptyStr;
+  Name:= EmptyStr;
+  ListValue.Text := EmptyStr;
+  DataSource.Clear;
+  DescriptionFieldName := EmptyStr;
+  IDFieldName := EmptyStr;
+  Value := EmptyStr;
+end;
+
+constructor TFieldFilter.Create;
+begin
+   FListValue := TStringList.Create;
+end;
+
+
+destructor TFieldFilter.Destroy;
+begin
+  FreeAndNil(FListValue);
+  inherited Destroy;
+end;
+
+procedure TFieldFilter.SetMaskTypes(const Value: TMaskTypes);
+begin
+  FMaskTypes := Value;
+end;
+
+procedure TFieldFilter.SetMethodName(const Value: string);
+begin
+  FMethodName := Value;
+end;
+
+procedure TFieldFilter.SetGridSize(const Value: integer);
+begin
+  FGridSize := Value;
+end;
+
+procedure TFieldFilter.SetIDFieldName(const Value: String);
+begin
+    if ListValue.Text <> EmptyStr then
+    begin
+      ShowMessage('Propriedade ListValue Preenchida. Operação não aceita');
+      exit;
+    end;
+    FIDFieldName := Value;
+end;
+
+procedure TFieldFilter.SetListValue(const Value: TStringList);
+begin
+    if Assigned(DataSource) then
+    begin
+      ShowMessage('Propriedade DataSource Preenchida. Operação não aceita');
+      exit;
+    end;
+
+    FListValue := Value;
+end;
+
+procedure TFieldFilter.SetChildField(const Value: string);
+begin
+  FChildField := Value;
+end;
+
+procedure TFieldFilter.SetComponentName(const Value: string);
+begin
+  FComponentName := Value;
+end;
+
+
+procedure TFieldFilter.SetDataSource(const Value: TList);
+begin
+    if ListValue.Text <> EmptyStr then
+    begin
+      ShowMessage('Propriedade ListValue Preenchida. Operação não aceita');
+      exit;
+    end;
+    FDataSource := Value;
+end;
+
+procedure TFieldFilter.SetDescription(const Value: string);
+begin
+  FDescription := Value;
+end;
+
+procedure TFieldFilter.SetDescriptionFieldName(const Value: String);
+begin
+    if ListValue.Text <> EmptyStr then
+    begin
+      ShowMessage('Propriedade ListValue Preenchida. Operação não aceita');
+      exit;
+    end;
+    FDescriptionFieldName := Value;
+end;
+
+procedure TFieldFilter.SetName(const Value: string);
+begin
+  FName := Value;
+end;
+
+
+procedure TFieldFilter.SetParentFields(const Value: string);
+begin
+  FParentFields := Value;
+end;
+
+procedure TFieldFilter.SetValue(const Value: String);
+begin
+  FValue := Value;
+end;
+
+procedure TFieldFilter.SeTFieldType(const Value: TFieldTypes);
+begin
+  FFieldType := Value;
+end;
+
+
+
+
+{ TFilter<T> }
+
+procedure TFilter<T>.AddField(Value: TFieldFilter);
+begin
+    FFieldsFilterList.Add(Value);
+end;
+
+procedure TFilter<T>.AddField(description, name, Value: string; maskType: TMaskTypes; listValue: TStringList);
+var
+    field: TFieldFilter;
+begin
+    field := TFieldFilter.Create;
+
+    field.description := description;
+    field.name := name;
+    field.MaskTypes := maskType;
+    // field.Value := value;
+    field.listValue := listValue;
+
+    AddField(field);
+end;
+
+procedure TFilter<T>.AddIndex(order: integer; field, description: String);
+var
+    ind: TIndex;
+begin
+    ind := TIndex.Create(order, field, description);
+    FIndex.Add(ind);
+end;
+
+function TFilter<T>.CountFields: integer;
+begin
+    result := FFieldsFilterList.Count;
+end;
+
+function TFilter<T>.CountIndexs: integer;
+begin
+    result := FIndex.Count;
+end;
+
+constructor TFilter<T>.Create;
+begin
+    FFieldsFilterList := TObjectList.Create;
+    FIndex := TObjectList.Create;
+end;
+
+destructor TFilter<T>.Destroy;
+begin
+    FreeAndNil(FFieldsFilterList);
+    FreeAndNil(FIndex);
+    //
+    inherited Destroy;
+end;
+
+function TFilter<T>.Execute: TResultFilter;
+var
+    Lista : TList;
+    Parametros : TParametro;
+    i : integer;
+    objeto : T;
+    objetoP : TItemParametro;
+begin
+    try
+        Application.CreateForm(Tlib.FormFiltro,frmFilterBase);
+        frmFilterBase.Filter := self;
+        frmFilterBase.ShowModal;
+            //
+        Lista := frmFilterBase.ResultFilter.List;
+        Parametros := frmFilterBase.ResultFilter.Parameters;
+
+        result := TResultFilter.Create;
+        Result.List := TList.Create;
+        Result.Parameters := TParametro.Create;
+        //
+        if Assigned(Lista) then
+        begin
+            for I := 0 to Lista.Count -1 do
+            begin
+                objeto := Tlib.CriaInstancia<T>;
+                TClasseBase(Lista[i]).CopiarPara(objeto);
+                Result.List.Add(TObject(objeto));
+            end;
+            //
+            for I := 0 to Parametros.Item.Count -1 do
+            begin
+                objetoP := TItemParametro.Create;
+                //
+                objetoP.ValorAnterior := Parametros.Item[i].ValorAnterior;
+                objetoP.Chave := Parametros.Item[i].Chave;
+                objetoP.Valor := Parametros.Item[i].Valor;
+                objetoP.Processo := Parametros.Item[i].Processo;
+                objetoP.Linha := Parametros.Item[i].Linha;
+                //
+                Result.Parameters.Item.Add(objetoP);
+            end;
+        end;
+    finally
+        FreeAndNil(frmFilterBase);
+    end;
+end;
+
+
+function TFilter<T>.Filtering(parameters: TParametro): Tlist;
+var
+    ObjList : TLista<t>;
+    objeto: T;
+    objetoMetodo:  T;
+    I: Integer;
+begin
+    try
+        objetoMetodo := Tlib.CriaInstancia<T>;
+        ObjList := ICRUD<T>(objetoMetodo).Consultar(parameters);
+        Result := ObjList.ToList;
+    finally
+        FreeAndNil(objetoMetodo);
+    end;
+end;
+
+function TFilter<T>.GetFieldByName(name: string): TFieldFilter;
+var
+    i: integer;
+begin
+    for i := 0 to CountFields - 1 do
+    begin
+        if FieldsFilter[i].name = name then
+        begin
+            result := FieldsFilter[i];
+            exit;
+        end;
+    end;
+    result := nil;
+end;
+
+function TFilter<T>.GetIndexes(index: integer): TIndex;
+begin
+    result := TIndex(FIndex[index]);
+end;
+
+function TFilter<T>.GetIndexs: Tlist;
+begin
+    result := FIndex;
+end;
+
+procedure TFilter<T>.SetFilterType(const Value: TFilterType);
+begin
+  FFilterType := Value;
+end;
+
+procedure TFilter<T>.SetInputForm(const Value: TFormClass);
+begin
+  FInputForm := Value;
+end;
+
+procedure TFilter<T>.SetMultiSelect(const Value: Boolean);
+begin
+    FMultiSelect := Value;
+end;
+
+procedure TFilter<T>.SetOperationType(const Value: TOparationTypes);
+begin
+    FOperationType := Value;
+end;
+
+procedure TFilter<T>.SetParametro(const Value: TParametro);
+begin
+    FParametro := Value;
+end;
+
+procedure TFilter<T>.SetScreenName(const Value: string);
+begin
+    FScreenName := Value;
+end;
+
+procedure TFilter<T>.SetTask(const Value: string);
+begin
+    FTask := Value;
+end;
+
+function TFilter<T>._FieldsFilter(index: integer): TFieldFilter;
+begin
+    result := TFieldFilter(FFieldsFilterList[index]);
+end;
+
+function TFilter<T>._MultiSelect: Boolean;
+begin
+    result := FMultiSelect;
+end;
+
+function TFilter<T>._OperationType: TOparationTypes;
+begin
+    result := FOperationType;
+end;
+
+function TFilter<T>._Parametro: TParametro;
+begin
+    result := FParametro;
+end;
+
+function TFilter<T>._ScreenName: string;
+begin
+    result := FScreenName
+end;
+
+function TFilter<T>._Task: string;
+begin
+    result := FTask;
+end;
+
+function TFilter<T>._FilterType: TFilterType;
+begin
+    result := FFIlterType;
+end;
+
+function TFilter<T>._InputForm: TFormClass;
+begin
+    result := FInputForm
+end;
+
+end.

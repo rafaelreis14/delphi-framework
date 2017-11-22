@@ -1,0 +1,39 @@
+unit ClsControleDados;
+
+interface
+
+uses ClsLib, Db, DbCommon, Generics.Collections, ClsRequisicao,
+     Data.Win.ADODB, ClsConexao, ClsParametro, DBConnectSIATD_TLB;
+
+type
+    TControleDados = class
+    private
+    FDataControl: IDataControl;
+    procedure SetDataControl(const Value: IDataControl);
+           public
+            property DataControl : IDataControl read FDataControl write SetDataControl;
+
+            constructor Create();
+    end;
+
+implementation
+
+uses
+    System.SysUtils, Vcl.Forms, ClsMensagens;
+
+
+{ TControleDados }
+
+constructor TControleDados.Create();
+begin
+  Self.DataControl := CoSQLDataControl.Create() as IDataControl;
+  inherited;
+
+end;
+
+procedure TControleDados.SetDataControl(const Value: IDataControl);
+begin
+  FDataControl := Value;
+end;
+
+end.

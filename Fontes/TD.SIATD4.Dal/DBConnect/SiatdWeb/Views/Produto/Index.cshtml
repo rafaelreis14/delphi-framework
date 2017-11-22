@@ -1,0 +1,43 @@
+﻿@model IEnumerable<SiatdWeb.Models.Produto>
+
+@{
+    ViewBag.Title = "Home";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<p>
+    @using (Html.BeginForm())
+{
+    <div style="margin:10px;">
+        <table style="width:100%;">
+            <tr><td><input id="Text1" name="Produto" onblur="Focus();" type="text" style="width:160px; display:inline; height:30px;" />
+                </td><td><input id="Submit1" hidden="hidden" type="submit" value="Consultar" class="btn btn-success" style="width: 80px; display: inline;" /></td></tr>
+        </table>
+    </div>
+}
+</p>
+
+@foreach (var item in Model)
+{
+    <div>
+        @Html.DisplayFor(modelItem => item.Descricao)
+    </div>
+
+    <div style="text-align:center">
+        <h2>
+           R$: @Html.DisplayFor(modelItem => item.Preco)
+        </h2>
+    </div>
+}
+
+<script type="text/javascript">
+
+    function Focus(){
+        document.getElementById("Text1").focus();
+    }
+    
+    Focus();
+
+</script>
+
+

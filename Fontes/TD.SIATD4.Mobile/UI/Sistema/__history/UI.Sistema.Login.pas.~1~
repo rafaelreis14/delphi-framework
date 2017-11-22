@@ -1,0 +1,146 @@
+unit UntLogin;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Buttons,
+  Vcl.ExtCtrls, ClsLib, Data.DB, Vcl.DBCtrls, UntDM, Vcl.Imaging.pngimage,
+  UntErrorProvider, Vcl.ComCtrls, UntFormBase, ClsParametro, RComboBox;
+
+type
+  TFrmLogin = class(TFrmBase)
+    Panel1: TPanel;
+    PnlRodape: TPanel;
+    lblServidorSocket: TLabel;
+    Label3: TLabel;
+    BtBtnOk: TBitBtn;
+    BtBtnSair: TBitBtn;
+    Image1: TImage;
+    Label1: TLabel;
+    Label2: TLabel;
+    edLogin: TLabeledEdit;
+    edSenha: TLabeledEdit;
+    cbFiliais: TRComboBox;
+    cbModulos: TRComboBox;
+    procedure BtBtnOkClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure edSenhaExit(Sender: TObject);
+    procedure cbFiliaisExit(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+var
+  FrmLogin: TFrmLogin;
+
+implementation
+
+uses
+  Datasnap.DBClient, ClsUsuarioLogado, ClsFilial, ClsModulo, UntTrocaSenha,
+  ClsEnumeradores;
+
+{$R *.dfm}
+
+procedure TFrmLogin.BtBtnOkClick(Sender: TObject);
+var
+   validado : Boolean;
+   Msg: string;
+   ParametroFlgAlteracaoSenha: TParametro;
+begin
+    try
+      inherited;
+      validado := True;
+      //
+      if (edLogin.Text = '')  or (EdSenha.Text = '') or
+         (cbFiliais.Value = '') or (cbModulos.value = '') then
+      begin
+          Validado := false;
+      end;
+      //
+      if not(Validado) then
+      begin
+          TLib.MensagemInformacao('Todo os campos são obrigatórios.',Self.Caption);
+          Abort;
+      end;
+      //
+      cbModulos.GetObject<TModulo>.CopiarPara(Tlib.UsuarioLogado.ModuloLogado);
+      //
+      Tlib.UsuarioLogado.EnviarDadosUsuario;
+      //
+      if (TLib.usuarioLogado.ObrigaTrocaSenha = 'S') or
+      (TLib.usuarioLogado.SenhaExpirada = true) then
+      begin
+           Msg := 'A sua senha expirou, favor informar a nova senha.';
+           if tlib.AbrirFormulario(TFrmTrocaSenha,TObject(Msg)) <> rfOK then
+              Application.Terminate;
+      end;
+      //
+      ModalResult := mrOk;
+    finally
+
+    end;
+end;
+
+
+
+procedure TFrmLogin.cbFiliaisExit(Sender: TObject);
+begin
+    if cbFiliais.value <> '' then
+    begin
+        cbFiliais.GetObject<TFilial>.CopiarPara(Tlib.UsuarioLogado.Filial);
+        Tlib.UsuarioLogado.ObterModulosDeAcesso;
+        cbModulos.Enabled := True;
+        cbModulos.DataSource := Tlib.UsuarioLogado.ModulosAcesso.ToList;
+        cbModulos.DataBind;
+        cbModulos.SetFocus;
+    end;
+end;
+
+
+
+procedure TFrmLogin.FormCreate(Sender: TObject);
+begin
+    inherited;
+    //PgCntrlLogin.TabIndex := 0;
+end;
+
+procedure TFrmLogin.FormShow(Sender: TObject);
+begin
+    inherited;
+    self.Width := MobileWidth;
+    self.Height := MobileHeight;
+    //PgCntrlLogin.TabIndex := 0;
+    //TbShtEmpresaModulo.TabVisible := False;
+    lblServidorSocket.Caption := DMCliente.ClientSocket.Host+' - ['+
+    IntToStr(DMCliente.ClientSocket.Port)+']';
+    EdLogin.SetFocus;
+end;
+
+
+
+procedure TFrmLogin.edSenhaExit(Sender: TObject);
+var
+    usuarioLogado: TUsuarioLogado;
+begin
+    inherited;
+    usuarioLogado := TUsuarioLogado.create;
+    usuarioLogado.EnviarDadosEstacaoCliente(edLogin.Text);
+    usuarioLogado.Autenticar(edLogin.Text, edSenha.Text);
+    if usuarioLogado.Autenticado then
+    begin
+        TLib.UsuarioLogado := usuarioLogado;
+        usuarioLogado.ObterFiliaisAcessoPorUsuario;
+        cbFiliais.DataSource := usuarioLogado.FiliaisAcesso.ToList;
+        cbFiliais.DataBind;
+    end
+    else
+    begin
+        cbModulos.Clear();
+        edLogin.SetFocus;
+    end;
+end;
+
+end.

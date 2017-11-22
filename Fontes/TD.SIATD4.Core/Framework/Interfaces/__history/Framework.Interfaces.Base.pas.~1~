@@ -1,0 +1,16 @@
+unit Framework.Interfaces.Base;
+
+interface
+
+uses
+  Lib.Enumeradores;
+type
+    IBase =  interface
+        function GetTipoManutencao:TTipoManutencao;
+        procedure SetTipoManutencao(const Value: TTipoManutencao);
+        procedure CopiarPara(objeto: TObject);
+    end;
+
+implementation
+
+end.

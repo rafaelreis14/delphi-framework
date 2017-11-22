@@ -1,0 +1,628 @@
+unit Biz.Cliente;
+
+interface
+
+uses Classes, System.SysUtils, Lib.Parametro, Lib.Enumeradores, Lib.Base,
+    Biz.Filial, Lib.Filter, Lib.Persistable, Lib.Lista, Datasnap.DBClient,
+    Lib.ResultFilter, Biz.Serasa, Framework.Interfaces.CRUD;
+
+type
+    TTipoPessoa = (tpDesconhecido, tpPessoaFisica, tpPessoaJuridica);
+
+    TCliente = Class(TBase, ICRUD<TCliente>)
+    private
+        FCodigo: string;
+        FLoja: string;
+        FNome: string;
+        FCgc: string;
+        FRecno: Integer;
+        FTipo: string;
+        FTipoPessoal: string;
+        FRg: string;
+        FBairro: string;
+        FCep: string;
+        FMunicipio: string;
+        FInscricao: string;
+        FEndereco: string;
+        FTelefone: string;
+        FEstado: string;
+        FCodigoClientePadrao: string;
+        FSeguencialClientePadrao: string;
+        FEmail: string;
+        FEmailNfe: string;
+        FDataNascimento: string;
+        procedure SetCodigo(const Value: string);
+        procedure SetLoja(const Value: string);
+        procedure SetNome(const Value: string);
+        procedure SetCgc(const Value: string);
+        procedure SetRecno(const Value: Integer);
+        procedure SetTipo(const Value: string);
+        procedure SetTipoPessoal(const Value: string);
+        procedure SetBairro(const Value: string);
+        procedure SetCep(const Value: string);
+        procedure SetEndereco(const Value: string);
+        procedure SetInscricao(const Value: string);
+        procedure SetMunicipio(const Value: string);
+        procedure SetRg(const Value: string);
+        procedure SetTelefone(const Value: string);
+        procedure SetEstado(const Value: string);
+        function GetTipoPessoa: TTipoPessoa;
+        procedure SetEmail(const Value: string);
+        procedure SetEmailNfe(const Value: string);
+        procedure SetDataNascimento(const Value: string);
+        function GetIdade: Integer;
+
+    public
+        function Inserir: boolean;
+
+        /// <summary>
+        /// Métodos que retorna uma lista  de objetos de uma consulta
+        /// pré-definida pelos parâmentros passados.
+        /// </summary>
+        function Consultar(parametros: TParametro): TLista<TCliente>;
+
+        function Alterar: boolean;
+        function Excluir: boolean;
+        function Listar(tipoOperacao: TOparationTypes; multselect: Boolean): TResultFilter;
+
+        function Obter(ID:string): TCliente; overload;
+        function Obter(parametros: TParametro): TCliente; overload;
+        function Obter(sequencial, ID: string): TCliente; overload;
+
+
+        procedure PreencherObjeto(cliente: TCliente);
+
+        function ValidarCPFCNPJ: Boolean;
+
+        function ValidarCaracteresInvalidosNome: Boolean;
+
+        function EFormatoCpf: Boolean;
+        function VerificarClientePadrao: Boolean;
+
+        [TPersistable(fgPersistable, 'A1_LOJA')]
+        property Sequencial: string read FLoja write SetLoja;
+
+        [TPersistable(fgPersistable, 'A1_COD')]
+        property Codigo: string read FCodigo write SetCodigo;
+
+        [TPersistable(fgPersistable, 'A1_NOME')]
+        property Nome: string read FNome write SetNome;
+
+        [TPersistable(fgPersistable, 'A1_CGC')]
+        property Cgc: string read FCgc write SetCgc;
+
+        [TPersistable(fgPersistable, 'A1_RG')]
+        property Rg: string read FRg write SetRg;
+
+        [TPersistable(fgPersistable, 'A1_DTNASC')]
+        property DataNascimento: string read FDataNascimento write SetDataNascimento;
+
+        [TPersistable(fgPersistable, 'A1_CEP')]
+        property Cep: string read FCep write SetCep;
+
+        [TPersistable(fgPersistable, 'A1_MUN')]
+        property Municipio: string read FMunicipio write SetMunicipio;
+
+        [TPersistable(fgPersistable, 'A1_BAIRRO')]
+        property Bairro: string read FBairro write SetBairro;
+
+        [TPersistable(fgPersistable, 'A1_END')]
+        property Endereco: string read FEndereco write SetEndereco;
+
+        [TPersistable(fgPersistable, 'A1_EST')]
+        property Estado: string read FEstado write SetEstado;
+
+        [TPersistable(fgPersistable, 'A1_INSCR')]
+        property Inscricao: string read FInscricao write SetInscricao;
+
+        [TPersistable(fgPersistable, 'A1_TEL')]
+        property Telefone: string read FTelefone write SetTelefone;
+
+        [TPersistable(fgPersistable, 'A1_EMAIL')]
+        property Email: string read FEmail write SetEmail;
+
+        [TPersistable(fgPersistable, 'A1_MAILNTD')]
+        property EmailNfe: string read FEmailNfe write SetEmailNfe;
+
+        /// <summary>
+        /// Tipo Cliente -  R = Revenda F = Final
+        /// </summary>
+        [TPersistable(fgPersistable, 'A1_TIPO')]
+        property Tipo: string read FTipo write SetTipo;
+
+        /// <summary>
+        /// Tipo pessoa - F = Pessoa Física, J = Pessoa Jurídica
+        /// </summary>
+        [TPersistable(fgPersistable, 'A1_PESSOA')]
+        property TipoPessoa: string read FTipoPessoal write SetTipoPessoal;
+
+        property TipoPessoa_: TTipoPessoa read GetTipoPessoa;
+
+        [TPersistable(fgUpdateable, 'R_E_C_N_O_')]
+        property Recno: Integer read FRecno write SetRecno;
+
+        property SeguencialClientePadrao: string read FSeguencialClientePadrao;
+        property CodigoClientePadrao: string read FCodigoClientePadrao;
+
+        property Idade: Integer read GetIdade;
+
+        /// <summary>
+        /// Obtem somente os códigos dos cliente padrao
+        /// </summary>
+        procedure ObterCodigoClientePadrao;
+
+        // Obtem e popular o Cliente
+        procedure ObterClientePadrao;
+
+        procedure ConsultarSerasa;
+
+        function ObterUltimaConsultaSerasa: TDadosConsultaSerasa;
+
+        function ObterInformacoesCadastrais(zab_zaarec: string): TInformacoesCadastrais;
+
+        function ObterAnotacoesSerasa(zac_zabrec: string): TLista<TAnotacaoSerasa>;
+
+        constructor Create; override;
+    end;
+
+implementation
+
+{ TCliente }
+
+uses Lib.Biblioteca;
+
+function TCliente.Alterar: boolean;
+begin
+
+end;
+
+function TCliente.Consultar(parametros: TParametro): TLista<TCliente>;
+begin
+  //  Result := BaseLib.XmlToObject<TCliente>(BaseLib.ExecutaTarefa('ConsultarCliente', 'TCliente', parametros)).Tolist;
+end;
+
+procedure TCliente.ConsultarSerasa;
+var
+    param: TParametro;
+begin
+    try
+        param := nil;
+        if trim(Self.Cgc) = EmptyStr then
+            raise Exception.Create('Cliente sem CPF/CNPJ cadastrado');
+
+        param := TParametro.Create;
+        param.Add('', 'CPFCNPJ', Self.Cgc);
+
+  //      BaseLib.ExecutaTarefa('ConsultarSerasa', 'TCliente', param);
+    finally
+        if param <> nil then
+            FreeAndNil(param);
+    end;
+end;
+
+constructor TCliente.Create;
+begin
+    inherited;
+    ObterCodigoClientePadrao;
+end;
+
+function TCliente.Excluir: boolean;
+begin
+
+end;
+
+function TCliente.EFormatoCpf: Boolean;
+begin
+    if length(Self.Cgc) > 11 then
+        Result := false
+    else
+        Result := true;
+end;
+
+function TCliente.GetIdade: Integer;
+begin
+    result := 0;
+
+    if Self.DataNascimento = EmptyStr then
+        exit;
+
+    Result := Trunc((tlib.DataSistemaParaDateTime(tlib.ObterDataAtual) - tlib.DataSistemaParaDateTime(Self.DataNascimento))/365.25);
+end;
+
+function TCliente.GetTipoPessoa: TTipoPessoa;
+begin
+    if Self.TipoPessoa = 'J' then
+        Result := tpPessoaJuridica
+    else if Self.TipoPessoa = 'F' then
+        Result := tpPessoaFisica
+    else
+        Result := tpDesconhecido;
+end;
+
+function TCliente.Inserir: boolean;
+begin
+
+end;
+
+function TCliente.Listar(tipoOperacao: TOparationTypes; multselect: Boolean): TResultFilter;
+var
+    campoFiltro: TFieldFilter;
+    filtro: TFilter<TCliente>;
+begin
+    inherited;
+    filtro := TFilter<TCliente>.Create;
+    filtro.ScreenName := 'Filtro de Clientes';
+    filtro.OperationType := tipoOperacao;
+    filtro.MultiSelect := multselect;
+    filtro.AddIndex(1, 'Cgc=A1_CGC', 'CNPJ/CPF');
+    filtro.AddIndex(2, 'Nome=A1_NOME', 'Nome');
+    filtro.AddIndex(3, 'Sequencial=A1_LOJA, Codigo=A1_COD', 'Loja + Código');
+    filtro.Task := 'ConsultarCliente';
+    //REIS VERIFICAR
+  //  filtro.InputForm := TfrmCadCliente;
+    //
+    campoFiltro := TFieldFilter.Create;
+    campoFiltro.Description := 'Sequencial';
+    campoFiltro.Name := 'Sequencial';
+    campoFiltro.MaskTypes := mtNone;
+    campoFiltro.GridSize := 60;
+    campoFiltro.FieldType := fdNormal;
+    filtro.AddField(campoFiltro);
+    //
+    campoFiltro := TFieldFilter.Create;
+    campoFiltro.Description := 'Codigo';
+    campoFiltro.Name := 'Codigo';
+    campoFiltro.MaskTypes := mtNone;
+    campoFiltro.GridSize := 60;
+    campoFiltro.FieldType := fdNormal;
+    filtro.AddField(campoFiltro);
+    //
+    campoFiltro := TFieldFilter.Create;
+    campoFiltro.Description := 'Nome';
+    campoFiltro.Name := 'Nome';
+    campoFiltro.MaskTypes := mtNone;
+    campoFiltro.FieldType := fdNormal;
+    campoFiltro.GridSize := 200;
+    filtro.AddField(campoFiltro);
+    //
+    campoFiltro := TFieldFilter.Create;
+    campoFiltro.Description := 'UF';
+    campoFiltro.Name := 'Estado';
+    campoFiltro.MaskTypes := mtNone;
+    campoFiltro.GridSize := 30;
+    campoFiltro.FieldType := fdNormal;
+    filtro.AddField(campoFiltro);
+    //
+    campoFiltro := TFieldFilter.Create;
+    campoFiltro.Description := 'Cgc';
+    campoFiltro.Name := 'Cgc';
+    campoFiltro.MaskTypes := mtNone;
+    campoFiltro.FieldType := fdNormal;
+    campoFiltro.GridSize := 80;
+    filtro.AddField(campoFiltro);
+    //
+    campoFiltro := TFieldFilter.Create;
+    campoFiltro.Description := 'Recno';
+    campoFiltro.Name := 'Recno';
+    campoFiltro.MaskTypes := mtNone;
+    campoFiltro.FieldType := fdNormal;
+    campoFiltro.GridSize := 60;
+    filtro.AddField(campoFiltro);
+    //
+    Result := filtro.Execute;
+end;
+
+function TCliente.Obter(sequencial, ID: string): TCliente;
+var
+    parametro: TParametro;
+begin
+    try
+        parametro := TParametro.Create;
+        parametro.Add('', 'A1_LOJA', sequencial);
+        parametro.Add('', 'A1_COD', ID);
+
+        Self.Obter(parametro);
+    finally
+        FreeAndNil(parametro);
+    end;
+end;
+
+function TCliente.Obter(ID: string): TCliente;
+begin
+
+end;
+
+function TCliente.ObterAnotacoesSerasa(zac_zabrec: string): TLista<TAnotacaoSerasa>;
+var
+    param: TParametro;
+begin
+    try
+        param := TParametro.Create;
+        param.Add('', 'zac_zabrec', zac_zabrec);
+
+ //       Result := BaseLib.XmlToObject<TAnotacaoSerasa>(BaseLib.ExecutaTarefa('ObterObterAnotacoesSerasa', 'TCliente', param));
+    finally
+        if param <> nil then
+            FreeAndNil(param);
+    end;
+end;
+
+procedure TCliente.ObterClientePadrao;
+begin
+    if (Self.SeguencialClientePadrao = '') or (Self.CodigoClientePadrao = '') then
+        Self.ObterCodigoClientePadrao;
+
+    Self.Obter(Self.SeguencialClientePadrao, Self.CodigoClientePadrao);
+end;
+
+procedure TCliente.ObterCodigoClientePadrao;
+var
+    dataSet: TClientDataSet;
+begin
+    try
+        dataSet := nil;
+//        dataSet := BaseLib.XmlToDataset(BaseLib.ExecutaTarefa('ObterClientePadrao', 'TCliente', nil));
+        if not dataSet.IsEmpty then
+        begin
+            FSeguencialClientePadrao := dataSet.FieldByName('S13_SEQCLIENTEPADRAO').AsString;
+            FCodigoClientePadrao := dataSet.FieldByName('S13_CLIENTEPADRAO').AsString;
+        end
+        else
+            raise Exception.Create('Não foi possível obter o cliente padrão, favor verificar.');
+    finally
+        if dataSet <> nil then
+            FreeAndNil(dataSet);
+    end;
+end;
+
+function TCliente.ObterInformacoesCadastrais(zab_zaarec: string): TInformacoesCadastrais;
+var
+    param: TParametro;
+    lista: TLista<TInformacoesCadastrais>;
+begin
+    try
+        param := TParametro.Create;
+        param.Add('', 'zab_zaarec', zab_zaarec);
+
+//        lista := BaseLib.XmlToObject<TInformacoesCadastrais>(BaseLib.ExecutaTarefa('ObterInformacoesCadastrais', 'TCliente', param));
+
+        if lista.count > 0 then
+            Result := lista[0]
+        else
+            Result := nil;
+    finally
+        if param <> nil then
+            FreeAndNil(param);
+    end;
+
+end;
+
+function TCliente.ObterUltimaConsultaSerasa: TDadosConsultaSerasa;
+var
+    param: TParametro;
+    lista: TLista<TDadosConsultaSerasa>;
+begin
+    try
+        param := nil;
+
+        if trim(Self.Cgc) = EmptyStr then
+            raise Exception.Create('Cliente sem CPF/CNPJ cadastrado');
+
+        param := TParametro.Create;
+        param.Add('', 'CPFCNPJ', Self.Cgc);
+
+ //       lista := BaseLib.XmlToObject<TDadosConsultaSerasa>(BaseLib.ExecutaTarefa('ObterUltimaConsultaSerasa', 'TCliente', param));
+
+        if lista.count > 0 then
+            Result := lista[0]
+        else
+            Result := nil;
+    finally
+        if param <> nil then
+            FreeAndNil(param);
+    end;
+end;
+
+//function TCliente.Obter(ID: string): TObject;
+//var
+//    parametros: TParametro;
+//
+//begin
+//    try
+//        parametros := TParametro.Create;
+//        parametros.Add('', 'Z3_NUM', ID);
+//        parametros.Add('', 'Z3_FILIAL', tlib.UsuarioLogado.Filial.Filial);
+//        Result := Obter(parametros);
+//    finally
+//        FreeAndNil(parametros);
+//    end;
+//
+//end;
+
+function TCliente.Obter(parametros: TParametro): TCliente;
+var
+    lista: TLista<TCliente>;
+
+begin
+    try
+  //      lista := BaseLib.XmlToObject<TCliente>(BaseLib.ExecutaTarefa('ConsultarCliente', 'TCliente', parametros));
+
+        if lista.count = 1 then
+        begin
+            PreencherObjeto(lista[0]);
+            Result := Self;
+        end
+        else
+        begin
+            tlib.MensagemAdvertencia('Nenhum registro encontrado.', 'Aviso');
+            Result := nil;
+        end;
+    finally
+        lista.Destroy;
+    end;
+end;
+
+function TCliente.ValidarCaracteresInvalidosNome: Boolean;
+begin
+    Result := tlib.ValidarCaracteresInvalidos(Self.Nome);
+end;
+
+function TCliente.ValidarCPFCNPJ: Boolean;
+Var
+    i, d, b, Digito: Byte;
+    Soma: Integer;
+    CNPJ: Boolean;
+    DgPass, DgCalc: String;
+    number: string;
+begin
+    Result := false;
+    number := tlib.SomenteNumeros(Self.Cgc);
+    //
+    if StrToInt64Def(number, 0) = 0 then
+        exit;
+
+    // Caso o número não seja 11 (CPF) ou 14 (CNPJ), aborta
+    Case length(number) of
+        11:
+            CNPJ := false;
+        14:
+            CNPJ := true;
+    else
+        exit;
+    end;
+    // Separa o número do digito
+    DgCalc := '';
+    DgPass := copy(number, length(number) - 1, 2);
+    number := copy(number, 1, length(number) - 2);
+    // Calcula o digito 1 e 2
+    For d := 1 to 2 do
+    begin
+        b := tlib.ifTernario(d = 1, 2, 3); // BYTE
+        Soma := tlib.ifTernario(d = 1, 0, STRTOINTDEF(DgCalc, 0) * 2);
+        for i := length(number) downto 1 do
+        begin
+            Soma := Soma + (Ord(number[i]) - Ord('0')) * b;
+            Inc(b);
+            If (b > 9) And CNPJ Then
+                b := 2;
+        end;
+        Digito := 11 - Soma mod 11;
+        If Digito >= 10 then
+            Digito := 0;
+        DgCalc := DgCalc + Chr(Digito + Ord('0'));
+    end;
+    if DgCalc <> DgPass then
+    begin
+        Result := false;
+        tlib.MensagemAdvertencia('CPF ou CNPJ Inválido');
+    end
+    else
+        Result := true;
+end;
+
+function TCliente.VerificarClientePadrao: Boolean;
+begin
+    if (Self.CodigoClientePadrao = '') or
+       (Self.SeguencialClientePadrao = '') then
+       Self.ObterCodigoClientePadrao;
+
+    result := ((Codigo = CodigoClientePadrao) and (sequencial = SeguencialClientePadrao));
+end;
+
+procedure TCliente.PreencherObjeto(cliente: TCliente);
+begin
+    cliente.CopiarPara(Self);
+end;
+
+procedure TCliente.SetBairro(const Value: string);
+begin
+    FBairro := Value;
+end;
+
+procedure TCliente.SetCep(const Value: string);
+begin
+    FCep := Value;
+end;
+
+procedure TCliente.SetCgc(const Value: string);
+begin
+    FCgc := Value;
+end;
+
+procedure TCliente.SetCodigo(const Value: string);
+begin
+    FCodigo := Value;
+end;
+
+procedure TCliente.SetDataNascimento(const Value: string);
+begin
+    FDataNascimento := Value;
+end;
+
+procedure TCliente.SetEmail(const Value: string);
+begin
+    FEmail := Value;
+end;
+
+procedure TCliente.SetEmailNfe(const Value: string);
+begin
+    FEmailNfe := Value;
+end;
+
+procedure TCliente.SetEndereco(const Value: string);
+begin
+    FEndereco := Value;
+end;
+
+procedure TCliente.SetEstado(const Value: string);
+begin
+    FEstado := Value;
+end;
+
+procedure TCliente.SetInscricao(const Value: string);
+begin
+    FInscricao := Value;
+end;
+
+procedure TCliente.SetLoja(const Value: string);
+begin
+    FLoja := Value;
+end;
+
+procedure TCliente.SetMunicipio(const Value: string);
+begin
+    FMunicipio := Value;
+end;
+
+procedure TCliente.SetNome(const Value: string);
+begin
+    FNome := Value;
+end;
+
+procedure TCliente.SetRecno(const Value: Integer);
+begin
+    FRecno := Value;
+end;
+
+procedure TCliente.SetRg(const Value: string);
+begin
+    FRg := Value;
+end;
+
+procedure TCliente.SetTelefone(const Value: string);
+begin
+
+    FTelefone := Value;
+end;
+
+procedure TCliente.SetTipo(const Value: string);
+begin
+    FTipo := Value;
+end;
+
+procedure TCliente.SetTipoPessoal(const Value: string);
+begin
+    FTipoPessoal := Value;
+end;
+
+end.

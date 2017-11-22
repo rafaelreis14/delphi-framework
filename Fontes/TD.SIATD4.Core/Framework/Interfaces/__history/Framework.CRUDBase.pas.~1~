@@ -1,0 +1,19 @@
+unit Lib.Interfaces.CRUDGenerico;
+
+interface
+
+uses
+    Classes, Lib.Enumeradores, Lib.Parametro, Lib.ResultFilter, Lib.Lista,
+    Lib.Base;
+type
+    ICRUDGenerico = interface
+        function Inserir: integer;
+        function Alterar: integer;
+        function Deletar: integer;
+        function Listar(tipoOperacao: TOparationTypes; MultiSelect: Boolean): TResultFilter;
+    end;
+
+
+implementation
+
+end.

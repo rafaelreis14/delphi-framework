@@ -1,0 +1,148 @@
+unit Dal.FabricaSQL;
+
+interface
+uses SysUtils,ComObj, Provider,DB,DbClient, Classes, typinfo,  Lib.Base, System.Rtti,
+  Lib.Persistable, Lib.Enumeradores;
+type
+    TFabricaSQL = class
+    private
+        FBase: TBase;
+        function ObterCamposSQL(tipoManutencao: TTipoManutencao; out recno: string): TStringList; overload;
+        function ObterCamposSQL(tipoManutencao: TTipoManutencao): TStringList; overload;
+        procedure ValidarGeracaoSQL;
+    public
+        function GerarSqlInsercao:wideString;
+        function GerarSqlAlteracao:wideString;
+        function GerarSqlDelecao: wideString;
+        constructor Create(base: TBase);
+  end;
+
+implementation
+
+
+{ TFabricaSQL }
+
+constructor TFabricaSQL.Create(base: TBase);
+begin
+    FBase := base;
+end;
+
+procedure TFabricaSQL.ValidarGeracaoSQL;
+begin
+  if FBase.TabelaReferencia = EmptyStr then
+    raise Exception.Create('Tabela referência não mencionada na classe passada.');
+end;
+
+function TFabricaSQL.GerarSqlAlteracao: wideString;
+var
+  campos: TStringList;
+  item: string;
+  sqlCampos:wideString;
+  recno: string;
+begin
+    try
+        ValidarGeracaoSQL;
+
+        campos := ObterCamposSQL(Alteracao, recno);
+
+        for item in campos do
+            sqlCampos := sqlCampos + item + ':'+item +',';
+
+        Delete(sqlCampos,length(sqlCampos),1);
+        result := 'UPDATE '+FBase.TabelaReferencia +' '+sqlCampos +' WHERE R_E_C_N_O_ = '+recno;
+    finally
+        if campos <> nil then
+            FreeAndNil(campos);
+    end;
+end;
+
+function TFabricaSQL.GerarSqlDelecao: wideString;
+var
+  campos: TStringList;
+  item: string;
+  sqlCampos:wideString;
+  recno: string;
+begin
+    try
+        ValidarGeracaoSQL;
+
+        campos := ObterCamposSQL(Alteracao, recno);
+
+        Delete(sqlCampos,length(sqlCampos),1);
+        result := 'UPDATE SET D_E_L_E_T_ = ''*'' WHERE R_E_C_N_O_ = '+recno;
+    finally
+        if campos <> nil then
+            FreeAndNil(campos);
+    end;
+
+end;
+
+function TFabricaSQL.GerarSqlInsercao: wideString;
+var
+  campos: TStringList;
+  item: string;
+  sql1,sql2: wideString;
+begin
+    try
+        ValidarGeracaoSQL;
+
+        campos := ObterCamposSQL(Insercao);
+        for item in campos do
+        begin
+            sql1 := sql1 + item + ',';
+            sql2 := sql2 + ':'+item + ',';
+        end;
+        Delete(sql1,length(sql1),1);
+        Delete(sql2,length(sql2),1);
+
+        result := 'INSERT INTO '+ FBase.TabelaReferencia +' ('+sql1+')'+' VALUES('+sql2+')';
+    finally
+        if campos <> nil then
+            FreeAndNil(campos);
+
+    end;
+end;
+
+
+
+function TFabricaSQL.ObterCamposSQL(tipoManutencao: TTipoManutencao): TStringList;
+var
+    param:string;
+begin
+    ObterCamposSQL(tipoManutencao,param);
+end;
+
+function  TFabricaSQL.ObterCamposSQL(tipoManutencao: TTipoManutencao; out recno: string): TStringList;
+var
+    context: TRttiContext;
+    Propriedade: TRttiProperty;
+    _ctx: TRttiContext;
+    _typ: TRttiType;
+    _pro: TRttiProperty;
+    oAtt: TCustomAttribute;
+    resultado: TStringList;
+begin
+    resultado := TStringList.Create;
+    _typ := _ctx.GetType(Self.ClassType);
+    for _pro in _typ.GetProperties do
+    begin
+        for oAtt in _pro.GetAttributes do
+        begin
+            if oAtt is TPersistable then
+            begin
+                if ((TPersistable(oAtt).Flag = fgPersistable) and (tipoManutencao = Insercao)) or ((TPersistable(oAtt).Flag in [fgUpdateable, fgPersistable]) and (tipoManutencao <> Insercao)) then
+                begin
+                    resultado.Add(_pro.GetValue(Self).ToString);
+
+                    if TPersistable(oAtt).FieldName = 'Recno' then
+                        recno := _pro.GetValue(Self).ToString;
+                end;
+            end;
+        end;
+    end;
+    if not (tipoManutencao in [Insercao]) then
+        if recno = EmptyStr then
+            raise Exception.Create('campo Recno não encontrado na classe passada');
+end;
+
+end.

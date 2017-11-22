@@ -1,0 +1,80 @@
+object frmPesquisaCliente: TfrmPesquisaCliente
+  Left = 0
+  Top = 0
+  Width = 446
+  Height = 42
+  TabOrder = 0
+  object Label2: TLabel
+    Left = 5
+    Top = 3
+    Width = 78
+    Height = 13
+    Caption = 'Pesquisa Cliente'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+  end
+  object edLoja: TREdit
+    Left = 4
+    Top = 17
+    Width = 24
+    Height = 21
+    Ctl3D = True
+    Enabled = False
+    ParentCtl3D = False
+    TabOrder = 0
+    Text = ''
+    MaskType = mtNone
+    MandatoryField = False
+    PersistentField = False
+    SaveLiteralCharacters = False
+    DecimalPlaces = 2
+  end
+  object edCoigoCliente: TREdit
+    Left = 29
+    Top = 17
+    Width = 50
+    Height = 21
+    Ctl3D = True
+    Enabled = False
+    ParentCtl3D = False
+    TabOrder = 1
+    Text = ''
+    MaskType = mtNone
+    MandatoryField = False
+    PersistentField = False
+    SaveLiteralCharacters = False
+    DecimalPlaces = 2
+  end
+  object edNomeCliente: TREdit
+    Left = 80
+    Top = 17
+    Width = 337
+    Height = 21
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+    TabOrder = 2
+    Text = ''
+    MaskType = mtNone
+    MandatoryField = False
+    PersistentField = False
+    SaveLiteralCharacters = False
+    DecimalPlaces = 2
+  end
+  object btnConsultaCliente: TBitBtn
+    Left = 417
+    Top = 16
+    Width = 26
+    Height = 22
+    Caption = '...'
+    TabOrder = 3
+    OnClick = btnConsultaClienteClick
+  end
+end

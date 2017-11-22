@@ -1,0 +1,375 @@
+unit RComboBox;
+
+interface
+
+uses
+  SysUtils, Classes, Controls, StdCtrls, TypInfo, Messages, Dialogs, RTTI;
+
+type
+  TRComboBox = class(TComboBox)
+  private
+    FDataSource: TList;
+    FDescriptionName: String;
+    FIDName: String;
+    FMandatoryField: boolean;
+    FPersistentField: boolean;
+    FFieldName: String;
+    FBlankField: boolean;
+    FListValue: TStrings;
+    FIndexList: TList;
+    FFilter: TStrings;
+    FFiltered: Boolean;
+    procedure SetDataSource(const Value: TList);
+    function GetValue: String;
+    procedure SetDescriptionName(const Value: String);
+    procedure SetIDName(const Value: String);
+    procedure SetFieldName(const Value: String);
+    procedure SetMandatoryField(const Value: boolean);
+    procedure SetPersistentField(const Value: boolean);
+    procedure SetBlankField(const Value: boolean);
+    procedure SetValue(const Value: String);
+    function IfTernario(condicao: Boolean; verdadeiro, falso: variant): variant;
+    procedure SetListValue(const Value: TStrings);
+    procedure SetFilter(const Value: TStrings);
+    function FilterVerified(obj: TObject): boolean;
+    function GetFiltered: Boolean;
+    { Private declarations }
+  protected
+    { Protected declarations }
+
+  published
+    property FieldName:String read FFieldName write SetFieldName;
+    property MandatoryField: boolean read FMandatoryField write SetMandatoryField;
+    property PersistentField: boolean read FPersistentField write SetPersistentField;
+    property BlankField: boolean read FBlankField write SetBlankField;
+    property IDFieldName:String read FIDName write SetIDName;
+    property DescriptionFieldName:String read FDescriptionName write SetDescriptionName;
+    property ListValue: TStrings read FListValue write SetListValue;
+    property Filter: TStrings read FFilter write SetFilter;
+
+  public
+    property Filtered: Boolean read GetFiltered;
+    property DataSource:TList read FDataSource write SetDataSource;
+    property Value:String read GetValue write SetValue;
+
+    procedure ClearFilter;
+    procedure ClearSource;
+    procedure DataBind;
+    function GetObject<T: class>:T;
+    procedure FindIndexByIDFieldName(idFieldNameValue: string);
+    procedure FindIndexByFieldName(fieldNameValue: string);
+
+    constructor Create(AOwner: TComponent);override;
+    destructor Destroy; override;
+  end;
+
+procedure Register;
+
+implementation
+
+uses
+  Lib.Enumeradores, Lib.Base;
+
+procedure Register;
+begin
+  RegisterComponents('SIATD', [TRComboBox]);
+end;
+
+{ TRComboBox }
+
+
+
+
+procedure TRComboBox.ClearSource;
+begin
+   self.Clear;
+   if Assigned(FDataSource) then
+       FDataSource := nil;
+
+   if Assigned(FListValue) then
+       FListValue.Clear;
+
+end;
+
+procedure TRComboBox.ClearFilter;
+begin
+   FFilter.Clear;
+end;
+
+constructor TRComboBox.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  Style := csOwnerDrawFixed;
+  self.fListValue := TStringList.Create;
+  self.fFilter := TStringList.Create;
+  self.FIndexList := TList.Create;
+end;
+
+procedure TRComboBox.DataBind;
+var
+  i:integer;
+  context: TRttiContext;
+  prop: TRttiProperty;
+begin
+  self.Clear;
+  self.FIndexList.Clear;
+  if (self.FDataSource <> nil)  or (self.FListValue <> nil) then
+  begin
+      self.Style := csOwnerDrawFixed;
+      if self.BlankField then self.Items.Add('');
+      if self.FDataSource <> nil then
+      begin
+        for i := 0 to self.FDataSource.Count-1 do
+        begin
+           if FilterVerified(self.FDataSource[i]) then
+           begin
+               try
+                 if (TObject(self.FDataSource[i]).InheritsFrom(TBase) and (TBase(self.FDataSource[i]).TipoManutencao <> Exclusao)) or (not TObject(self.FDataSource[i]).InheritsFrom(TBase)) then
+                 begin
+                     prop := context.GetType(TObject(self.FDataSource[i]).ClassType).GetProperty(self.DescriptionFieldName);
+                     self.Items.Add(prop.GetValue(TObject(self.FDataSource[i])).ToString);
+                     self.FIndexList.Add(pointer(I));
+                 end;
+               except
+                 raise Exception.Create('Erro ao tentar acessar a propriedade: '+self.DescriptionFieldName+'. Verifique Configuração');
+
+               end;
+           end;
+        end;
+      end
+      else
+      if self.FListValue <> nil then
+      begin
+        for I := 0 to self.FListValue.Count-1 do
+        begin
+          self.Items.Add(self.FListValue.Names[I])
+        end;
+      end;
+
+      if self.ItemCount > 0 then self.ItemIndex := 0;
+  end;
+end;
+
+function TRComboBox.FilterVerified(obj: TObject): boolean;
+var
+  I: integer;
+  context: TRttiContext;
+  prop: TRttiProperty;
+  id: string;
+begin
+  result := true;
+  for I := 0 to self.Filter.Count-1 do
+  begin
+     prop := context.GetType(obj.ClassType).GetProperty(self.Filter.Names[I]);
+     id := prop.GetValue(obj).ToString;
+     if not (self.Filter.ValueFromIndex[I] = id) then
+     begin
+         result := false;
+         break;
+     end;
+  end;
+end;
+
+destructor TRComboBox.Destroy;
+var
+  I:integer;
+begin
+  if self.FListValue <> nil then
+        FreeAndNil(self.FListValue);
+
+  if self.FFilter <> nil then
+       FreeAndNil(self.FFilter);
+
+  FreeAndNil(FIndexList);
+  //
+  inherited Destroy;
+end;
+
+procedure TRComboBox.FindIndexByFieldName(fieldNameValue: string);
+var
+    I: integer;
+begin
+    for I := 0 to self.Items.Count-1 do
+    begin
+        if self.Items.Strings[i] = fieldNameValue then
+        begin
+           Self.ItemIndex := i;
+           exit;
+        end;
+    end;
+end;
+
+procedure TRComboBox.FindIndexByIDFieldName(idFieldNameValue: string);
+var
+    i, ind: integer;
+    context: TRttiContext;
+    prop: TRttiProperty;
+begin
+
+    if Assigned(FDataSource) then
+    begin
+        for i := 0 to FDataSource.Count - 1 do
+        begin
+            prop := context.GetType(TObject(FDataSource[i]).ClassType).GetProperty(self.IDFieldName);
+            if prop.GetValue(TObject(FDataSource[i])).ToString = idFieldNameValue then
+            begin
+                self.ItemIndex := IfTernario(self.BlankField, i + 1, i);
+                exit;
+            end;
+        end;
+    end
+    else
+    begin
+        if FListValue.Count > 0 then
+        begin
+            for i := 0 to self.FListValue.Count - 1 do
+            begin
+                if self.FListValue.ValueFromIndex[i] = idFieldNameValue then
+                begin
+                    self.ItemIndex := IfTernario(self.BlankField, i + 1, i);
+                    exit;
+                end;
+            end;
+        end
+        else
+        begin
+            if self.Items[i] = idFieldNameValue then
+            begin
+                for i := 0 to self.Items.Count - 1 do
+                begin
+                    self.ItemIndex := IfTernario(self.BlankField, i + 1, i);
+                    exit;
+                end;
+            end;
+        end;
+    end;
+end;
+
+
+function TRComboBox.GetFiltered: Boolean;
+begin
+   result := false;
+   if Assigned(FFilter) then
+     if FFilter.Count > 0 then
+        result := true;
+end;
+
+function TRComboBox.GetObject<T>: T;
+begin
+    if FDataSource <> nil then
+        Result :=  T(TObject(FDataSource[self.GetItemIndex]));
+end;
+
+
+function TRComboBox.GetValue: String;
+var
+  ind:integer;
+  context: TRttiContext;
+  prop: TRttiProperty;
+begin
+  try
+    if (self.BlankField) and (self.Text = EmptyStr) then
+        Result := EmptyStr
+    else
+    begin
+        if self.BlankField then ind := self.GetItemIndex - 1
+        else ind := self.GetItemIndex;
+
+        if Self.DataSource = nil then
+           if self.ListValue.Count = 0 then
+             result := self.Text
+           else
+             result := self.ListValue.ValueFromIndex[ind]
+        else
+        begin
+           ind := Integer(FIndexList.Items[ind]);
+           prop := context.GetType(TObject(Self.DataSource[ind]).ClassType).GetProperty(self.IDFieldName);
+           Result :=  prop.GetValue(TObject(Self.DataSource[ind])).ToString;
+        end;
+    end;
+  except
+     raise Exception.Create('Error ao tentar pegar o valor do componte: '+self.Name+'. Verifique Configuração');
+  end;
+
+end;
+
+
+function TRComboBox.IfTernario(condicao: Boolean; verdadeiro, falso: variant)
+  : variant;
+begin
+    if condicao then
+        Result := verdadeiro
+    else
+        Result := falso;
+end;
+
+
+
+procedure TRComboBox.SetValue(const Value: String);
+begin
+  try
+     self.FindIndexByIDFieldName(Value);
+  except
+     raise Exception.Create('Error ao tentar setar o valor do componte: '+self.Name+'. Verifique Configuração');
+  end;
+end;
+
+procedure TRComboBox.SetBlankField(const Value: boolean);
+begin
+  if FBlankField <> Value then
+    FBlankField := Value;
+end;
+
+procedure TRComboBox.SetDataSource(const Value: TList);
+begin
+  if FDataSource <> Value then
+    FDataSource := Value;
+end;
+
+
+
+procedure TRComboBox.SetDescriptionName(const Value: String);
+begin
+  if FDescriptionName <> Value then
+    FDescriptionName := Value;
+end;
+
+procedure TRComboBox.SetFieldName(const Value: String);
+begin
+  if FFieldName <> Value then
+    FFieldName := Value;
+end;
+
+procedure TRComboBox.SetFilter(const Value: TStrings);
+begin
+  if FFilter <> Value then
+    FFilter := Value;
+end;
+
+procedure TRComboBox.SetIDName(const Value: String);
+begin
+  if FIDName <> Value then
+    FIDName := Value;
+end;
+
+
+procedure TRComboBox.SetListValue(const Value: TStrings);
+begin
+  if FListValue <> Value then
+    FListValue.Assign(Value);
+end;
+
+procedure TRComboBox.SetMandatoryField(const Value: boolean);
+begin
+  if FMandatoryField <> Value then
+    FMandatoryField := Value;
+end;
+
+procedure TRComboBox.SetPersistentField(const Value: boolean);
+begin
+  if FPersistentField <> Value then
+    FPersistentField := Value;
+end;
+
+
+end.

@@ -1,0 +1,8 @@
+inherited FrmConsulta: TFrmConsulta
+  Caption = 'FrmConsulta'
+  OnShow = FormShow
+  ExplicitWidth = 320
+  ExplicitHeight = 296
+  PixelsPerInch = 96
+  TextHeight = 13
+end

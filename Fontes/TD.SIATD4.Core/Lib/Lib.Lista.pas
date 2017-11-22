@@ -1,0 +1,147 @@
+unit Lib.Lista;
+
+interface
+
+uses  Generics.Collections, System.SysUtils, Classes, System.Rtti;
+
+type
+    TLista<T: Class> = class(TObjectList<T>)
+    private
+         function CriaInstancia<T: Class>: T;
+    public
+         function ToDelimiterList(proper: string; withQuotes: boolean = false): string;
+         function ToList: TList;
+         procedure CopyTo(var lista: TLista<T>);
+         procedure Delete(base: T);
+         procedure Add(objeto: T);
+         function CountWithOutDeleted: integer;
+    end;
+
+implementation
+
+uses Lib.Enumeradores, Lib.Base;
+
+
+
+{ TLista<T> }
+
+
+
+function TLista<T>.CountWithOutDeleted: integer;
+var
+    item: T;
+    i: integer;
+begin
+    i := 0;
+    for item in Self do
+    begin
+        if TBase(item).TipoManutencao <> Exclusao then
+            inc(i);
+    end;
+    result := i;
+end;
+
+procedure TLista<T>.Delete(base: T);
+var
+    index: integer;
+begin
+    index := indexOf(base);
+    if index = -1 then
+        raise Exception.Create('objeto passado não existe na lista');
+
+    if TObject(Self[index]).InheritsFrom(TBase) then
+    begin
+        if TBase(Self[index]).TipoManutencao = Insercao then
+            TObjectList<T>(Self).Delete(index)
+        else
+            TBase(Self[index]).TipoManutencao := Exclusao
+    end
+    else
+        TObjectList<T>(Self).Delete(index);
+
+end;
+
+function TLista<T>.ToDelimiterList(proper: string; withQuotes: boolean): string;
+var
+    i: integer;
+    context: TRttiContext;
+    prop: TRttiProperty;
+    text: string;
+begin
+    try
+        for i := 0 to self.Count - 1 do
+        begin
+            if TBase(Self[i]).TipoManutencao <> Exclusao then
+            begin
+                prop := context.GetType(TObject(self[i]).ClassType).GetProperty(proper);
+                if withQuotes then
+                    text := text + QuotedStr(prop.GetValue(TObject(self[i])).ToString) + ','
+                else
+                    text := text + prop.GetValue(TObject(self[i])).ToString + ',';
+            end;
+        end;
+        System.Delete(text, Length(text), 1);
+        Result := text;
+    except
+        raise Exception.Create('Erro ao acessar a proriedade passada');
+    end;
+end;
+
+//
+procedure TLista<T>.Add(objeto: T);
+begin
+    TObjectList<T>(Self).Add(objeto);
+    if TObject(Objeto).InheritsFrom(TBase) then
+        TBase(Objeto).TipoManutencao := Insercao;
+end;
+
+procedure TLista<T>.CopyTo(var lista: TLista<T>);
+var
+    baseClass: T;
+    i: Integer;
+begin
+    for i := 0 to Self.Count-1 do
+    begin
+        baseClass := Self.CriaInstancia<T>;
+        TBase(Self[i]).CopiarPara(baseClass);
+        lista.Add(baseClass);
+    end;
+end;
+
+function TLista<T>.CriaInstancia<T>: T;
+var
+    valor: TValue;
+    ctx: TRttiContext;
+    Tipo: TRttiType;
+    metodo: TRttiMethod;
+    tipoInstancia: TRttiInstanceType;
+begin
+    Tipo := ctx.GetType(TypeInfo(T));
+    metodo := Tipo.GetMethod('Create');
+    //
+    if Assigned(metodo) and Tipo.IsInstance then
+    begin
+        tipoInstancia := Tipo.AsInstance;
+        //
+        valor := metodo.Invoke(tipoInstancia.MetaclassType, []);
+
+        Result := valor.AsType<T>;
+    end;
+end;
+//
+function TLista<T>.ToList: TList;
+var
+  i: integer;
+begin
+   result := tlist.Create;
+   for I := 0 to Self.Count-1 do
+   begin
+//      if TBase(Self[i]).TipoManutencao <> Exclusao then
+          result.Add(Pointer(Self[i]));
+   end;
+
+
+
+end;
+
+end.

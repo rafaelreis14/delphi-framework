@@ -1,0 +1,54 @@
+package RBindComponent;
+
+{$R *.res}
+{$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
+{$ALIGN 8}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO OFF}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION OFF}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES ON}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST OFF}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$DEFINE DEBUG}
+{$ENDIF IMPLICITBUILDING}
+{$IMPLICITBUILD ON}
+
+requires
+  rtl,
+  vcl,
+  vclx,
+  designide,
+  vclactnband,
+  xmlrtl;
+
+contains
+  RGrid in 'RGrid\RGrid.pas',
+  RCombobox in 'RComboBox\RCombobox.pas',
+  REdit in 'REdit\REdit.pas',
+  RSearch in 'RSearch\RSearch.pas',
+  RCheckBox in 'RCheckBox\RCheckBox.pas',
+  RCheckListBox in 'RCheckListBox\RCheckListBox.pas',
+  RRadioGroup in 'RRadioGroup\RRadioGroup.pas',
+  Lib.Base in '..\..\Fontes\TD.SIATD4.Core\Lib\Lib.Base.pas',
+  Lib.Enumeradores in '..\..\Fontes\TD.SIATD4.Core\Lib\Lib.Enumeradores.pas',
+  Lib.Lista in '..\..\Fontes\TD.SIATD4.Core\Lib\Lib.Lista.pas',
+  Lib.Parametro in '..\..\Fontes\TD.SIATD4.Core\Lib\Lib.Parametro.pas',
+  Lib.ResultFilter in '..\..\Fontes\TD.SIATD4.Core\Lib\Lib.ResultFilter.pas',
+  Framework.Interfaces.CRUDGenerico in '..\..\Fontes\TD.SIATD4.Core\Framework\Interfaces\Framework.Interfaces.CRUDGenerico.pas',
+  Framework.Interfaces.Listavel in '..\..\Fontes\TD.SIATD4.Core\Framework\Interfaces\Framework.Interfaces.Listavel.pas';
+
+end.

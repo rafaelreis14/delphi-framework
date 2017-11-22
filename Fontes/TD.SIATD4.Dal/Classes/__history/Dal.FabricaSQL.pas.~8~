@@ -1,0 +1,134 @@
+unit Dal.FabricaSQL;
+
+interface
+uses SysUtils,ComObj, Provider,DB,DbClient, Classes, typinfo,  Lib.Base, System.Rtti,
+  Lib.Persistable, Lib.Enumeradores;
+type
+    TFabricaSQL = class
+    private
+        FBase: TBase;
+        function VerificarExistenciaCampo(campo: string): boolean;
+        procedure ValidarGeracaoSQL(tipoManutencao: TTipoManutencao);
+    public
+        function GerarSqlInsercao:wideString;
+        function GerarSqlAlteracao:wideString;
+        function GerarSqlExclusao(definitivo: boolean = false): wideString;
+        constructor Create(base: TBase);
+  end;
+
+implementation
+
+uses
+  Vcl.Dialogs;
+
+
+{ TFabricaSQL }
+
+constructor TFabricaSQL.Create(base: TBase);
+begin
+    FBase := base;
+end;
+
+procedure TFabricaSQL.ValidarGeracaoSQL(tipoManutencao: TTipoManutencao);
+begin
+  if FBase.TabelaReferencia = EmptyStr then
+    raise Exception.Create('Tabela referência não mencionada na classe passada.');
+
+
+  if tipoManutencao in [Alteracao, Exclusao] then
+    if not VerificarExistenciaCampo('R_E_C_N_O_') then
+            raise Exception.Create('A classe não possui a propiedade obrigatoria Recno.');
+
+
+
+end;
+
+function TFabricaSQL.GerarSqlAlteracao: wideString;
+var
+  campos: TStringList;
+  item: string;
+  sqlCampos:wideString;
+begin
+    try
+        ValidarGeracaoSQL(Alteracao);
+
+        campos := FBase.ObterListaDeCampos(Alteracao, ['Recno','Delete']);
+
+        for item in campos do
+            sqlCampos := sqlCampos + item + ' = :'+item +', ';
+
+        Delete(sqlCampos,length(trim(sqlCampos)),1);
+        result := 'UPDATE '+FBase.TabelaReferencia +' SET '+sqlCampos +' WHERE R_E_C_N_O_ = :R_E_C_N_O_';
+    finally
+        if campos <> nil then
+            FreeAndNil(campos);
+    end;
+end;
+
+function TFabricaSQL.GerarSqlExclusao(definitivo: boolean): wideString;
+begin
+    try
+        ValidarGeracaoSQL(Exclusao);
+        if not definitivo then
+            result := 'UPDATE '+FBase.TabelaReferencia +' SET D_E_L_E_T_ = ''*'' WHERE R_E_C_N_O_ = :R_E_C_N_O_'
+        else
+            result := 'DELETE FROM '+FBase.TabelaReferencia +' WHERE R_E_C_N_O_ = :R_E_C_N_O_';
+    finally
+
+    end;
+
+end;
+
+function TFabricaSQL.GerarSqlInsercao: wideString;
+var
+  campos: TStringList;
+  param: TStringList;
+begin
+    try
+        ValidarGeracaoSQL(Insercao);
+
+        campos := FBase.ObterListaDeCampos(Insercao, []);
+
+        param := FBase.ObterListaDeCampos(Insercao,[],true);
+
+        result := 'INSERT INTO '+ FBase.TabelaReferencia +' ('+campos.CommaText+')'+' VALUES('+param.CommaText+')';
+    finally
+        if campos <> nil then
+            FreeAndNil(campos);
+
+        if param <> nil then
+            FreeAndNil(param);
+    end;
+end;
+
+
+function  TFabricaSQL.VerificarExistenciaCampo(campo: string): boolean;
+var
+    context: TRttiContext;
+    Propriedade: TRttiProperty;
+    _ctx: TRttiContext;
+    _typ: TRttiType;
+    _pro: TRttiProperty;
+    oAtt: TCustomAttribute;
+
+begin
+    try
+        result := false;
+        _typ := _ctx.GetType(FBase.ClassType);
+        for _pro in _typ.GetProperties do
+        begin
+            for oAtt in _pro.GetAttributes do
+            begin
+                if oAtt is TPersistable then
+                begin
+                      if TPersistable(oAtt).FieldName = 'R_E_C_N_O_' then
+                          result := true;
+                end;
+            end;
+        end;
+    finally
+
+    end;
+end;
+
+end.

@@ -1,0 +1,371 @@
+unit ClsDispositivo;
+
+interface
+
+uses
+    Classes, System.SysUtils, Dialogs, ClsBase, ClsParametro, ClsEnumeradores,
+    ClsPersistable, ClsLib, ClsFilial, ClsLista, ClsResultFilter;
+
+type
+    TDispositivo = class(TBase)
+    private
+        FCodigoDispositivo: string;
+        FDescricao: string;
+        FDelet: string;
+        FCodigoFilial: string;
+        FCodigoUltimoUsuario: string;
+        FStatus: string;
+        FFilial: TFilial;
+    FRecno: integer;
+        procedure SetCodigoDispositivo(const Value: string);
+        procedure SetCodigoFilial(const Value: string);
+        procedure SetCodigoUltimoUsuario(const Value: string);
+        procedure SetDelet(const Value: string);
+        procedure SetDescricao(const Value: string);
+        procedure SetStatus(const Value: string);
+        procedure SetFilial(const Value: TFilial);
+    procedure SetRecno(const Value: integer);
+
+    public
+        ///	<summary>
+        ///	  Metodo que faz a inserção da ClasseBase
+        ///	</summary>
+        function Inserir: integer; override;
+
+        ///	<summary>
+        ///	  Metodo que faz a alteração da ClasseBase
+        ///	</summary>
+        function Alterar: integer; override;
+
+        ///	<summary>
+        ///	  Métido que faz a Deleção da ClasseBase
+        ///	</summary>
+        ///	<param name="ID">
+        ///	  Chave  primária da tabela
+        ///	</param>
+        function Deletar(ID: string): integer; override;
+
+        ///	<summary>
+        ///	  Método que chama a tela de filtro
+        ///	</summary>
+        ///	<param name="tipoOperacao">
+        ///	  Tipo da operação, se é somente filtro, ou seleção de registro
+        ///	</param>
+        function Listar(tipoOperacao: TOparationTypes): TResultFilter; override;
+
+        ///	<summary>
+        ///	  Método que retorna um objeto preenchido
+        ///	</summary>
+        ///	<param name="ID">
+        ///	  Chave primária da tabela
+        ///	</param>
+        function Obter(ID: string): TObject; overload; override;
+
+        ///	<summary>
+        ///	  Método que retorna um objeto preenchido
+        ///	</summary>
+        ///	<param name="parametros">
+        ///	  Parametros para a consulta do objeto a ser preenchido
+        ///	</param>
+        function Obter(parametros:TParametro): TObject; overload;
+
+
+        /// <summary>
+        /// Obtem todos os dispositivos livres da filial logada
+        /// </summary>
+        function ObterDispositivosLivresPorFilial: TLista<TDispositivo>;
+
+
+        ///	<summary>
+        ///	  Obtem todos dispositivos cadastados
+        ///	</summary>
+        function ObterTodosDispositivosPorFilial: TLista<TDispositivo>;
+
+        ///	<summary>
+        ///	  Método que preenche a instância do Objeto
+        ///	</summary>
+        ///	<param name="ClasseBase">
+        ///	  objeto de parametro para preenchimento da instância
+        ///	</param>
+        procedure PopularObjeto(Dispositivo: TDispositivo);
+
+
+        ///	<summary>
+        ///	  Bloquear dispositivo instanciado
+        ///	</summary>
+        procedure BloquearDispositivo(iduser:string);
+
+        ///	<summary>
+        ///	  Desbloquear dispositivo instanciado
+        ///	</summary>
+        procedure DesbloquearDispositivo;
+
+
+        [TPersistable(fgPersistable, 'R_E_C_N_O_')]
+        property Recno: integer read FRecno write SetRecno;
+
+        [TPersistable(fgPersistable, 'Z15_FILIAL')]
+        property CodigoFilial: string read FCodigoFilial write SetCodigoFilial;
+
+        property Filial: TFilial read FFilial write SetFilial;
+
+        [TPersistable(fgPersistable, 'Z15_DISPO')]
+        property CodigoDispositivo: string read FCodigoDispositivo write SetCodigoDispositivo;
+
+        [TPersistable(fgPersistable, 'Z15_DESCRI')]
+        property Descricao: string read FDescricao write SetDescricao;
+
+        [TPersistable(fgPersistable, 'Z15_STATUS')]
+        property Status: string read FStatus write SetStatus;
+
+        [TPersistable(fgPersistable, 'Z15_USERID')]
+        property CodigoUltimoUsuario: string read FCodigoUltimoUsuario write SetCodigoUltimoUsuario;
+
+        [TPersistable(fgUpdateable, 'D_E_L_E_T_')]
+        property Delet: string read FDelet write SetDelet;
+
+    end;
+
+implementation
+
+{ TDispositivo }
+
+uses ClsFilter, ClsFieldFilter;
+
+{$REGION 'Métodos CRUD'}
+
+function TDispositivo.Inserir: integer;
+begin
+    // Lib.ExecutaTarefa('InserirDispositivo', 'TDispositivo', TLib.ObjectToParameters(Self,acInsercao));
+    // ###Validar retorno da função
+    // result := 0;
+end;
+
+function TDispositivo.Alterar: integer;
+begin
+    // Lib.ExecutaTarefa('AlterarDispositivo', 'TDispositivo' , TLib.ObjectToParameters(Self,acAlteracao));
+    // ###Validar retorno da função
+    // result := 0;
+end;
+
+function TDispositivo.Deletar(ID: string): integer;
+var
+    parametro: TParametro;
+begin
+    // try
+    // parametro := TParametro.Create;
+    // parametro.Add('', 'R_E_C_N_O_', ID);
+    //
+    // Lib.ExecutaTarefa('DeletarDispositivo', 'TDispositivo', parametro);
+    //
+    // //###Validar retorno da função
+    // result := 0;
+    // finally
+    // parametro.Free;
+    // end;
+end;
+
+procedure TDispositivo.DesbloquearDispositivo;
+begin
+   self.Status := 'LIVRE';
+   BaseLib.ExecutaTarefa('AlterarDispositivo', 'TDispositivo' , ObjetoParaParametros(acAlteracao));
+end;
+
+function TDispositivo.Listar(tipoOperacao: TOparationTypes): TResultFilter;
+var
+    campoFiltro: TFieldFilter;
+    filtro: TFilter<TDispositivo>;
+    // parametro : TParametro;
+    // lista:TLista<TDispositivo>
+begin
+    inherited;
+    try
+        filtro := TFilter<TDispositivo>.Create;
+        filtro.ScreenName := 'Filtro de Dispositivo';
+        filtro.OperationType := tipoOperacao;
+        filtro.MultiSelect := true;
+        filtro.Task := 'ConsultarDispositivo';
+        // ###Criar os Índices do filtro
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'CodigoFilial';
+        campoFiltro.Name := 'CodigoFilial';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'CodigoDispositivo ';
+        campoFiltro.Name := 'CodigoDispositivo ';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Descricao ';
+        campoFiltro.Name := 'Descricao ';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Status';
+        campoFiltro.Name := 'Status';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'CodigoUltimoUsuario  ';
+        campoFiltro.Name := 'CodigoUltimoUsuario  ';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Delet';
+        campoFiltro.Name := 'Delet';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        result := filtro.Execute;
+    finally
+        // FreeAndNil(parametro);
+        // lista.Destroy;
+    end;
+end;
+
+
+procedure TDispositivo.BloquearDispositivo(iduser: string);
+begin
+    self.CodigoUltimoUsuario := iduser;
+    self.Status := 'OCUPADO';
+    BaseLib.ExecutaTarefa('AlterarDispositivo', 'TDispositivo' , ObjetoParaParametros(acAlteracao));
+end;
+
+function TDispositivo.Obter(parametros: TParametro): TObject;
+var
+    lista: TLista<TDispositivo>;
+begin
+    try
+        lista := BaseLib.XmlToObject<TDispositivo>(BaseLib.ExecutaTarefa('ConsultarDispositivo', 'TDispositivo', parametros));
+
+        if lista.Count = 1 then
+        begin
+            PopularObjeto(lista[0]);
+            result := Self;
+        end
+        else
+        begin
+            MessageDlg('Nenhum registro encontrado.', mtError, [mbOk], 0);
+            result := nil;
+        end;
+    finally
+        lista.Destroy;
+    end;
+end;
+
+function TDispositivo.ObterDispositivosLivresPorFilial: TLista<TDispositivo>;
+var
+    parametro: TParametro;
+begin
+    parametro := TParametro.Create;
+    parametro.Add('', 'Z15_FILIAL', TLib.UsuarioLogado.Filial.Filial);
+    parametro.Add('', 'Z15_STATUS', 'LIVRE');
+    result := BaseLib.XmlToObject<TDispositivo>(BaseLib.ExecutaTarefa('ConsultarDispositivo', 'TDispositivo', parametro));
+end;
+
+function TDispositivo.ObterTodosDispositivosPorFilial: TLista<TDispositivo>;
+var
+    parametro: TParametro;
+begin
+    parametro := TParametro.Create;
+    parametro.Add('', 'Z15_FILIAL', TLib.UsuarioLogado.Filial.Filial);
+    result := BaseLib.XmlToObject<TDispositivo>(BaseLib.ExecutaTarefa('ConsultarDispositivo', 'TDispositivo', parametro));
+end;
+
+function TDispositivo.Obter(ID: string): TObject;
+var
+    parametros: TParametro;
+
+begin
+    try
+        parametros := TParametro.Create;
+        parametros.Add('', 'Z15_DISPO', ID);
+        parametros.Add('', 'Z15_FILIAL', TLIB.UsuarioLogado.Filial.FIlial);
+        result := Obter(parametros);
+    finally
+        FreeAndNil(parametros);
+    end;
+end;
+
+{$ENDREGION}
+
+{$REGION 'Regras de Negócio'}
+
+procedure TDispositivo.PopularObjeto(Dispositivo: TDispositivo);
+begin
+    Self.CodigoFilial := Dispositivo.CodigoFilial;
+    Self.CodigoDispositivo := Dispositivo.CodigoDispositivo;
+    Self.Descricao := Dispositivo.Descricao;
+    Self.Status := Dispositivo.Status;
+    Self.CodigoUltimoUsuario := Dispositivo.CodigoUltimoUsuario;
+    Self.Delet := Dispositivo.Delet;
+    self.Recno := Dispositivo.Recno;
+
+end;
+
+{$ENDREGION}
+
+{$REGION 'Métodos de Propriedades'}
+
+procedure TDispositivo.SetCodigoDispositivo(const Value: string);
+begin
+    FCodigoDispositivo := Value;
+end;
+
+procedure TDispositivo.SetCodigoFilial(const Value: string);
+begin
+    FCodigoFilial := Value;
+end;
+
+procedure TDispositivo.SetCodigoUltimoUsuario(const Value: string);
+begin
+    FCodigoUltimoUsuario := Value;
+end;
+
+procedure TDispositivo.SetDelet(const Value: string);
+begin
+    FDelet := Value;
+end;
+
+procedure TDispositivo.SetDescricao(const Value: string);
+begin
+    FDescricao := Value;
+end;
+
+procedure TDispositivo.SetFilial(const Value: TFilial);
+begin
+    FFilial := Value;
+end;
+
+procedure TDispositivo.SetRecno(const Value: integer);
+begin
+  FRecno := Value;
+end;
+
+procedure TDispositivo.SetStatus(const Value: string);
+begin
+    FStatus := Value;
+end;
+
+{$ENDREGION}
+
+end.

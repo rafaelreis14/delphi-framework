@@ -1,0 +1,702 @@
+unit ClsUsuario;
+
+interface
+
+uses
+    Classes, System.SysUtils, Dialogs,  Clsbase, ClsParametro, ClsEnumeradores, Datasnap.DBClient,
+    ClsPersistable,ClsGrupo, ClsLista, ClsResultFilter, ClsFilial,
+    ClsModulo;
+
+type
+    TUsuario = class(TBase)
+    private
+        FDelet: string;
+        FAlteraSenha: string;
+        FMudaSenha: string;
+        FBloqueado: string;
+        FRecno: integer;
+        FEmpresa: string;
+        FSenha: string;
+        FLogin: string;
+        FNome: string;
+        FCracha: string;
+        FObsTrocaSenha: string;
+        FCodigoImpressora: string;
+        FSRAMat: string;
+        FAcessoFull: string;
+        FExterno: string;
+        FDtAltSenha: string;
+        FSRAEmpresa: string;
+        FTpObSenha: integer;
+        FMudaData: string;
+        FSRAFilial: string;
+        FListaFiliaisUsuario: string;
+        FListaGrupoUsuario: string;
+        FFiliaisAcesso: TLista<TFilial>;
+        FGruposAcesso: TLista<TGrupo>;
+        FBancoMS: string;
+    FEmpresaFilialUsuario: string;
+    FVendedor: string;
+    FMultiplasInstancias: string;
+        procedure SetAlteraSenha(const Value: string);
+        procedure SetBloqueado(const Value: string);
+        procedure SetCracha(const Value: string);
+        procedure SetDelet(const Value: string);
+        procedure SetEmpresa(const Value: string);
+        procedure SetLogin(const Value: string);
+        procedure SetMudaSenha(const Value: string);
+        procedure SetNome(const Value: string);
+        procedure SetRecno(const Value: integer);
+        procedure SetSenha(const Value: string);
+        procedure SetAcessoFull(const Value: string);
+        procedure SetCodigoImpressora(const Value: string);
+        procedure SetDtAltSenha(const Value: string);
+        procedure SetExterno(const Value: string);
+        procedure SetMudaData(const Value: string);
+        procedure SetObsTrocaSenha(const Value: string);
+        procedure SetSRAEmpresa(const Value: string);
+        procedure SetSRAFilial(const Value: string);
+        procedure SetSRAMat(const Value: string);
+        procedure SetTpObSenha(const Value: integer);
+        procedure SetListaFiliaisUsuario(const Value: string);
+        procedure SetListaGrupoUsuario(const Value: string);
+        procedure SetFiliaisAcesso(const Value: TLista<TFilial>);
+        procedure SetGrupos(const Value: TLista<TGrupo>);
+        procedure SetBancoMS(const Value: string);
+        procedure SetEmpresaFilialUsuario(const Value: string);
+        procedure SetVendedor(const Value: string);
+        function GetMultiplasInstancias: boolean;
+    procedure SetMultiplasInstancias(const Value: string);
+    public
+        ///	<summary>
+        ///	  Metodo que faz a inserção da Usuario
+        ///	</summary>
+        function Inserir: integer; override;
+        ///	<summary>
+        ///	  Metodo que faz a alteração da Usuario
+        ///	</summary>
+        function Alterar: integer; override;
+
+        ///	<summary>
+        ///	  Métido que faz a Deleção da Usuario
+        ///	</summary>
+        ///	<param name="ID">
+        ///	  Chave  primária da tabela
+        ///	</param>
+        function Deletar(ID: string): integer; override;
+
+        ///	<summary>
+        ///	  Método que chama a tela de filtro
+        ///	</summary>
+        ///	<param name="tipoOperacao">
+        ///	  Tipo da operação, se é somente filtro, ou seleção de registro
+        ///	</param>
+        function Listar(tipoOperacao: TOparationTypes; multiSelect: boolean): TResultFilter; override;
+
+        ///	<summary>
+        ///	  Método que retorna um objeto preenchido
+        ///	</summary>
+        ///	<param name="ID">
+        ///	  Chave primária da tabela
+        ///	</param>
+        function Obter(ID: string): TObject; overload; override;
+
+        ///	<summary>
+        ///	  Método que retorna um objeto preenchido
+        ///	</summary>
+        ///	<param name="parametros">
+        ///	  Parametros para a consulta do objeto a ser preenchido
+        ///	</param>
+        function Obter(parametros:TParametro): TObject; overload;
+
+        ///	<summary>
+        ///	  Obtem um DataSet com todos os usuarios disponíveis para iniciar uma operacao
+        ///	</summary>
+        function ObterUsuariosDisponiveisParaInventario: TClientDataSet;
+
+        ///	<summary>
+        ///	  Obtem uma lista de todos os usuarios do sistema
+        ///	</summary>
+        function ObterUsuariosSistema:TLista<TUsuario>;
+
+        ///	<summary>
+        ///	  Método que preenche a instância do Objeto
+        ///	</summary>
+        ///	<param name="Usuario">
+        ///	  objeto de parametro para preenchimento da instância
+        ///	</param>
+        procedure PopularObjeto(Usuario: TUsuario);
+
+        ///	<summary>
+        ///	  Métodos que retorna uma lista  de objetos de uma consulta
+        ///	  pré-definida pelos parâmentros passados.
+        ///	</summary>
+        function Consultar(parametros: TParametro): TList;override;
+
+
+        procedure ObterFiliaisAcessoPorUsuario;
+        procedure ObterFiliaisAcessoPorUsuarioEmpresa(Empresa: string);
+        procedure ObterGruposAcessoPorUsuario;
+
+        function ValidarSenha(senha: string): boolean;
+
+         ///	<summary>
+        ///	  Propriedade com a lista de Filiais que o Usuario pode acessar para persistir na
+        ///	  tabela SIATD_S04
+        ///	</summary>
+        [TPersistable(fgPersistable, 'EMPRESA_ACESSO')]
+        property EmpresaFiliaisUsuario : string read FEmpresaFilialUsuario write SetEmpresaFilialUsuario;
+
+         ///	<summary>
+        ///	  Propriedade com a lista de Filiais que o Usuario pode acessar para persistir na
+        ///	  tabela SIATD_S04
+        ///	</summary>
+        [TPersistable(fgPersistable, 'FILIAIS_USUARIO')]
+        property ListaFiliaisUsuario : string read FListaFiliaisUsuario write SetListaFiliaisUsuario;
+
+        ///	<summary>
+        ///	  Propriedade com O Modulo referente a quais Permissoes do Grupo será aplicada na
+        ///	  tabela SIATD_S03_01
+        ///	</summary>
+        [TPersistable(fgPersistable, 'GRUPO_USUARIO')]
+        property ListaGrupoUsuario : string read FListaGrupoUsuario write SetListaGrupoUsuario;
+
+
+        [TPersistable(fgPersistable, 'S01_LOGIN')]
+        property Login : string read FLogin write SetLogin;
+
+        [TPersistable(fgPersistable, 'S01_NOME')]
+        property Nome : string read FNome write SetNome;
+
+        [TPersistable(fgPersistable, 'S01_SENHA')]
+        property Senha : string read FSenha write SetSenha;
+
+        [TPersistable(fgPersistable, 'S01_BLOQUEADO')]
+        property Bloqueado : string read FBloqueado write SetBloqueado;
+
+        [TPersistable(fgPersistable, 'S01_MUDASENHA')]
+        property MudaSenha: string read FMudaSenha write SetMudaSenha;
+
+        [TPersistable(fgPersistable, 'S01_ALTERASENHA')]
+        property AlteraSenha: string read FAlteraSenha write SetAlteraSenha;
+
+        [TPersistable(fgPersistable, 'S01_SRA_EMPRESA')]
+        property SRAEmpresa: string read FSRAEmpresa write SetSRAEmpresa;
+
+        [TPersistable(fgPersistable, 'S01_SRA_FILIAL')]
+        property SRAFilial: string read FSRAFilial write SetSRAFilial;
+
+        [TPersistable(fgPersistable, 'S01_SRA_MAT')]
+        property SRAMat: string read FSRAMat write SetSRAMat;
+
+        [TPersistable(fgPersistable, 'S01_CRACHA')]
+        property Cracha: string read FCracha write SetCracha;
+
+        [TPersistable(fgPersistable, 'S01_MUDADATA')]
+        property MudaData: string read FMudaData write SetMudaData;
+
+        [TPersistable(fgPersistable, 'S01_OBSTROCSENHA')]
+        property ObrigaTrocaSenha: string read FObsTrocaSenha write SetObsTrocaSenha;
+
+        [TPersistable(fgPersistable, 'S01_TPOBSENHA')]
+        property TpObSenha: integer read FTpObSenha write SetTpObSenha;
+
+        [TPersistable(fgPersistable, 'S01_DTALTSENHA')]
+        property DtAltSenha: string read FDtAltSenha write SetDtAltSenha;
+
+        [TPersistable(fgPersistable, 'S01_ACESSO_FULL')]
+        property AcessoFull: string read FAcessoFull write SetAcessoFull;
+
+        [TPersistable(fgPersistable, 'S01_EXTERNO')]
+        property Externo: string read FExterno write SetExterno;
+
+        [TPersistable(fgPersistable, 'S01_CODIGOIMPRESSORA')]
+        property CodigoImpressora: string read FCodigoImpressora write SetCodigoImpressora;
+
+        [TPersistable(fgPersistable, 'S01_BANCO_MS')]
+        property BancoMS: string read FBancoMS write SetBancoMS;
+
+        [TPersistable(fgPersistable, 'D_E_L_E_T_')]
+        property Delet: string read FDelet write SetDelet;
+
+        [TPersistable(fgPersistable, 'R_E_C_N_O_')]
+        property Recno: integer read FRecno write SetRecno;
+
+        property FiliaisAcesso: TLista<TFilial> read FFiliaisAcesso;
+        property GruposAcesso: TLista<TGrupo> read FGruposAcesso;
+
+        [TPersistable(fgReadOnly, 'RA_VEND')]
+        property Vendedor: string read FVendedor write SetVendedor;
+
+        [TPersistable(fgPersistable, 'S01_MULTIPLAINSTANCIA')]
+        property MultiplasInstancias: string read FMultiplasInstancias write SetMultiplasInstancias;
+
+        property MultiplasInstancias_:boolean read GetMultiplasInstancias;
+
+        constructor Create;
+        destructor Destroy; override;
+    end;
+
+implementation
+
+
+{ TUsuario }
+
+uses ClsFilter, ClsFieldFilter, ClsBaseLib, ClsErro, System.RegularExpressions;
+
+{$REGION 'Métodos CRUD'}
+
+function TUsuario.Inserir: integer;
+begin
+     BaseLib.ExecutaTarefa('InserirUsuario', 'TUsuario', Self.ObjetoParaParametros(acInsercao));
+
+    //###Validar retorno da função
+    //result := 0;
+end;
+
+function TUsuario.Alterar: integer;
+begin
+    BaseLib.ExecutaTarefa('AlterarUsuario', 'TUsuario' , Self.ObjetoParaParametros(acAlteracao));
+    //###Validar retorno da função
+    //result := 0;
+end;
+
+function TUsuario.Deletar(ID: string): integer;
+var
+    parametro: TParametro;
+begin
+    try
+        parametro := TParametro.Create;
+        parametro.Add('', 'R_E_C_N_O_', ID);
+
+        BaseLib.ExecutaTarefa('DeletarUsuario', 'TUsuario', parametro);
+
+        //###Validar retorno da função
+        result := 0;
+    finally
+        parametro.Free;
+    end;
+end;
+
+destructor TUsuario.Destroy;
+begin
+   freeandnil(FFiliaisAcesso);
+   freeandnil(FGruposAcesso);
+  inherited;
+end;
+
+function TUsuario.GetMultiplasInstancias: boolean;
+begin
+  if FMultiplasInstancias <> 'S' then
+      result := false
+  else
+      result := true;
+end;
+
+function TUsuario.Listar(tipoOperacao: TOparationTypes; multiSelect: boolean): TResultFilter;
+var
+    campoFiltro:TFieldFilter;
+    filtro : TFilter<TUsuario>;
+    //parametro : TParametro;
+    //lista:TLista<TUsuario>
+begin
+    inherited;
+    try
+        filtro := TFilter<TUsuario>.Create();
+        filtro.ScreenName := 'Filtro de Usuario';
+        filtro.OperationType := tipoOperacao;
+        filtro.MultiSelect := multiSelect;
+        filtro.AddIndex(1, 'Login=S01_LOGIN', 'Login');
+        filtro.AddIndex(2, 'Nome=S01_NOME', 'Nome');
+        filtro.AddIndex(3, 'Filial=S01_FILIAL', 'Filial');
+        filtro.Task := 'ConsultarUsuario';
+        //###Criar os Índices do filtro
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Login';
+        campoFiltro.Name := 'Login';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Nome';
+        campoFiltro.Name := 'Nome';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Senha';
+        campoFiltro.Name := 'Senha';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Bloqueado';
+        campoFiltro.Name := 'Bloqueado';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'MudaSenha';
+        campoFiltro.Name := 'MudaSenha';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'AlteraSenha';
+        campoFiltro.Name := 'AlteraSenha';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Empresa';
+        campoFiltro.Name := 'Empresa';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Filial';
+        campoFiltro.Name := 'Filial';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Cracha';
+        campoFiltro.Name := 'Cracha';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Delet';
+        campoFiltro.Name := 'Delet';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Recno';
+        campoFiltro.Name := 'Recno';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+
+        result := filtro.Execute;
+    finally
+        // FreeAndNil(parametro);
+        // lista.Destroy;
+    end;
+end;
+
+
+function TUsuario.Obter(parametros: TParametro): TObject;
+var
+  lista: TLista<TUsuario>;
+begin
+    try
+        lista := BaseLib.XmlToObject<TUsuario>(BaseLib.ExecutaTarefa('ConsultarUsuario', 'TUsuario', parametros));
+        if lista.Count = 1 then
+        begin
+           PopularObjeto(lista[0]);
+           Result := Self;
+        end
+        else
+        if lista.Count > 1 then
+        begin
+           raise Erro.Create('Existe mais de um usuário para esta mesma pesquisa.');
+        end
+        else
+        begin
+            //MessageDlg('Nenhum registro encontrado.',mtError,[mbOk],0);
+            Result := nil;
+        end;
+    finally
+        lista.Destroy;
+    end;
+end;
+
+function TUsuario.ObterUsuariosDisponiveisParaInventario: TClientDataSet;
+begin
+    result := BaseLib.XmlToDataset(BaseLib.ExecutaTarefa('ObterUsuariosDisponiveisParaInventario', 'EnvioTarefaColetor',nil));
+end;
+
+function TUsuario.ObterUsuariosSistema: TLista<TUsuario>;
+begin
+    result := BaseLib.XmlToObject<TUsuario>(BaseLib.ExecutaTarefa('ObterUsuariosSistema', 'EnvioTarefaColetor',nil));
+end;
+
+function TUsuario.Obter(ID: string): TObject;
+var
+    parametros: TParametro;
+begin
+    try
+        parametros := TParametro.Create;
+        parametros.Add('', 'R_E_C_N_O_', ID);
+        result := Obter(parametros);
+    finally
+        FreeAndNil(parametros);
+    end;
+end;
+
+{$ENDREGION}
+
+procedure TUsuario.ObterGruposAcessoPorUsuario;
+var
+  parametro: TParametro;
+begin
+    try
+      parametro := TParametro.Create();
+      parametro.Add('', 'S04_S01_LOGIN', Self.Login);
+      FGruposAcesso := BaseLib.XmlToObject<TGrupo>(BaseLib.ExecutaTarefa('ObterGruposPorUsuario','TUsuario',parametro));
+    finally
+      freeAndNil(parametro);
+    end;
+end;
+
+
+procedure TUsuario.ObterFiliaisAcessoPorUsuarioEmpresa(Empresa : string);
+var
+  parametro: TParametro;
+begin
+    try
+      parametro := TParametro.Create();
+      parametro.Add('', 'S13_S12_EMP', Empresa);
+      parametro.Add('', 'S04_S01_LOGIN', Self.Login);
+      FFiliaisAcesso := BaseLib.XmlToObject<TFilial>(BaseLib.ExecutaTarefa('ObterFiliaisAcessoPorUsuarioEmpresa',  'TUsuario',parametro));
+    finally
+      freeAndNil(parametro);
+    end;
+end;
+
+procedure TUsuario.ObterFiliaisAcessoPorUsuario;
+var
+  parametro: TParametro;
+begin
+    try
+      parametro := TParametro.Create();
+      parametro.Add('', 'S04_S01_LOGIN', Self.Login);
+      FFiliaisAcesso := BaseLib.XmlToObject<TFilial>(BaseLib.ExecutaTarefa('ObterFiliaisAcessoPorUsuario',  'TUsuario',parametro));
+    finally
+      freeAndNil(parametro);
+    end;
+end;
+
+//function TUsuario.ObterFilial(Empresa : string): TLista<TFilial>;
+//var
+//  parametro: TParametro;
+//begin
+//    try
+//      parametro := TParametro.Create();
+//      parametro.Add('', 'S13_S12_EMP', Empresa);
+//      result := BaseLib.XmlToObject<TFilial>(BaseLib.ExecutaTarefa('ConsultarFilial', 'Usuario',parametro));
+//    finally
+//      freeAndNil(parametro);
+//    end;
+//end;
+
+
+function TUsuario.Consultar(parametros: TParametro): TList;
+begin
+    Result := BaseLib.XmlToObject<TUsuario>(BaseLib.ExecutaTarefa('ConsultarUsuario', 'TUsuario', parametros)).toList;
+end;
+
+
+constructor TUsuario.Create;
+begin
+   FFiliaisAcesso:= TLista<TFilial>.create;
+   FGruposAcesso:= TLista<TGrupo>.create;
+end;
+
+{$REGION 'Regras de Negócio'}
+
+procedure TUsuario.PopularObjeto(Usuario: TUsuario);
+begin
+    Usuario.CopiarPara(Self);
+    FPreenchido := true;
+end;
+
+
+procedure TUsuario.SetAcessoFull(const Value: string);
+begin
+  FAcessoFull := Value;
+end;
+
+procedure TUsuario.SetAlteraSenha(const Value: string);
+begin
+  FAlteraSenha := Value;
+end;
+
+procedure TUsuario.SetBancoMS(const Value: string);
+begin
+  FBancoMS := Value;
+end;
+
+procedure TUsuario.SetBloqueado(const Value: string);
+begin
+  FBloqueado := Value;
+end;
+
+procedure TUsuario.SetCodigoImpressora(const Value: string);
+begin
+  FCodigoImpressora := Value;
+end;
+
+procedure TUsuario.SetCracha(const Value: string);
+begin
+  FCracha := Value;
+end;
+
+procedure TUsuario.SetDelet(const Value: string);
+begin
+  FDelet := Value;
+end;
+
+procedure TUsuario.SetDtAltSenha(const Value: string);
+begin
+  FDtAltSenha := Value;
+end;
+
+procedure TUsuario.SetEmpresa(const Value: string);
+begin
+  FEmpresa := Value;
+end;
+
+procedure TUsuario.SetEmpresaFilialUsuario(const Value: string);
+begin
+  FEmpresaFilialUsuario := Value;
+end;
+
+procedure TUsuario.SetExterno(const Value: string);
+begin
+  FExterno := Value;
+end;
+
+procedure TUsuario.SetFiliaisAcesso(const Value: TLista<TFilial>);
+begin
+  FFiliaisAcesso := Value;
+end;
+
+
+procedure TUsuario.SetGrupos(const Value: TLista<TGrupo>);
+begin
+  FGruposAcesso := Value;
+end;
+
+procedure TUsuario.SetListaFiliaisUsuario(const Value: string);
+begin
+  FListaFiliaisUsuario := Value;
+end;
+
+procedure TUsuario.SetListaGrupoUsuario(const Value: string);
+begin
+  FListaGrupoUsuario := Value;
+end;
+
+procedure TUsuario.SetLogin(const Value: string);
+begin
+  FLogin := Value;
+end;
+
+
+procedure TUsuario.SetMudaData(const Value: string);
+begin
+  FMudaData := Value;
+end;
+
+procedure TUsuario.SetMudaSenha(const Value: string);
+begin
+  FMudaSenha := Value;
+end;
+
+procedure TUsuario.SetMultiplasInstancias(const Value: string);
+begin
+  FMultiplasInstancias := Value;
+end;
+
+procedure TUsuario.SetNome(const Value: string);
+begin
+  FNome := Value;
+end;
+
+procedure TUsuario.SetObsTrocaSenha(const Value: string);
+begin
+  FObsTrocaSenha := Value;
+end;
+
+procedure TUsuario.SetRecno(const Value: integer);
+begin
+  FRecno := Value;
+end;
+
+procedure TUsuario.SetSenha(const Value: string);
+begin
+  FSenha := Value;
+end;
+
+procedure TUsuario.SetSRAEmpresa(const Value: string);
+begin
+  FSRAEmpresa := Value;
+end;
+
+procedure TUsuario.SetSRAFilial(const Value: string);
+begin
+  FSRAFilial := Value;
+end;
+
+procedure TUsuario.SetSRAMat(const Value: string);
+begin
+  FSRAMat := Value;
+end;
+
+procedure TUsuario.SetTpObSenha(const Value: integer);
+begin
+  FTpObSenha := Value;
+end;
+
+procedure TUsuario.SetVendedor(const Value: string);
+begin
+  FVendedor := Value;
+end;
+
+function TUsuario.ValidarSenha(senha: string): boolean;
+var
+    s: TRegEx;
+begin
+    s := TRegEx.Create('(?=.{8}).*([A-Za-z][0-9]|[0-9][A-Za-z]).*');
+
+    if s.match(senha).success then
+        result := true
+    else
+        result := false;
+end;
+
+{$ENDREGION}
+
+{$REGION 'Métodos de Propriedades'}
+
+
+{$ENDREGION}
+
+end.
+
+

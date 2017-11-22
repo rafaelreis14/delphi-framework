@@ -1,0 +1,129 @@
+unit Biz.Adminsitradora;
+
+interface
+
+uses Lib.Base, Lib.Persistable, Lib.Lista, System.SysUtils, System.StrUtils;
+
+type
+    TAdministradora = class(TBase)
+    private
+        FDescricao: string;
+        FCodigoFilial: string;
+        FDias: integer;
+        FCodigoAdministradora: string;
+        FTaxa: double;
+        FQuantidadeParcelasMaxima: integer;
+        procedure SetCodigoAdministradora(const Value: string);
+        procedure SetCodigoFilial(const Value: string);
+        procedure SetDescricao(const Value: string);
+        procedure SetDias(const Value: integer);
+        procedure SetTaxa(const Value: double);
+        procedure SetQuantidadeParcelasMaxima(const Value: integer);
+    public
+        [TPersistable(fgPersistable, 'AE_FILIAL')]
+        property CodigoFilial: string read FCodigoFilial write SetCodigoFilial;
+
+        [TPersistable(fgPersistable, 'AE_COD')]
+        property CodigoAdministradora: string read FCodigoAdministradora write SetCodigoAdministradora;
+
+        [TPersistable(fgPersistable, 'AE_DESC')]
+        property Descricao: string read FDescricao write SetDescricao;
+
+        [TPersistable(fgPersistable, 'AE_VENCTO')]
+        property Dias: integer read FDias write SetDias;
+
+        [TPersistable(fgPersistable, 'AE_TAXA')]
+        property Taxa: double read FTaxa write SetTaxa;
+
+        [TPersistable(fgPersistable, 'AE_TDPMAX')]
+        property QuantidadeParcelasMaxima: integer read FQuantidadeParcelasMaxima write SetQuantidadeParcelasMaxima;
+
+        class function ObterListaAdmistradorasPorFormaPagto(tipoPagamento: string): TLista<TAdministradora>;
+        procedure ObterAdminsitradora(condicaoPagamento, rede, binCartao: string; parcela: integer);
+    end;
+
+implementation
+
+{ TAdministrdora }
+
+uses Lib.Parametro, Lib.Biblioteca;
+
+procedure TAdministradora.ObterAdminsitradora(condicaoPagamento, rede, binCartao: string; parcela: integer);
+var
+    parametros: TParametro;
+    lista: TLista<TAdministradora>;
+begin
+    try
+        parametros := TParametro.Create;
+        parametros.Add('', 'CONDICAOPAGAMENTO', condicaoPagamento);
+        parametros.Add('', 'PARCELA', inttostr(parcela));
+        parametros.Add('', 'REDE', rede);
+        parametros.Add('', 'BINCARTAO', binCartao);
+        lista := BaseLib.XmlToObject<TAdministradora>(BaseLib.ExecutaTarefa('ConsultarAdministradora', 'TAdministradora', parametros));
+
+        if lista.Count = 1 then
+        begin
+            TAdministradora(lista[0]).CopiarPara(Self);
+        end
+        else
+        begin
+            raise Exception.Create('Nenhuma administradora foi encontrada.');
+        end;
+    finally
+        if lista <> nil then
+            FreeAndNil(lista);
+
+        if parametros <> nil then
+            FreeAndNil(parametros);
+    end;
+
+end;
+
+class function TAdministradora.ObterListaAdmistradorasPorFormaPagto(tipoPagamento: string): TLista<TAdministradora>;
+var
+    parametro: TParametro;
+    vBaseLib: TBaseLib;
+begin
+    try
+        parametro := TParametro.Create;
+        parametro.Add('', 'TIPO', tipoPagamento);
+        vBaseLib := TBaseLib.Create();
+        result := vBaseLib.XmlToObject<TAdministradora>(vBaseLib.ExecutaTarefa('ListarAdministradoraBanco', 'TAdministradora', parametro));
+
+    finally
+        FreeAndNil(vBaseLib);
+        FreeAndNil(parametro);
+    end;
+end;
+
+procedure TAdministradora.SetCodigoAdministradora(const Value: string);
+begin
+    FCodigoAdministradora := Value;
+end;
+
+procedure TAdministradora.SetCodigoFilial(const Value: string);
+begin
+    FCodigoFilial := Value;
+end;
+
+procedure TAdministradora.SetDescricao(const Value: string);
+begin
+    FDescricao := Value;
+end;
+
+procedure TAdministradora.SetDias(const Value: integer);
+begin
+    FDias := Value;
+end;
+
+procedure TAdministradora.SetQuantidadeParcelasMaxima(const Value: integer);
+begin
+    FQuantidadeParcelasMaxima := Value;
+end;
+
+procedure TAdministradora.SetTaxa(const Value: double);
+begin
+    FTaxa := Value;
+end;
+
+end.

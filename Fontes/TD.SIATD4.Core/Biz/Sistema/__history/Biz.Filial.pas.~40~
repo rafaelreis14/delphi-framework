@@ -1,0 +1,696 @@
+unit Biz.Filial;
+
+interface
+
+uses
+    Classes, System.SysUtils, Dialogs, Lib.ClasseBase, Lib.Parametro, Lib.Enumeradores,
+    Lib.Persistable, Lib.ResultFilter, Biz.Empresa, Lib.Lista, Biz.TipoEntrega,
+    Dal.ControleDados, Dal.CondicaoConsulta, Framework.Interfaces.CRUD, Dal.FabricaSQL ;
+
+type
+    [TReferenceTable('SIATD_S13')]
+    TFilial = class(TClasseBase, ICRUD<TFilial>)
+    private
+        FFone: string;
+        FCnpj: string;
+        FFilial: string;
+        FEmail: string;
+        FBairro: string;
+        FFax: string;
+        FUf: string;
+        FDescricao: string;
+        FCep: string;
+        FDataAbertura: string;
+        FRazaoSocial: string;
+        FRecno: integer;
+        FEmpresa: string;
+        FCD: string;
+        FInscricaoEstadual: string;
+        FCidade: string;
+        FEndereco: string;
+        FNomeEmpresa: string;
+        FPafEcf: string;
+        FMensagemCupom: string;
+        FCodigoChubb: string;
+        FTiposEntrega: TLista<TTipoEntrega>;
+        FSimilar: String;
+        FCrossSelling: String;
+        FUpSelling: String;
+
+        procedure SetBairro(const Value: string);
+        procedure SetCD(const Value: string);
+        procedure SetCep(const Value: string);
+        procedure SetCidade(const Value: string);
+        procedure SetCnpj(const Value: string);
+        procedure SetDataAbertura(const Value: string);
+        procedure SetDescricao(const Value: string);
+        procedure SetEmail(const Value: string);
+        procedure SetEmpresa(const Value: string);
+        procedure SetEndereco(const Value: string);
+        procedure SetFax(const Value: string);
+        procedure SetFilial(const Value: string);
+        procedure SetFone(const Value: string);
+        procedure SetInscricaoEstadual(const Value: string);
+        procedure SetRazaoSocial(const Value: string);
+        procedure SetRecno(const Value: integer);
+        procedure SetUf(const Value: string);
+        function GetEmpresaFilial: string;
+        procedure SetNomeEmpresa(const Value: string);
+        procedure SetPafEcf(const Value: string);
+        procedure SetMensagemCupom(const Value: string);
+        procedure SetCodigoChubb(const Value: string);
+        procedure SetTiposEntrega(const Value: TLista<TTipoEntrega>);
+        function GetCrossSelling_: Boolean;
+        function GetSimilar_: Boolean;
+        function GetUpSelling_: Boolean;
+        procedure SetCrossSelling(const Value: String);
+        procedure SetSimilar(const Value: String);
+        procedure SetUpSelling(const Value: String);
+
+    public
+        class var dao: TControleDados<TLista<TFilial>,TListaDAO<TFilial>>;
+
+        /// <summary>
+        /// Metodo que faz a inserção da ClasseBase
+        /// </summary>
+        function Inserir: boolean;
+
+        /// <summary>
+        /// Metodo que faz a alteração da ClasseBase
+        /// </summary>
+        function Alterar: boolean;
+
+        /// <summary>
+        /// Métido que faz a Deleção da ClasseBase
+        /// </summary>
+        /// <param name="ID">
+        /// Chave  primária da tabela
+        /// </param>
+        function Excluir: boolean;
+
+        /// <summary>
+        /// Métodos que retorna uma lista  de objetos de uma consulta
+        /// pré-definida pelos parâmentros passados.
+        /// </summary>
+        function Consultar(parametros: TParametro): TLista<TFilial>;
+
+
+        /// <summary>
+        /// Método que chama a tela de filtro
+        /// </summary>
+        /// <param name="tipoOperacao">
+        /// Tipo da operação, se é somente filtro, ou seleção de registro
+        /// </param>
+        function Listar(tipoOperacao: TOparationTypes; multselect: Boolean): TResultFilter;
+
+        /// <summary>
+        /// Método que retorna um objeto preenchido
+        /// </summary>
+        /// <param name="ID">
+        /// Chave primária da tabela
+        /// </param>
+        function Obter(ID: string): TFilial; overload;
+
+        /// <summary>
+        /// Método que retorna um objeto preenchido
+        /// </summary>
+        /// <param name="parametros">
+        /// Parametros para a consulta do objeto a ser preenchido
+        /// </param>
+        function Obter(parametros: TParametro): TFilial; overload;
+
+        /// <summary>
+        /// obtem a lista de todas as filiais;
+        /// </summary>
+        function ObterTodasFiliais: TLista<TFilial>;
+
+
+        function ObterFiliaisAcessoPorUsuario(usuario: string): TLista<TFilial>;
+
+        /// <summary>
+        /// retorna uma lista de tipo de entraga de acordo com a filial logada
+        /// </summary>
+        procedure ObterListaTipoEntrega(tipoVenda: TTipoVenda = tvVendaBalcao);
+        function ObterTipoEntrega(tipoEntrega: String): TTipoEntrega;
+
+        /// <summary>
+        /// Método que preenche a instância do Objeto
+        /// </summary>
+        /// <param name="ClasseBase">
+        /// objeto de parametro para preenchimento da instância
+        /// </param>
+        procedure PopularObjeto(Filial: TFilial);
+
+        [TPersistable(fgPersistable, 'S13_S12_EMP')]
+        property Empresa: string read FEmpresa write SetEmpresa;
+
+        [TPersistable(fgReadOnly, 'S12_NOME')]
+        property NomeEmpresa: string read FNomeEmpresa write SetNomeEmpresa;
+
+        [TPersistable(fgPersistable, 'S13_FILIAL')]
+        property Filial: string read FFilial write SetFilial;
+
+        property CodigoNomeFilial: string read GetEmpresaFilial;
+
+        [TPersistable(fgPersistable, 'S13_DESC')]
+        property Descricao: string read FDescricao write SetDescricao;
+
+        [TPersistable(fgPersistable, 'S13_RAZAOSOCIAL')]
+        property RazaoSocial: string read FRazaoSocial write SetRazaoSocial;
+
+        [TPersistable(fgPersistable, 'S13_END')]
+        property Endereco: string read FEndereco write SetEndereco;
+
+        [TPersistable(fgPersistable, 'S13_BAIRRO')]
+        property Bairro: string read FBairro write SetBairro;
+
+        [TPersistable(fgPersistable, 'S13_CIDADE')]
+        property Cidade: string read FCidade write SetCidade;
+
+        [TPersistable(fgPersistable, 'S13_UF')]
+        property Uf: string read FUf write SetUf;
+
+        [TPersistable(fgPersistable, 'S13_CEP')]
+        property Cep: string read FCep write SetCep;
+
+        [TPersistable(fgPersistable, 'S13_CNPJ')]
+        property Cnpj: string read FCnpj write SetCnpj;
+
+        [TPersistable(fgPersistable, 'S13_IE')]
+        property InscricaoEstadual: string read FInscricaoEstadual write SetInscricaoEstadual;
+
+        [TPersistable(fgPersistable, 'S13_FONE')]
+        property Fone: string read FFone write SetFone;
+
+        [TPersistable(fgPersistable, 'S13_FAX')]
+        property Fax: string read FFax write SetFax;
+
+        [TPersistable(fgPersistable, 'S13_DTABERTURA')]
+        property DataAbertura: string read FDataAbertura write SetDataAbertura;
+
+        [TPersistable(fgPersistable, 'S13_EMAIL')]
+        property Email: string read FEmail write SetEmail;
+
+        [TPersistable(fgPersistable, 'S13_CD')]
+        property CD: string read FCD write SetCD;
+
+        [TPersistable(fgPersistable, 'S13_PAFECF')]
+        property PafEcf: string read FPafEcf write SetPafEcf;
+
+        [TPersistable(fgPersistable, 'S13_MENSAGEMCUPOM')]
+        property MensagemCupom: string read FMensagemCupom write SetMensagemCupom;
+
+        [TPersistable(fgPersistable, 'S13_CODIGOCHUBB')]
+        property CodigoChubb: string read FCodigoChubb write SetCodigoChubb;
+
+        [TPersistable(fgUpdateable, 'R_E_C_N_O_')]
+        property Recno: integer read FRecno write SetRecno;
+
+        [TPersistable(fgPersistable, 'S13_CROSSSELLING')]
+        property CrossSelling: String read FCrossSelling write SetCrossSelling;
+        property CrossSelling_: Boolean read GetCrossSelling_;
+
+        [TPersistable(fgPersistable, 'S13_UPSELLING')]
+        property UpSelling: String read FUpSelling write SetUpSelling;
+        property UpSelling_: Boolean Read GetUpSelling_;
+
+        [TPersistable(fgPersistable, 'S13_SIMILAR')]
+        property Similar: String read FSimilar write SetSimilar;
+        property Similar_: Boolean Read GetSimilar_;
+
+        property TiposEntrega: TLista<TTipoEntrega> read FTiposEntrega write SetTiposEntrega;
+
+        constructor Create; override;
+        destructor Destroy; override;
+    end;
+
+implementation
+
+{ TFilial }
+
+uses Lib.Filter, Lib.Biblioteca, Biz.UsuarioLogado;
+
+{$REGION 'Métodos CRUD'}
+
+function TFilial.Inserir: boolean;
+var
+    fabrica: TFabricaSQL;
+    sql: WideString;
+    parametro: TParametro;
+begin
+    fabrica := TFabricaSQL.Create(Self);
+    try
+        try
+            fabrica.GerarSqlInsercao(sql,parametro);
+            result := dao.Inserir(sql, parametro);
+        except
+          on e: exception do
+              raise Exception.Create('Erro ao inserir Filial'+#13+ e.Message);
+        end;
+    finally
+        if parametro <> nil then
+            FreeAndNil(parametro);
+    end;
+end;
+
+function TFilial.Alterar: boolean;
+var
+    fabrica: TFabricaSQL;
+    sql: WideString;
+    parametro: TParametro;
+begin
+    fabrica := TFabricaSQL.Create(Self);
+    try
+        try
+            fabrica.GerarSqlAlteracao(sql,parametro);
+            result := dao.Alterar(sql, parametro);
+        except
+          on e: exception do
+              raise Exception.Create('Erro ao alterar Filial'+#13+ e.Message);
+        end;
+    finally
+        if parametro <> nil then
+            FreeAndNil(parametro);
+    end;
+end;
+
+function TFilial.Consultar(parametros: TParametro): TLista<TFilial>;
+var
+    query: string;
+    condicao: TCondicaoConsulta;
+begin
+    try
+        condicao := TCondicaoConsulta.Create(parametros);
+        condicao.Adiciona('S13_S12_EMP',ccIgual, lgAnd);
+        condicao.Adiciona('S13_FILIAL',ccIgual, lgAND);
+        condicao.Adiciona('S13_DESC',ccLike, lgAND);
+        condicao.Adiciona('S13_RAZAOSOCIAL',ccIgual, lgAND);
+        condicao.Adiciona('S13_END',ccIgual, lgAND);
+        condicao.Adiciona('S13_BAIRRO',ccIgual, lgAND);
+        condicao.Adiciona('S13_CIDADE',ccIgual, lgAND);
+        condicao.Adiciona('S13_UF',ccIgual, lgAND);
+        condicao.Adiciona('S13_CEP',ccIgual, lgAND);
+        condicao.Adiciona('S13_CNPJ',ccIgual, lgAND);
+        condicao.Adiciona('S13_IE',ccIgual, lgAND);
+        condicao.Adiciona('S13_FONE',ccIgual, lgAND);
+        condicao.Adiciona('S13_FAX',ccIgual, lgAND);
+        condicao.Adiciona('S13_DTABERTURA',ccIgual, lgAND);
+        condicao.Adiciona('S13_EMAIL',ccIgual, lgAND);
+        condicao.Adiciona('S13_CD',ccIgual, lgAND);
+        condicao.Adiciona('S13_PAFECF',ccIgual, lgAND);
+        condicao.Adiciona('R_E_C_N_O_',ccIgual, lgAND);
+
+        query := 'SELECT S13_S12_EMP, S12_NOME, S13_FILIAL, S13_DESC, S13_RAZAOSOCIAL, S13_END, '+
+                    ' S13_BAIRRO, S13_CIDADE, S13_UF, S13_CEP, S13_CNPJ, S13_IE, S13_FONE, '+
+                    ' S13_FAX, S13_DTABERTURA, S13_EMAIL, S13_CD, S13_PAFECF, S13_MENSAGEMCUPOM, S13_CODIGOCHUBB, SIATD_S13.R_E_C_N_O_, '+
+                    ' S13_CROSSSELLING, S13_UPSELLING, S13_SIMILAR ' +
+                    ' FROM SIATD_S13 INNER JOIN SIATD_S12 '+
+                    ' ON S12_EMPRESA = S13_S12_EMP '+
+                    ' WHERE S12_EMPRESA = ''01'' '+ condicao.ToString(true);
+
+
+
+        result := dao.Consultar(query, parametros)
+    finally
+        if condicao <> nil then
+            FreeAndNil(condicao);
+    end;
+end;
+
+constructor TFilial.Create;
+begin
+    inherited;
+    FTiposEntrega := TLista<TTipoEntrega>.Create;
+end;
+
+function TFilial.Excluir: boolean;
+var
+    fabrica: TFabricaSQL;
+    sql: WideString;
+    parametro: TParametro;
+begin
+    fabrica := TFabricaSQL.Create(Self);
+    try
+        try
+            fabrica.GerarSqlExclusao(sql,parametro,true);
+            result := dao.Excluir(sql, parametro);
+        except
+          on e: exception do
+              raise Exception.Create('Erro ao excluir Filial'+#13+ e.Message);
+        end;
+    finally
+        if parametro <> nil then
+            FreeAndNil(parametro);
+    end;
+end;
+
+destructor TFilial.Destroy;
+begin
+    if FTiposEntrega <> nil then
+        FreeAndNil(FTiposEntrega);
+    inherited;
+end;
+
+function TFilial.Listar(tipoOperacao: TOparationTypes; multselect: Boolean): TResultFilter;
+var
+    parametro: TParametro;
+    campoFiltro: TFieldFilter;
+    Filtro: TFilter<TFilial>;
+    Lista: TLista<TFilial>;
+begin
+    try
+        parametro := TParametro.Create;
+        parametro.Add('', 'S13_S12_EMP', TUsuarioLogado.ObterInstancia.Filial.Empresa);
+        Lista := Self.Consultar(parametro);
+
+        Filtro := TFilter<TFilial>.Create;
+
+        Filtro.ScreenName := 'Filtro de Filial';
+        Filtro.OperationType := tipoOperacao;
+        Filtro.MultiSelect := True;
+        // filtro.AddIndex(1, 'Empresa=S13_S12_EMP, Filila=S13_FILIAL', 'Empresa + Filial');
+        Filtro.AddIndex(2, 'Filial=S13_FILIAL', 'Filial');
+        // filtro.AddIndex(3, 'Empresa=S13_S12_EMP, Filial=S13_FILIAL, Descricao=S13_DESC', 'Empresa + Filial + Descrição');
+        Filtro.Task := 'ConsultarFilial';
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Empresa';
+        campoFiltro.Name := 'Empresa';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        Filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Filial';
+        campoFiltro.Name := 'Filial';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.IDFieldName := 'Filial';
+        campoFiltro.DescriptionFieldName := 'Descricao';
+        campoFiltro.FieldType := fdDataListCombo;
+        campoFiltro.DataSource := Lista.Tolist;
+        Filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Descricao';
+        campoFiltro.Name := 'Descricao';
+        campoFiltro.MaskTypes := mtString;
+        campoFiltro.FieldType := fdNormal;
+        campoFiltro.GridSize := 100;
+        Filtro.AddField(campoFiltro);
+
+        result := Filtro.Execute;
+
+    finally
+        FreeAndNil(parametro);
+        FreeAndNil(Lista);
+    end;
+end;
+
+function TFilial.Obter(parametros: TParametro): TFilial;
+var
+    lista: TLista<TFilial>;
+    query: string;
+begin
+    try
+        lista := nil;
+        lista := Self.Consultar(parametros);
+
+        if Lista.Count = 1 then
+        begin
+            PopularObjeto(Lista[0]);
+            result := Self;
+        end
+        else
+        begin
+            MessageDlg('Nenhum registro encontrado.', mtError, [mbOk], 0);
+            result := nil;
+        end;
+    finally
+        FreeAndNil(Lista);
+    end;
+end;
+
+function TFilial.ObterFiliaisAcessoPorUsuario(usuario: string): TLista<TFilial>;
+var
+    parametro: TParametro;
+    query: string;
+begin
+    try
+        parametro := TParametro.Create();
+        parametro.Add('', 'S04_S01_LOGIN', usuario);
+        query := 'SELECT ' +
+                  ' S13.S13_S12_EMP, S13.S13_FILIAL, S13.S13_DESC, S13.S13_RAZAOSOCIAL, S13.S13_END, '+
+                  ' S13.S13_BAIRRO, S13.S13_CIDADE, S13.S13_UF, S13.S13_CEP, S13.S13_CNPJ, S13.S13_IE, S13.S13_FONE, '+
+                  ' S13.S13_FAX, S13.S13_DTABERTURA, S13.S13_EMAIL, S13.S13_CD, S13_MENSAGEMCUPOM, S13_CODIGOCHUBB, '+
+                  ' S13.R_E_C_N_O_, S13_PAFECF, SIATD_S12.S12_NOME, S13_CROSSSELLING, S13_UPSELLING, S13_SIMILAR '+
+                  ' FROM SIATD_S04 S04 INNER JOIN SIATD_S13 '+
+                  ' S13 ON S04.S04_S13_FILIAL = S13.S13_FILIAL '+
+                  ' INNER JOIN  SIATD_S12 ' +
+                  ' ON S12_EMPRESA = S13_S12_EMP '+
+                  ' WHERE S04.D_E_L_E_T_ = '''' '+
+                  ' AND S04.S04_S01_LOGIN = :S04_S01_LOGIN AND S12_EMPRESA = ''01'' ';
+        result  := dao.Consultar(query,parametro);
+    finally
+        freeAndNil(parametro);
+    end;
+
+end;
+
+function TFilial.ObterTipoEntrega(tipoEntrega: String): TTipoEntrega;
+var
+    tipo: TTipoEntrega;
+begin
+    result := nil;
+    for tipo in Self.TiposEntrega do
+    begin
+        if tipo.tipoEntrega = tipoEntrega then
+        begin
+            result := tipo;
+            Break;
+        end;
+    end;
+
+end;
+
+function TFilial.ObterTodasFiliais: TLista<TFilial>;
+begin
+     result := Self.Consultar(nil);
+end;
+
+function TFilial.Obter(ID: string): TFilial;
+var
+    parametros: TParametro;
+
+begin
+    try
+        parametros := TParametro.Create;
+        parametros.Add('', 'S13_FILIAL', ID);
+        result := Obter(parametros);
+    finally
+        FreeAndNil(parametros)
+    end;
+end;
+
+{$ENDREGION}
+{$REGION 'Regras de Negócio'}
+
+
+
+procedure TFilial.PopularObjeto(Filial: TFilial);
+begin
+    Filial.CopiarPara(Self);
+    FPreenchido := True;
+end;
+
+{$ENDREGION}
+{$REGION 'Métodos de Propriedades'}
+
+procedure TFilial.SetBairro(const Value: string);
+begin
+    FBairro := Value;
+end;
+
+procedure TFilial.SetCD(const Value: string);
+begin
+    FCD := Value;
+end;
+
+procedure TFilial.SetCep(const Value: string);
+begin
+    FCep := Value;
+end;
+
+procedure TFilial.SetCidade(const Value: string);
+begin
+    FCidade := Value;
+end;
+
+procedure TFilial.SetCnpj(const Value: string);
+begin
+    FCnpj := Value;
+end;
+
+procedure TFilial.SetCodigoChubb(const Value: string);
+begin
+    FCodigoChubb := Value;
+end;
+
+function TFilial.GetCrossSelling_: Boolean;
+begin
+    result := false;
+
+    if FCrossSelling = 'S' then
+        result := True;
+end;
+
+procedure TFilial.SetCrossSelling(const Value: String);
+begin
+    FCrossSelling := Value;
+end;
+
+function TFilial.GetEmpresaFilial: string;
+begin
+    result := Self.Filial + ' - ' + Self.Descricao;
+end;
+
+function TFilial.GetSimilar_: Boolean;
+begin
+    result := false;
+
+    if FSimilar = 'S' then
+        result := True;
+end;
+
+function TFilial.GetUpSelling_: Boolean;
+begin
+    result := false;
+
+    if FUpSelling = 'S' then
+        result := True;
+end;
+
+procedure TFilial.SetDataAbertura(const Value: string);
+begin
+    ValidarAlteracaoPropriedade('DataAbertura', Value);
+    FDataAbertura := Value;
+end;
+
+procedure TFilial.SetDescricao(const Value: string);
+begin
+    ValidarAlteracaoPropriedade('Descricao', Value);
+    FDescricao := Value;
+end;
+
+procedure TFilial.SetEmail(const Value: string);
+begin
+    ValidarAlteracaoPropriedade('Email', Value);
+    FEmail := Value;
+end;
+
+procedure TFilial.SetEmpresa(const Value: string);
+begin
+    ValidarAlteracaoPropriedade('Empresa', Value);
+    FEmpresa := Value;
+end;
+
+procedure TFilial.SetEndereco(const Value: string);
+begin
+    ValidarAlteracaoPropriedade('Endereco', Value);
+    FEndereco := Value;
+end;
+
+procedure TFilial.SetFax(const Value: string);
+begin
+    ValidarAlteracaoPropriedade('Fax', Value);
+    FFax := Value;
+end;
+
+procedure TFilial.SetFilial(const Value: string);
+begin
+    ValidarAlteracaoPropriedade('Filial', Value);
+    FFilial := Value;
+end;
+
+procedure TFilial.SetFone(const Value: string);
+begin
+    ValidarAlteracaoPropriedade('Fone', Value);
+    FFone := Value;
+end;
+
+procedure TFilial.SetInscricaoEstadual(const Value: string);
+begin
+    ValidarAlteracaoPropriedade('InscricaoEstadual', Value);
+    FInscricaoEstadual := Value;
+end;
+
+procedure TFilial.SetMensagemCupom(const Value: string);
+begin
+    ValidarAlteracaoPropriedade('MensagemCupom', Value);
+    FMensagemCupom := Value;
+end;
+
+procedure TFilial.SetNomeEmpresa(const Value: string);
+begin
+    ValidarAlteracaoPropriedade('NomeEmpresa', Value);
+    FNomeEmpresa := Value;
+end;
+
+procedure TFilial.SetPafEcf(const Value: string);
+begin
+    ValidarAlteracaoPropriedade('PafEcf', Value);
+    FPafEcf := Value;
+end;
+
+procedure TFilial.SetRazaoSocial(const Value: string);
+begin
+    ValidarAlteracaoPropriedade('RazaoSocial', Value);
+    FRazaoSocial := Value;
+end;
+
+procedure TFilial.SetRecno(const Value: integer);
+begin
+    ValidarAlteracaoPropriedade('Recno', Value);
+    FRecno := Value;
+end;
+
+procedure TFilial.SetSimilar(const Value: String);
+begin
+    FSimilar := Value;
+end;
+
+procedure TFilial.SetTiposEntrega(const Value: TLista<TTipoEntrega>);
+begin
+    FTiposEntrega := Value;
+end;
+
+procedure TFilial.SetUf(const Value: string);
+begin
+    ValidarAlteracaoPropriedade('Uf', Value);
+    FUf := Value;
+end;
+
+procedure TFilial.SetUpSelling(const Value: String);
+begin
+    FUpSelling := Value;
+end;
+
+{$ENDREGION}
+
+procedure TFilial.ObterListaTipoEntrega(tipoVenda: TTipoVenda);
+var
+    tipoEntrega: TTipoEntrega;
+begin
+    try
+        tipoEntrega := TTipoEntrega.Create;
+
+        FTiposEntrega := tipoEntrega.ObterListaTipoEntregaPorTipoVenda(tipoVenda);
+    finally
+        if tipoEntrega <> nil then
+            FreeAndNil(tipoEntrega);
+
+    end;
+end;
+
+end.

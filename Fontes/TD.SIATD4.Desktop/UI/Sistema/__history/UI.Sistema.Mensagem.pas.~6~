@@ -1,0 +1,175 @@
+unit UI.Sistema.Mensagem;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, jpeg, ExtCtrls, StdCtrls, Buttons, Menus, Lib.Biblioteca, Vcl.ComCtrls,
+  Vcl.Mask, Lib.Enumeradores, REdit, Framework.UI.FormBase, UntErrorProvider,
+  Framework.UI.MensagemBase;
+
+type
+
+
+  TFrmMensagem = class (TFrmMensagemBase)
+    Imgadventencia: TImage;
+    ImgPergunta: TImage;
+    ImgInformacao: TImage;
+    ImgErro: TImage;
+    lblDescricao: TLabel;
+    BtBtnSim: TBitBtn;
+    BtBtnNao: TBitBtn;
+    BtBtnOK: TBitBtn;
+    lblTexto: TLabel;
+    SpdBTnErro: TSpeedButton;
+    edValor: TREdit;
+    RchEdtErro: TRichEdit;
+    procedure BtBtnCancelaClick(Sender: TObject);
+    procedure BtBtnSimClick(Sender: TObject);
+    procedure BtBtnNaoClick(Sender: TObject);
+    procedure BtBtnOkClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure SpdBTnErroClick(Sender: TObject);
+    procedure BtBtnNaoExit(Sender: TObject);
+    procedure FormActivate(Sender: TObject);
+  private
+    fAlturaOriginal : integer;
+    tipoMSG: TipoMensagem;
+    fcBotaoSim: boolean;
+    { Private declarations }
+  public
+    constructor Create(AOwner: TComponent; Titulo,Descricao,Erro : String; TipoMSG : TipoMensagem; TipoMascara: TMaskTypes = mtString; focoBotaoSim: boolean = true); reintroduce;Overload;
+    { Public declarations }
+
+  end;
+
+var
+  FrmMensagem: TFrmMensagem;
+
+implementation
+
+{$R *.dfm}
+
+procedure TFrmMensagem.BtBtnSimClick(Sender: TObject);
+begin
+     ModalResult := mrYes;
+end;
+
+procedure TFrmMensagem.BtBtnOkClick(Sender: TObject);
+begin
+     ModalResult:= mrOk;
+end;
+
+procedure TFrmMensagem.BtBtnCancelaClick(Sender: TObject);
+begin
+     Self.ModalResult := mrCancel;
+end;
+
+procedure TFrmMensagem.BtBtnNaoClick(Sender: TObject);
+begin
+     ModalResult := mrNo;
+end;
+
+procedure TFrmMensagem.BtBtnNaoExit(Sender: TObject);
+begin
+  BtBtnSim.SetFocus
+end;
+
+constructor TFrmMensagem.Create(AOwner: TComponent; Titulo, Descricao, Erro: String; TipoMSG: TipoMensagem; TipoMascara: TMaskTypes; focoBotaoSim: boolean);
+begin
+     inherited Create(AOwner);
+
+     if  Length(Descricao) < 60 then
+          Descricao := Descricao + Tlib.ReplicaCarateres(' ',60-Length(Descricao));
+
+     Self.lblDescricao.Caption := Descricao;
+     Self.Height := lblDescricao.Height+120;
+     fAlturaOriginal := Self.Height;
+     Self.Width := lblDescricao.Width+100;
+     fcBotaoSim := focoBotaoSim;
+     RchEdtErro.Visible := False;
+
+
+     tipoMSG:= TipoMSG;
+
+     case TipoMSG of
+          MSGErro: begin
+                        Self.Caption := tlib.IfTernario(Titulo = EmptyStr,'Erro', titulo);
+                        ImgErro.Visible := true;
+                        BtBtnOK.Visible := true;
+                        RchEdtErro.Visible := True;
+                        RchEdtErro.Lines.Clear;
+                        RchEdtErro.Text := StringReplace(Erro,'&apos;','',[rfReplaceAll]);
+                        RchEdtErro.Width := lblDescricao.Width+80;
+                        SpdBTnErro.Visible := true;
+                        SpdBTnErro.Down := true;
+                        SpdBTnErro.Click;
+
+                   end;
+          MSGInformacao: begin
+
+                              Self.Caption :=  tlib.IfTernario(Titulo = EmptyStr,'Informação', titulo);
+                              ImgInformacao.Visible := true;
+                              BtBtnOK.Visible := true;
+                              RchEdtErro.Visible := false;
+                         end;
+          MSGAdvertencia: begin
+                               Self.Caption := tlib.IfTernario(Titulo = EmptyStr,'Aviso', titulo);;
+                               Imgadventencia.Visible := True;
+                               BtBtnOK.Visible := true;
+                          end;
+          MSGPergunta: begin
+                            Self.Caption := tlib.IfTernario(Titulo = EmptyStr,'Pergunta', titulo);
+                            ImgPergunta.Visible := True;
+                            BtBtnSim.Left := BtBtnNao.Left;
+                            BtBtnNao.Left := BtBtnOK.Left;
+                            BtBtnSim.Visible := true;
+                            BtBtnNao.Visible := true;
+                       end;
+          MSGCaixaEntrada: begin
+                              Self.Caption := tlib.IfTernario(Titulo = EmptyStr,'Caixa de Entrada', titulo);
+                              ImgPergunta.Visible := true;
+                              BtBtnSim.Left := BtBtnNao.Left;
+                              BtBtnNao.Left := BtBtnOK.Left;
+                              BtBtnSim.Visible := true;
+                              BtBtnNao.Visible := true;
+                              BtBtnSim.Caption := 'Confirmar';
+                              BtBtnNao.Caption := 'Cancelar';
+                              edValor.Visible := true;
+                              edValor.MaskType := REdit.TMaskTypes(tipoMascara);
+                              edValor.SaveLiteralCharacters := true;
+                              Self.Height := edValor.Height+120;
+                              Self.Width := edValor.Width+100;
+
+          end;
+     end;
+end;
+
+procedure TFrmMensagem.FormActivate(Sender: TObject);
+begin
+   if not fcBotaoSim then
+      btBtnNao.SetFocus
+end;
+
+procedure TFrmMensagem.FormCreate(Sender: TObject);
+begin
+//  inherited;
+
+end;
+
+
+procedure TFrmMensagem.SpdBTnErroClick(Sender: TObject);
+begin
+    if SpdBTnErro.Down then
+    begin
+        Self.Height := 320;
+        SpdBTnErro.Caption := 'Ocultar'
+    end
+    else
+    begin
+        Self.Height := fAlturaOriginal;
+        SpdBTnErro.Caption := 'Detalhes'
+    end;
+end;
+
+end.

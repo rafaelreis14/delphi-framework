@@ -1,0 +1,157 @@
+object FrmConsultaPadraoMobile: TFrmConsultaPadraoMobile
+  Left = 0
+  Top = 0
+  Caption = 'Consulta Padr'#227'o'
+  ClientHeight = 344
+  ClientWidth = 246
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  KeyPreview = True
+  OldCreateOrder = True
+  Position = poDesktopCenter
+  ShowHint = True
+  PixelsPerInch = 96
+  TextHeight = 13
+  object PnlGrade: TPanel
+    Left = 752
+    Top = 123
+    Width = 771
+    Height = 360
+    BevelOuter = bvNone
+    Caption = 'PnlGrade'
+    TabOrder = 0
+  end
+  object pgControles: TPageControl
+    Left = 0
+    Top = 0
+    Width = 246
+    Height = 344
+    ActivePage = tbsDados
+    Align = alClient
+    OwnerDraw = True
+    TabOrder = 1
+    object tbsConsulta: TTabSheet
+      Caption = 'Consulta'
+      object Panel2: TPanel
+        Left = 0
+        Top = 266
+        Width = 238
+        Height = 50
+        Align = alBottom
+        BevelOuter = bvNone
+        ParentColor = True
+        TabOrder = 0
+        DesignSize = (
+          238
+          50)
+        object BtBtnConsultar: TBitBtn
+          Left = 179
+          Top = 3
+          Width = 55
+          Height = 45
+          Hint = 'Clique para Consultar'
+          Anchors = [akTop, akRight]
+          Caption = 'Consultar'
+          Layout = blGlyphTop
+          TabOrder = 0
+        end
+      end
+    end
+    object tbsDados: TTabSheet
+      Caption = 'Dados'
+      ImageIndex = 1
+      object pnlBotoes: TPanel
+        Left = 0
+        Top = 266
+        Width = 238
+        Height = 50
+        Align = alBottom
+        BevelOuter = bvNone
+        Padding.Left = 4
+        Padding.Top = 4
+        Padding.Right = 4
+        Padding.Bottom = 4
+        ParentColor = True
+        TabOrder = 0
+        DesignSize = (
+          238
+          50)
+        object btnInserir: TBitBtn
+          Left = 21
+          Top = 2
+          Width = 55
+          Height = 45
+          Hint = 'Clique para Inserir'
+          Anchors = [akTop, akRight]
+          Caption = 'Inserir'
+          Layout = blGlyphTop
+          TabOrder = 0
+        end
+        object btnAlterar: TBitBtn
+          Left = 75
+          Top = 2
+          Width = 55
+          Height = 45
+          Hint = 'Clique para Alterar'
+          Anchors = [akTop, akRight]
+          Caption = 'Alterar'
+          Layout = blGlyphTop
+          TabOrder = 1
+        end
+        object btnExcluir: TBitBtn
+          Left = 129
+          Top = 2
+          Width = 55
+          Height = 45
+          Hint = 'Clique para Excluir'
+          Anchors = [akTop, akRight]
+          Caption = 'Excluir'
+          Layout = blGlyphTop
+          ParentShowHint = False
+          ShowHint = True
+          Spacing = -1
+          TabOrder = 2
+        end
+        object btnSair: TBitBtn
+          Left = 183
+          Top = 2
+          Width = 55
+          Height = 45
+          Hint = 'Clique para Sair'
+          Anchors = [akTop, akRight]
+          Caption = 'Sair'
+          Layout = blGlyphTop
+          ParentShowHint = False
+          ShowHint = True
+          Spacing = -1
+          TabOrder = 3
+        end
+      end
+      object grDados: TRGrid
+        Left = 0
+        Top = 0
+        Width = 238
+        Height = 266
+        Align = alClient
+        ColCount = 2
+        DefaultRowHeight = 18
+        DrawingStyle = gdsClassic
+        RowCount = 2
+        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goColMoving, goRowSelect]
+        TabOrder = 1
+        MultiSelect = False
+        MasterDetailType = mdMaster
+        ColWidths = (
+          15
+          64)
+        RowHeights = (
+          18
+          18)
+      end
+    end
+  end
+end

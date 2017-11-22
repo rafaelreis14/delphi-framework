@@ -1,0 +1,255 @@
+unit ClsAtualizador;
+
+interface
+
+uses
+  System.Classes, IniFiles;
+
+type
+  TStatusAtualizacao = (Atualizando, Atualizado, Aguardando, Erro);
+
+  TAtualizador = class(TThread)
+  private
+    FAtualiza: boolean;
+    DiretorioAplicacao: string;
+    RepositorioAplicacao: string;
+    NomeAplicacao: string;
+    TempoVerificacao: integer;
+    TraceAtualizacao: boolean;
+    VersaoAtual, VersaoAtualizada:string;
+    Ini: TIniFile;
+    FStatusAtualizacao: TStatusAtualizacao;
+
+    procedure SetStatusAtualizacao(const Value: TStatusAtualizacao);
+    procedure SetAtualiza(const Value: boolean);
+
+    { Private declarations }
+  protected 
+    procedure Execute; override;
+    procedure Encerrar(Sender: TObject);
+
+    property Atualiza: boolean read FAtualiza write SetAtualiza;
+    property StatusAtualizacao: TStatusAtualizacao read FStatusAtualizacao write SetStatusAtualizacao;
+
+    function ExisteVersaoAtualizada: boolean;
+    function ObterVersao(executavel: string): string;
+    procedure ObterVersaoAtual;
+    
+    procedure ObterExecutavelAtualizado;
+
+    procedure AtualizarVersaoArquivoIni;
+
+  public
+    constructor Create(nome:string; trace: boolean = false);
+    
+    destructor Destroy; override;
+  end;
+
+implementation
+
+uses
+  System.SysUtils, Vcl.Forms, Windows, Vcl.Dialogs, ClsAguarde,
+  Winapi.Messages, ClsVersionInfo;
+
+{ TAtualizador }
+
+procedure TAtualizador.AtualizarVersaoArquivoIni;
+var
+    versao: string;
+begin
+    
+    if StatusAtualizacao = Atualizado then
+        versao := VersaoAtualizada
+    else
+    if StatusAtualizacao in [Erro, Aguardando] then
+        versao := VersaoAtual
+    else
+        versao := '';
+    
+    Ini.WriteString('Atualizacao', 'VersaoAtual', versao);
+end;
+
+procedure TAtualizador.ObterExecutavelAtualizado;
+begin
+     if FileExists(PWIdeChar(DiretorioAplicacao+NomeAplicacao+'_old')) then     
+         if not DeleteFile(PWIdeChar(DiretorioAplicacao+NomeAplicacao+'_old')) then
+            raise Exception.Create('Erro ao deletar  o arquivo antigo'); 
+
+     if not RenameFile(DiretorioAplicacao+NomeAplicacao,DiretorioAplicacao+NomeAplicacao+'_old') then
+        raise Exception.Create('Erro ao renomear o arquivo');
+
+     if not copyFile(PWIdeChar(repositorioAplicacao+NomeAplicacao), PWideChar(DiretorioAplicacao+NomeAplicacao), true) then
+        raise Exception.Create('Erro ao copiar arquivo');
+
+     VersaoAtual := VersaoAtualizada;
+end;
+
+
+procedure TAtualizador.SetAtualiza(const Value: boolean);
+begin
+  FAtualiza := Value;
+end;
+
+procedure TAtualizador.SetStatusAtualizacao(const Value: TStatusAtualizacao);
+begin
+  FStatusAtualizacao := Value;
+end;
+
+constructor TAtualizador.create(nome: string; trace: boolean);
+var
+    retorno: string;
+  I: Integer;
+begin
+    inherited Create (True);
+    NomeAplicacao := nome+'.exe';
+    DiretorioAplicacao := ExtractFilePath(Application.Exename);
+    TraceAtualizacao := trace;
+    ini := TIniFile.Create(DiretorioAplicacao+'Config.ini');
+
+    RepositorioAplicacao := ini.ReadString('Atualizacao','Repositorio', '');
+    Atualiza := StrToBoolDef(Ini.ReadString('Atualizacao', 'Atualiza', ''),false);
+    TempoVerificacao := ((StrToIntDef(Ini.ReadString('Atualizacao', 'TempoMinVerificacao', ''),1800000) * 60) * 1000);
+
+    if RepositorioAplicacao = EmptyStr then
+        Atualiza := false;
+
+    ObterVersaoAtual;    
+    if VersaoAtual = '' then
+        StatusAtualizacao := Atualizando
+    else
+    begin
+        StatusAtualizacao := Aguardando;
+        
+        retorno := ObterVersao(DiretorioAplicacao+NomeAplicacao);
+        if VersaoAtual <> retorno then
+        begin
+            VersaoAtual := retorno;
+            AtualizarVersaoArquivoIni;
+        end;
+        
+    end;
+
+    Self.OnTerminate := Encerrar;
+
+    FreeonTerminate := True
+    
+end;
+
+destructor TAtualizador.Destroy;
+begin
+  if Ini <> nil then
+      Ini.Free;
+
+  inherited;
+end;
+
+
+procedure TAtualizador.Encerrar(Sender: TObject);
+begin
+   if StatusAtualizacao = Atualizado then
+      Application.Terminate
+end;
+
+procedure TAtualizador.Execute;
+var
+    contador: integer;
+begin
+   try
+      contador := 10;
+      while Atualiza do
+      begin
+          if StatusAtualizacao = Aguardando then
+          begin
+              if ExisteVersaoAtualizada then
+              begin
+                  try
+                      StatusAtualizacao := Atualizando;
+                      AtualizarVersaoArquivoIni;
+                      ObterExecutavelAtualizado;                      
+                      StatusAtualizacao := Atualizado;
+                      AtualizarVersaoArquivoIni;                      
+                  except
+                      on e: exception do
+                      begin
+                          StatusAtualizacao := Erro;
+                          AtualizarVersaoArquivoIni;
+                          raise Exception.Create(e.Message);
+                      end;
+                  end;
+              end
+              else
+                  sleep(TempoVerificacao);
+          end
+          else
+          begin
+              if not ExisteVersaoAtualizada then StatusAtualizacao := Atualizado;
+              if StatusAtualizacao = Atualizado then
+              begin
+                  if contador >= 0  then
+                  begin
+                      TAguarde.AguardandoFinalizacaoProcesso(Application.MainForm, 25, 'O sistema foi atualizado e fechará em '+inttostr(Contador)+' minutos'+#13+'   Por favor, feche o sistema assim que possível.  ', $001D17DD);
+                      sleep(3000);   // 3 seg
+                      TAguarde.ProcessoFinalizado;
+                      dec(contador);
+                      sleep(60000); // 1 min
+                  end
+                  else
+                  begin
+                      Atualiza := false;
+
+                  end;
+
+              end
+              else
+                  sleep(TempoVerificacao);
+          end;
+        end;
+        DoTerminate;
+   except
+       on e : exception do
+            Showmessage('Erro ao atualizar o sistema'+#13+e.Message)
+   end;
+end;
+
+function TAtualizador.ExisteVersaoAtualizada: boolean;
+var
+  exec: string;
+begin
+    result := false;
+    if RepositorioAplicacao = EmptyStr then exit;
+
+    exec := RepositorioAplicacao+NomeAplicacao;
+
+    if FileExists(exec) then
+    begin        
+        ObterVersaoAtual;
+        versaoAtualizada := ObterVersao(exec);
+        
+        if (versaoAtual <> versaoAtualizada) and (versaoAtualizada <> EmptyStr) then
+          result := true;        
+    end;
+end;
+
+function TAtualizador.ObterVersao(executavel:string): string;
+var
+    verInf : tVersionInfo;
+begin
+    result := '';
+    verInf := TVersionInfo.Create(executavel);
+    try
+        result := verInf.GetVerValue('FileVersion');
+    finally
+      if verInf <> nil then
+          FreeAndNil(verInf);
+    end;
+end;
+
+
+
+procedure TAtualizador.ObterVersaoAtual;
+begin
+    VersaoAtual := Ini.ReadString('Atualizacao', 'VersaoAtual', '');
+end;
+
+end.
+

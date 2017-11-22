@@ -1,0 +1,78 @@
+unit ClsObservador;
+
+interface
+
+uses System.Classes;
+
+type
+    TObjetoBase = class abstract
+    private
+        FValor: Variant;
+        procedure SetValor(const Value: Variant);
+    public
+        property Valor: Variant read FValor write SetValor;
+    end;
+
+    IObservador = interface
+      ['{6FAFB4CC-B5BF-46B8-894D-121D3FDF0BF4}']
+      procedure Atualizar(objetoBase: TObjetoBase);
+    end;
+
+    TObjetoConcreto = class(TObjetoBase)
+    private
+        FObservadores: TInterfaceList;
+    public
+        constructor Create;
+        procedure Atachar(observador: IObservador);
+        procedure Desatachar(observador: IObservador);
+        procedure NotificarObservadores;
+    end;
+
+implementation
+
+{ TObjetoBase }
+
+
+
+procedure TObjetoBase.SetValor(const Value: Variant);
+begin
+  FValor := Value;
+end;
+
+{ TObjetoConcreto }
+
+procedure TObjetoConcreto.Atachar(observador: IObservador);
+begin
+   FObservadores.Add(observador);
+end;
+
+constructor TObjetoConcreto.Create;
+begin
+    inherited Create;
+    FObservadores := TInterfaceList.Create;
+
+end;
+
+procedure TObjetoConcreto.Desatachar(observador: IObservador);
+var
+  idx: Integer;
+begin
+  idx := FObservadores.IndexOf(observador);
+  if idx <> -1 then
+    FObservadores.Delete(idx);
+end;
+
+procedure TObjetoConcreto.NotificarObservadores;
+var
+  current: IInterface;
+  observador: IObservador;
+begin
+  for current in FObservadores do
+  begin
+    if current.QueryInterface(IObservador, Observador) = 0 then
+      observador.Atualizar(self);
+  end;
+end;
+
+
+end.

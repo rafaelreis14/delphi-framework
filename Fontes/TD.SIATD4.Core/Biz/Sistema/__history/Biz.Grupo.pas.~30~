@@ -1,0 +1,482 @@
+{ *Created by @ReisCodeGenerator* }
+unit Biz.Grupo;
+
+interface
+
+uses
+    Classes, System.SysUtils, Dialogs, Lib.ClasseBase, Lib.Parametro, Lib.Enumeradores,
+    Lib.Persistable, Lib.ResultFilter, Dal.ControleDados, Dal.CondicaoConsulta,
+    Framework.Interfaces.CRUD, Dal.FabricaSQL, Biz.Acesso,
+    Lib.Lista, Biz.Modulo;
+
+type
+
+    [TReferenceTable('SIATD_S02_01')]
+    TGrupo = class(TClasseBase, ICRUD<TGrupo>)
+    private
+        FDescricao: string;
+        FDelet: string;
+        FRecno: integer;
+        FGrupo: string;
+        FAcessos: TLista<TAcesso>;
+        FCarregou: boolean;
+        procedure SetDelet(const Value: string);
+        procedure SetDescricao(const Value: string);
+        procedure SetGrupo(const Value: string);
+        procedure SetRecno(const Value: integer);
+        class var dao: TControleDados<TLista<TGrupo>, TListaDAO<TGrupo>>;
+        procedure SetAcessos(const Value: TLista<TAcesso>);
+        procedure SetCarregou(const Value: boolean);
+
+    public
+        /// <summary>
+        /// Metodo que faz a inserção da Grupo
+        /// </summary>
+        function Inserir: boolean;
+        /// <summary>
+        /// Metodo que faz a alteração da Grupo
+        /// </summary>
+        function Alterar: boolean;
+
+        /// <summary>
+        /// Métido que faz a Deleção da Grupo
+        /// </summary>
+        function Excluir: boolean;
+
+        /// <summary>
+        /// Método que chama a tela de filtro
+        /// </summary>
+        /// <param name="tipoOperacao">
+        /// Tipo da operação, se é somente filtro, ou seleção de registro
+        /// </param>
+        function Listar(tipoOperacao: TOparationTypes; multselect: boolean): TResultFilter;
+
+        /// <summary>
+        /// Método que retorna um objeto preenchido
+        /// </summary>
+        /// <param name="ID">
+        /// Chave primária da tabela
+        /// </param>
+        function Obter(ID: string): TGrupo; overload;
+
+        /// <summary>
+        /// Método que retorna um objeto preenchido
+        /// </summary>
+        /// <param name="parametros">
+        /// Parametros para a consulta do objeto a ser preenchido
+        /// </param>
+        function Obter(parametros: TParametro): TGrupo; overload;
+
+        /// <summary>
+        /// Método que retonar uma lista com varios objetos de acordo com parametro passado
+        /// </summary>
+        /// <param name="parametros">
+        /// Parametros para a consulta do objeto a ser preenchido
+        /// </param>
+        function Consultar(parametros: TParametro): TLista<TGrupo>;
+
+        /// <summary>
+        /// Método que preenche a instância do Objeto
+        /// </summary>
+        /// <param name="Grupo">
+        /// objeto de parametro para preenchimento da instância
+        /// </param>
+        procedure PreencherObjeto(Grupo: TGrupo);
+
+        function ObterTodosGrupos: TLista<TGrupo>;
+
+        [TPersistable(fgPersistable, 'S02_GRUPO')]
+        [TMaxLenght(20)]
+        property Grupo: string read FGrupo write SetGrupo;
+
+        [TPersistable(fgPersistable, 'S02_DESC')]
+        [TMaxLenght(60)]
+        property Descricao: string read FDescricao write SetDescricao;
+
+        [TPersistable(fgPersistable, 'D_E_L_E_T_')]
+        [TMaxLenght(1)]
+        property Delet: string read FDelet write SetDelet;
+
+        [TPersistable(fgPersistable, 'R_E_C_N_O_')]
+        property Recno: integer read FRecno write SetRecno;
+
+        property Carregou: boolean read FCarregou write SetCarregou;
+
+
+        property Acessos: TLista<TAcesso> read FAcessos write SetAcessos;
+        procedure AdicionarAcesso(acesso:TAcesso);
+        procedure DeletarAcesso(acesso:TAcesso);
+        function ObterAcesso(modulo, rotina: string): TAcesso;
+        procedure CarregarAcessos(modulo, tipoRotina, rotina: string); overload;
+        procedure CarregarAcessos(modulo, tipoRotina: string); overload;
+        procedure LimparAcesso;
+        procedure ManterAcessos(modulo:TModulo; tipoRotina:string);
+
+
+
+        constructor Create;
+        destructor Destroy; override;
+
+
+
+    end;
+implementation
+
+{ TGrupo }
+
+uses Lib.Filter, Lib.Biblioteca, Biz.UsuarioLogado, Biz.PermissaoAcesso;
+
+{$REGION 'Métodos CRUD'}
+
+function TGrupo.Inserir: boolean;
+var
+    fabrica: TFabricaSQL;
+    sql: WideString;
+    Parametro: TParametro;
+begin
+    fabrica := TFabricaSQL.Create(Self);
+    try
+        try
+            sql := fabrica.GerarSqlInsercao;
+            Parametro := Self.ObjetoParaParametros(Insercao);
+            result := dao.Inserir(sql, Parametro);
+        except
+            on e: exception do
+                raise exception.Create('Erro ao inserir Grupo' + #13 + e.Message);
+        end;
+    finally
+        if Parametro <> nil then
+            FreeAndNil(Parametro);
+    end;
+end;
+
+procedure TGrupo.AdicionarAcesso(acesso: TAcesso);
+begin
+    Self.FAcessos.Add(acesso);
+end;
+
+function TGrupo.Alterar: boolean;
+var
+    fabrica: TFabricaSQL;
+    sql: WideString;
+    Parametro: TParametro;
+begin
+    fabrica := TFabricaSQL.Create(Self);
+    try
+        try
+            sql := fabrica.GerarSqlAlteracao;
+            Parametro := Self.ObjetoParaParametros(Alteracao);
+            result := dao.Alterar(sql, Parametro);
+        except
+            on e: exception do
+                raise exception.Create('Erro ao alterar Grupo' + #13 + e.Message);
+        end;
+    finally
+        if Parametro <> nil then
+            FreeAndNil(Parametro);
+    end;
+end;
+
+function TGrupo.Excluir: boolean;
+var
+    fabrica: TFabricaSQL;
+    sql: WideString;
+    Parametro: TParametro;
+begin
+    fabrica := TFabricaSQL.Create(Self);
+    try
+        try
+            sql := fabrica.GerarSqlExclusao;
+            Parametro := Self.ObjetoParaParametros(Exclusao);
+            result := dao.Excluir(sql, Parametro);
+        except
+            on e: exception do
+                raise exception.Create('Erro ao excluir Grupo' + #13 + e.Message);
+        end;
+    finally
+        if Parametro <> nil then
+            FreeAndNil(Parametro);
+    end;
+
+end;
+
+
+
+procedure TGrupo.CarregarAcessos(modulo, tipoRotina: string);
+begin
+    Self.CarregarAcessos(modulo, tipoRotina, emptystr);
+end;
+
+function TGrupo.Consultar(parametros: TParametro): TLista<TGrupo>;
+var
+    query: string;
+    condicao: TCondicaoConsulta;
+begin
+    try
+        condicao := TCondicaoConsulta.Create(parametros);
+        condicao.Adiciona('S02_GRUPO', ccLike, lgAnd);
+        condicao.Adiciona('S02_DESC', ccLike, lgAnd);
+        condicao.Adiciona('D_E_L_E_T_', ccIgual, lgAnd);
+        condicao.Adiciona('R_E_C_N_O_', ccIgual, lgAnd);
+
+        query := 'SELECT ' + Self.ObterCamposSeparadosPorVirgula(Consulta, []) + ' FROM ' + Self.TabelaReferencia + ' WHERE D_E_L_E_T_ = '''' ' +  condicao.ToString(true);
+
+        result := dao.Consultar(query, parametros);
+    finally
+        condicao.Free;
+    end;
+end;
+
+constructor TGrupo.Create;
+begin
+    FAcessos := TLista<TAcesso>.Create;
+end;
+
+procedure TGrupo.DeletarAcesso(acesso: TAcesso);
+begin
+    Self.Acessos.Delete(acesso);
+end;
+
+destructor TGrupo.Destroy;
+begin
+    if FAcessos <> nil then
+        FreeAndNil(FAcessos);
+    inherited;
+end;
+
+procedure TGrupo.LimparAcesso;
+begin
+    if FAcessos <> nil then
+        FreeAndNil(FAcessos);
+
+    FAcessos := TLista<TAcesso>.Create;
+end;
+
+function TGrupo.Listar(tipoOperacao: TOparationTypes; multselect: boolean): TResultFilter;
+var
+    campoFiltro: TFieldFilter;
+    filtro: TFilter<TGrupo>;
+    // parametro : TParametro;
+    // lista:TLista<TGrupo>
+begin
+    try
+        filtro := TFilter<TGrupo>.Create;
+        filtro.ScreenName := 'Filtro de Grupo';
+        filtro.OperationType := tipoOperacao;
+        filtro.MultiSelect := multselect;
+        filtro.AddIndex(1, 'Grupo=S02_GRUPO', 'Grupo');
+        filtro.AddIndex(2, 'Descricao=S02_DESC', 'Descricao');
+        // ###Criar os Índices do filtro
+        // filtro.AddIndex(99, 'Empresa=S01_EMP, Filial=S01_FILIAL, Descricao=S01_DESC', 'Empresa + Filial + Descrição');
+
+{$REGION 'Campo Filtro'}
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Grupo';
+        campoFiltro.Name := 'Grupo';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Descricao';
+        campoFiltro.Name := 'Descricao';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Delet';
+        campoFiltro.Name := 'Delet';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Recno';
+        campoFiltro.Name := 'Recno';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+{$ENDREGION}
+        result := filtro.Execute;
+    finally
+        // FreeAndNil(parametro);
+        // FreeAndNil(lista);
+    end;
+end;
+
+procedure TGrupo.ManterAcessos(modulo:TModulo; tipoRotina:string);
+var
+    acesso,ac: TAcesso;
+    pm: TPermissaoAcesso;
+begin
+    try
+        try
+        dao.IniciarTransacao('MANTERACESSO');
+        ac := TAcesso.Create;
+        pm := TPermissaoAcesso.Create;
+
+        for acesso in Self.Acessos do
+        begin
+            if acesso.PermissoesAcesso.Count = 0 then
+                acesso.CarregarPermissoesAcesso(acesso.TipoRotina);
+        end;
+
+
+        ac.ExcluirPorGrupoEModulo(Self.Grupo, modulo.Modulo, tipoRotina);
+        pm.ExcluirPermissoes(Self.Grupo, modulo.Modulo);
+
+        for acesso in Self.Acessos do
+            acesso.Inserir;
+
+        dao.ConfirmarTransacao('MANTERACESSO');            
+        except on E: Exception do
+            begin
+                dao.ReverterTransacao('MANTERACESSO');
+                raise Exception.Create('Erro ao manter acessos'+#13+e.message);
+            end;
+        end;            
+    finally
+        if ac <> nil then
+            FreeAndNil(ac);
+
+        if pm <> nil then
+            FreeAndNil(pm);
+    end;
+
+end;
+
+function TGrupo.Obter(parametros: TParametro): TGrupo;
+var
+    Lista: TLista<TGrupo>;
+begin
+    try
+        Lista := Self.Consultar(parametros);
+
+        if Lista.Count = 1 then
+        begin
+            PreencherObjeto(Lista[0]);
+            result := Self;
+        end
+        else
+        begin
+            TLib.MensagemAdvertencia('Nenhum registro encontrado.', 'Aviso');
+            result := nil;
+        end;
+    finally
+        Lista.Destroy;
+    end;
+end;
+
+function TGrupo.ObterAcesso(modulo, rotina: string): TAcesso;
+var
+    item: TAcesso;
+begin
+    Result := nil;
+    for item in Self.Acessos do
+    begin
+        if (item.Modulo = modulo) and (item.Rotina = rotina)then
+        begin
+            result := item;
+            exit;
+        end;
+    end;
+
+end;
+
+function TGrupo.ObterTodosGrupos: TLista<TGrupo>;
+begin
+    result := Self.Consultar(nil);
+end;
+
+function TGrupo.Obter(ID: string): TGrupo;
+var
+    parametros: TParametro;
+
+begin
+    try
+        parametros := TParametro.Create;
+        parametros.Add('', 'S02_GRUPO', ID);
+        result := Obter(parametros);
+    finally
+        FreeAndNil(parametros);
+    end;
+end;
+
+
+procedure TGrupo.CarregarAcessos(modulo, tipoRotina, rotina: string);
+var
+    acesso: TAcesso;
+    parametro: TParametro;
+begin
+    try
+        acesso := TAcesso.Create;
+        parametro := TParametro.Create;
+        parametro.Add('','S20_S02_GRUPO', Grupo);
+        parametro.Add('','S20_S09_S08_MODULO', modulo);
+        parametro.Add('','S20_TIPOROTINA', tipoRotina);
+
+        if rotina <> EmptyStr then
+            parametro.Add('','S20_S09_S05_ROTINA', UpperCase(rotina));
+
+        FAcessos := acesso.Consultar(parametro);
+    finally
+        if acesso <> nil then
+            FreeAndNil(acesso);
+        if parametro <> nil then
+            FreeAndNil(parametro);
+    end;
+end;
+
+
+
+{$ENDREGION}
+{$REGION 'Regras de Negócio'}
+
+procedure TGrupo.PreencherObjeto(Grupo: TGrupo);
+begin
+    Grupo.CopiarPara(Self);
+    FPreenchido := true;
+end;
+
+procedure TGrupo.SetAcessos(const Value: TLista<TAcesso>);
+begin
+  FAcessos := Value;
+end;
+
+procedure TGrupo.SetCarregou(const Value: boolean);
+begin
+  FCarregou := Value;
+end;
+
+procedure TGrupo.SetDelet(const Value: string);
+begin
+    FDelet := Value;
+end;
+
+procedure TGrupo.SetDescricao(const Value: string);
+begin
+    FDescricao := Value;
+end;
+
+procedure TGrupo.SetGrupo(const Value: string);
+begin
+    FGrupo := Value;
+end;
+
+procedure TGrupo.SetRecno(const Value: integer);
+begin
+    FRecno := Value;
+end;
+
+
+{$ENDREGION}
+{$REGION 'Métodos de Propriedades'}
+{$ENDREGION}
+
+end.

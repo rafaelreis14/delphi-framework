@@ -1,0 +1,112 @@
+unit Lib.Lista;
+
+interface
+
+uses  Generics.Collections, System.SysUtils, Classes, System.Rtti;
+
+type
+    TLista<T: Class> = class(TObjectList<T>)
+    private
+    public
+         function ToDelimiterList(proper: string; withQuotes: boolean = false): string;
+         function ToList: TList;
+         procedure CopyTo(var lista: TLista<T>);
+         procedure Delete(base: T);
+         procedure Add(objeto: T);
+//         function Count: integer;
+    end;
+
+implementation
+
+uses Lib.Biblioteca, Lib.Enumeradores, Framework.Interfaces.Base;
+
+
+
+{ TLista<T> }
+
+
+
+//function TLista<T>.Count: integer;
+//var
+//    item: T;
+//    i: integer;
+//begin
+//    i := 0;
+//    for item in Self do
+//    begin
+//        if TBase(item).TipoManutencao <> Exclusao then
+//            inc(i);
+//    end;
+//    result := i;
+//end;
+
+procedure TLista<T>.Delete(base: T);
+var
+    index: integer;
+begin
+    index := indexOf(base);
+    if index = -1 then
+        raise Exception.Create('objeto passado não existe na lista');
+
+    if (TObject(Self[index]).InheritsFrom(IBase)) then
+        IBase(Self[index]).SetTipoManutencao := Exclusao
+    else
+        TObjectList<T>(Self).Delete(index);
+
+end;
+
+function TLista<T>.ToDelimiterList(proper: string; withQuotes: boolean): string;
+var
+    i: integer;
+    context: TRttiContext;
+    prop: TRttiProperty;
+    text: string;
+begin
+    try
+        for i := 0 to self.Count - 1 do
+        begin
+            prop := context.GetType(TObject(self[i]).ClassType).GetProperty(proper);
+            if withQuotes then
+                text := text + QuotedStr(prop.GetValue(TObject(self[i])).ToString) + ','
+            else
+                text := text + prop.GetValue(TObject(self[i])).ToString + ',';
+        end;
+        System.Delete(text, Length(text), 1);
+        Result := text;
+    except
+        raise Exception.Create('Erro ao acessar a proriedade passada');
+
+    end;
+end;
+
+procedure TLista<T>.Add(objeto: T);
+begin
+    TObjectList<T>(Self).Add(objeto);
+    if (Objeto.InheritsFrom(IBase)) then
+        IBase(Objeto).SetTipoManutencao := Insercao;
+end;
+
+procedure TLista<T>.CopyTo(var lista: TLista<T>);
+var
+    baseClass: T;
+    i: Integer;
+begin
+    for i := 0 to Self.Count-1 do
+    begin
+        baseClass := TLib.CriaInstancia<T>;
+        IBase(Self[i]).CopiarPara(baseClass);
+        lista.Add(baseClass);
+    end;
+end;
+
+function TLista<T>.ToList: TList;
+var
+  i: integer;
+begin
+   result := tlist.Create;
+   for I := 0 to Self.Count-1 do
+      result.Add(Pointer(Self[i]));
+
+end;
+
+end.

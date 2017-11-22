@@ -1,0 +1,392 @@
+inherited frmCadCliente: TfrmCadCliente
+  Caption = 'frmCadCliente'
+  ClientHeight = 358
+  ClientWidth = 513
+  ExplicitWidth = 519
+  ExplicitHeight = 386
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited Panel2: TPanel
+    Width = 513
+    ExplicitWidth = 509
+    inherited Label1: TLabel
+      Width = 171
+      Caption = 'Cadastro de Cliente'
+      ExplicitWidth = 171
+    end
+  end
+  inherited Panel3: TPanel
+    Top = 318
+    Width = 513
+    ExplicitTop = 318
+    ExplicitWidth = 509
+    inherited pnlBotoes: TPanel
+      Left = 314
+      ExplicitLeft = 310
+    end
+  end
+  inherited pgcComponentes: TPageControl
+    Width = 513
+    Height = 281
+    ExplicitWidth = 509
+    ExplicitHeight = 281
+    inherited tbPrincipal: TTabSheet
+      ExplicitLeft = -20
+      ExplicitTop = 27
+      ExplicitWidth = 505
+      ExplicitHeight = 253
+      object Label8: TLabel
+        Left = 5
+        Top = 13
+        Width = 51
+        Height = 13
+        Caption = 'Sequencial'
+      end
+      object Label2: TLabel
+        Left = 76
+        Top = 13
+        Width = 33
+        Height = 13
+        Caption = 'C'#243'digo'
+      end
+      object Label3: TLabel
+        Left = 5
+        Top = 54
+        Width = 27
+        Height = 13
+        Caption = 'Nome'
+      end
+      object Label4: TLabel
+        Left = 5
+        Top = 102
+        Width = 48
+        Height = 13
+        Caption = 'CPF/CNPJ'
+      end
+      object Label5: TLabel
+        Left = 118
+        Top = 102
+        Width = 14
+        Height = 13
+        Caption = 'RG'
+      end
+      object Label7: TLabel
+        Left = 426
+        Top = 54
+        Width = 56
+        Height = 13
+        Caption = 'Tipo Cliente'
+      end
+      object Label9: TLabel
+        Left = 207
+        Top = 102
+        Width = 42
+        Height = 13
+        Caption = 'Telefone'
+      end
+      object Label16: TLabel
+        Left = 8
+        Top = 156
+        Width = 24
+        Height = 13
+        Caption = 'Email'
+      end
+      object Label6: TLabel
+        Left = 356
+        Top = 54
+        Width = 57
+        Height = 13
+        Caption = 'Tipo Pessoa'
+      end
+      object Label17: TLabel
+        Left = 192
+        Top = 156
+        Width = 44
+        Height = 13
+        Caption = 'Email Nfe'
+      end
+      object edRecno: TREdit
+        Left = 5
+        Top = 29
+        Width = 68
+        Height = 21
+        ReadOnly = True
+        TabOrder = 0
+        FieldName = 'Sequencial'
+        MaskType = mtNone
+        MandatoryField = False
+        PersistentField = True
+        SaveLiteralCharacters = False
+        DecimalPlaces = 2
+      end
+      object REdit1: TREdit
+        Left = 76
+        Top = 29
+        Width = 68
+        Height = 21
+        ReadOnly = True
+        TabOrder = 1
+        FieldName = 'Codigo'
+        MaskType = mtNone
+        MandatoryField = False
+        PersistentField = True
+        SaveLiteralCharacters = False
+        DecimalPlaces = 2
+      end
+      object REdit2: TREdit
+        Left = 5
+        Top = 70
+        Width = 349
+        Height = 21
+        ReadOnly = True
+        TabOrder = 2
+        FieldName = 'Nome'
+        MaskType = mtNone
+        MandatoryField = False
+        PersistentField = True
+        SaveLiteralCharacters = False
+        DecimalPlaces = 2
+      end
+      object REdit3: TREdit
+        Left = 5
+        Top = 118
+        Width = 111
+        Height = 21
+        EditMask = '000.000.000-00;1;_'
+        MaxLength = 14
+        ReadOnly = True
+        TabOrder = 3
+        Text = '   .   .   -  '
+        FieldName = 'Cgc'
+        MaskType = mtCPF
+        MandatoryField = False
+        PersistentField = True
+        SaveLiteralCharacters = False
+        DecimalPlaces = 2
+      end
+      object REdit4: TREdit
+        Left = 118
+        Top = 118
+        Width = 88
+        Height = 21
+        ReadOnly = True
+        TabOrder = 4
+        FieldName = 'Rg'
+        MaskType = mtNone
+        MandatoryField = False
+        PersistentField = True
+        SaveLiteralCharacters = False
+        DecimalPlaces = 2
+      end
+      object REdit7: TREdit
+        Left = 207
+        Top = 118
+        Width = 92
+        Height = 21
+        EditMask = '!\(99\)0000-0000;1;_'
+        MaxLength = 13
+        ReadOnly = True
+        TabOrder = 5
+        Text = '(  )    -    '
+        FieldName = 'Telefone'
+        MaskType = mtPhone
+        MandatoryField = False
+        PersistentField = True
+        SaveLiteralCharacters = False
+        DecimalPlaces = 2
+      end
+      object REdit14: TREdit
+        Left = 7
+        Top = 172
+        Width = 179
+        Height = 21
+        ReadOnly = True
+        TabOrder = 6
+        FieldName = 'Email'
+        MaskType = mtNone
+        MandatoryField = False
+        PersistentField = True
+        SaveLiteralCharacters = False
+        DecimalPlaces = 2
+      end
+      object cbTipoPessoa: TRComboBox
+        Left = 356
+        Top = 70
+        Width = 69
+        Height = 22
+        Style = csOwnerDrawFixed
+        TabOrder = 7
+        FieldName = 'TipoPessoa'
+        MandatoryField = False
+        PersistentField = True
+        BlankField = False
+        ListValue.Strings = (
+          'F'#237'sica=F'
+          'Jur'#237'dica=J')
+      end
+      object cbTipoCliente: TRComboBox
+        Left = 427
+        Top = 70
+        Width = 69
+        Height = 22
+        Style = csOwnerDrawFixed
+        TabOrder = 8
+        FieldName = 'Tipo'
+        MandatoryField = False
+        PersistentField = True
+        BlankField = False
+        ListValue.Strings = (
+          'Revenda=R'
+          'Final=F')
+      end
+      object REdit5: TREdit
+        Left = 188
+        Top = 172
+        Width = 179
+        Height = 21
+        ReadOnly = True
+        TabOrder = 9
+        FieldName = 'EmailNfe'
+        MaskType = mtNone
+        MandatoryField = False
+        PersistentField = True
+        SaveLiteralCharacters = False
+        DecimalPlaces = 2
+      end
+    end
+    object TabSheet1: TTabSheet
+      Caption = 'Endere'#231'o'
+      ImageIndex = 1
+      ExplicitWidth = 501
+      object Label10: TLabel
+        Left = 5
+        Top = 13
+        Width = 45
+        Height = 13
+        Caption = 'Endere'#231'o'
+      end
+      object Label11: TLabel
+        Left = 432
+        Top = 13
+        Width = 37
+        Height = 13
+        Caption = 'N'#250'mero'
+      end
+      object Label12: TLabel
+        Left = 5
+        Top = 61
+        Width = 43
+        Height = 13
+        Caption = 'Munic'#237'pio'
+      end
+      object Label13: TLabel
+        Left = 181
+        Top = 61
+        Width = 13
+        Height = 13
+        Caption = 'UF'
+      end
+      object Label14: TLabel
+        Left = 390
+        Top = 61
+        Width = 19
+        Height = 13
+        Caption = 'CEP'
+      end
+      object Label15: TLabel
+        Left = 213
+        Top = 61
+        Width = 28
+        Height = 13
+        Caption = 'Bairro'
+      end
+      object REdit8: TREdit
+        Left = 5
+        Top = 29
+        Width = 424
+        Height = 21
+        ReadOnly = True
+        TabOrder = 0
+        FieldName = 'Endereco'
+        MaskType = mtNone
+        MandatoryField = False
+        PersistentField = True
+        SaveLiteralCharacters = False
+        DecimalPlaces = 2
+      end
+      object REdit9: TREdit
+        Left = 431
+        Top = 29
+        Width = 54
+        Height = 21
+        ReadOnly = True
+        TabOrder = 1
+        FieldName = 'Codigo'
+        MaskType = mtNone
+        MandatoryField = False
+        PersistentField = True
+        SaveLiteralCharacters = False
+        DecimalPlaces = 2
+      end
+      object REdit10: TREdit
+        Left = 5
+        Top = 77
+        Width = 173
+        Height = 21
+        ReadOnly = True
+        TabOrder = 2
+        FieldName = 'Municipio'
+        MaskType = mtNone
+        MandatoryField = False
+        PersistentField = True
+        SaveLiteralCharacters = False
+        DecimalPlaces = 2
+      end
+      object REdit11: TREdit
+        Left = 181
+        Top = 77
+        Width = 30
+        Height = 21
+        ReadOnly = True
+        TabOrder = 3
+        FieldName = 'Estado'
+        MaskType = mtNone
+        MandatoryField = False
+        PersistentField = True
+        SaveLiteralCharacters = False
+        DecimalPlaces = 2
+      end
+      object REdit12: TREdit
+        Left = 390
+        Top = 77
+        Width = 89
+        Height = 21
+        EditMask = '00.000\-000;1;_'
+        MaxLength = 10
+        ReadOnly = True
+        TabOrder = 4
+        Text = '  .   -   '
+        FieldName = 'Cep'
+        MaskType = mtCEP
+        MandatoryField = False
+        PersistentField = True
+        SaveLiteralCharacters = False
+        DecimalPlaces = 2
+      end
+      object REdit13: TREdit
+        Left = 213
+        Top = 77
+        Width = 174
+        Height = 21
+        ReadOnly = True
+        TabOrder = 5
+        FieldName = 'Bairro'
+        MaskType = mtNone
+        MandatoryField = False
+        PersistentField = True
+        SaveLiteralCharacters = False
+        DecimalPlaces = 2
+      end
+    end
+  end
+end

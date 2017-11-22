@@ -1,0 +1,306 @@
+unit Framework.UI.FiltroBase;
+
+interface
+
+uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Framework.UI.FormBase, Vcl.Menus, Vcl.StdCtrls, Vcl.Buttons, Vcl.ExtCtrls, RComboBox, Vcl.Grids, RGrid,
+    UntErrorProvider, Lib.Biblioteca, Lib.Lista, Lib.Parametro,
+    Lib.Enumeradores;
+
+type
+    TIndice = class
+    private
+        FDescricao: string;
+        FCampo: String;
+        FOrdem: Integer;
+        procedure SetCampo(const Value: String);
+        procedure SetDescricao(const Value: string);
+        procedure SetOrdem(const Value: Integer);
+    public
+        property Ordem: Integer read FOrdem write SetOrdem;
+        property Campo: String read FCampo write SetCampo;
+        property Descricao: string read FDescricao write SetDescricao;
+        constructor Create(Ordem: Integer; Campo, Descricao: string);
+    end;
+
+    TCampo = class
+    private
+        FNomeMetodo: string;
+        FNomeCompente: string;
+        FValor: String;
+        FCamposPais: string;
+        FDescricao: string;
+        FListaValor: TStringList;
+        FCampoFilho: string;
+        FTamanhoGrid: Integer;
+        FTipoCampo: TFieldTypes;
+        FDescricaoCampoFilho: String;
+        FTipoMascara: TMaskTypes;
+        FIDCampoFilho: String;
+        FNome: string;
+        FFonteDados: TList;
+        procedure SetCampoFilho(const Value: string);
+        procedure SetCamposPais(const Value: string);
+        procedure SetDescricao(const Value: string);
+        procedure SetDescricaoCampoFilho(const Value: String);
+        procedure SetFonteDados(const Value: TList);
+        procedure SetIDCampoFilho(const Value: String);
+        procedure SetListaValor(const Value: TStringList);
+        procedure SetNome(const Value: string);
+        procedure SetNomeCompente(const Value: string);
+        procedure SetNomeMetodo(const Value: string);
+        procedure SetTamanhoGrid(const Value: Integer);
+        procedure SetTipoCampo(const Value: TFieldTypes);
+        procedure SetTipoMascara(const Value: TMaskTypes);
+        procedure SetValor(const Value: String);
+
+    public
+        procedure Limpar;
+        property Descricao: string read FDescricao write SetDescricao;
+        property Nome: string read FNome write SetNome;
+        property TipoMascara: TMaskTypes read FTipoMascara write SetTipoMascara;
+        property TipoCampo: TFieldTypes read FTipoCampo write SetTipoCampo;
+        property TamanhoGrid: Integer read FTamanhoGrid write SetTamanhoGrid;
+
+        { List properties }
+        property FonteDados: TList read FFonteDados write SetFonteDados;
+        property IDCampoFilho: String read FIDCampoFilho write SetIDCampoFilho;
+        property DescricaoCampoFilho: String read FDescricaoCampoFilho write SetDescricaoCampoFilho;
+
+        property ListaValor: TStringList read FListaValor write SetListaValor;
+        property CampoFilho: string read FCampoFilho write SetCampoFilho;
+        property CamposPais: string read FCamposPais write SetCamposPais;
+        property NomeCompente: string read FNomeCompente write SetNomeCompente;
+        property NomeMetodo: string read FNomeMetodo write SetNomeMetodo;
+
+        { Value }
+        property Valor: String read FValor write SetValor;
+
+        constructor Create();
+        destructor Destroy(); override;
+    end;
+
+
+    TExecutaFiltro<T> = class
+    public
+
+
+    end;
+
+    TFiltro = class(TFrmBase)
+        grdSearch: TRGrid;
+        pnInformacoes: TPanel;
+        lbl1: TLabel;
+        Panel4: TPanel;
+        cbComponents: TScrollBox;
+        cbIndexes: TRComboBox;
+        pnBotoes: TPanel;
+        Bevel1: TBevel;
+        btnCancelar: TBitBtn;
+        btnFiltrar: TBitBtn;
+        btnSelecionar: TBitBtn;
+        btnImprimir: TBitBtn;
+        Panel2: TPanel;
+        Panel1: TPanel;
+        lblLetreiro: TLabel;
+        ppVisualizar: TPopupMenu;
+        VisualizarCadastro1: TMenuItem;
+    private
+        FIndices: TLista<TIndice>;
+        FDescricaoTela: string;
+        FTipoFiltro: TFilterType;
+        FCampos: TLista<TCampo>;
+        FParametro: TParametro;
+        FTelaCadastro: TFormClass;
+        FMultiSelecao: Boolean;
+        FTipoOperacao: TOparationTypes;
+        procedure SetCampos(const Value: TLista<TCampo>);
+        procedure SetDescricaoTela(const Value: string);
+        procedure SetIndices(const Value: TLista<TIndice>);
+        procedure SetMultiSelecao(const Value: Boolean);
+        procedure SetParametro(const Value: TParametro);
+        procedure SetTelaCadastro(const Value: TFormClass);
+        procedure SetTipoFiltro(const Value: TFilterType);
+        procedure SetTipoOperacao(const Value: TOparationTypes);
+        { Private declarations }
+    public
+        property DescricaoTela: string read FDescricaoTela write SetDescricaoTela;
+        property MultiSelecao: Boolean read FMultiSelecao write SetMultiSelecao;
+        property Campos: TLista<TCampo> read FCampos write SetCampos;
+        property Indices: TLista<TIndice> read FIndices write SetIndices;
+        property TipoOperacao: TOparationTypes read FTipoOperacao write SetTipoOperacao;
+        property TipoFiltro: TFilterType read FTipoFiltro write SetTipoFiltro;
+        property Parametro: TParametro read FParametro write SetParametro;
+        property TelaCadastro: TFormClass read FTelaCadastro write SetTelaCadastro;
+
+        property ExecutaFiltro
+    end;
+
+var
+    Filtro: TFiltro;
+
+implementation
+
+{$R *.dfm}
+{ TCampo }
+
+constructor TCampo.Create;
+begin
+    FListaValor := TStringList.Create;
+end;
+
+destructor TCampo.Destroy;
+begin
+    FreeAndNil(FListaValor);
+    inherited Destroy;
+end;
+
+procedure TCampo.Limpar;
+begin
+    Descricao := EmptyStr;
+    Nome := EmptyStr;
+    ListaValor.Text := EmptyStr;
+    FonteDados.Clear;
+    DescricaoCampoFilho := EmptyStr;
+    IDCampoFilho := EmptyStr;
+    Valor := EmptyStr;
+end;
+
+procedure TCampo.SetCampoFilho(const Value: string);
+begin
+    FCampoFilho := Value;
+end;
+
+procedure TCampo.SetCamposPais(const Value: string);
+begin
+    FCamposPais := Value;
+end;
+
+procedure TCampo.SetDescricao(const Value: string);
+begin
+    FDescricao := Value;
+end;
+
+procedure TCampo.SetDescricaoCampoFilho(const Value: String);
+begin
+    FDescricaoCampoFilho := Value;
+end;
+
+procedure TCampo.SetFonteDados(const Value: TList);
+begin
+    FFonteDados := Value;
+end;
+
+procedure TCampo.SetIDCampoFilho(const Value: String);
+begin
+    FIDCampoFilho := Value;
+end;
+
+procedure TCampo.SetListaValor(const Value: TStringList);
+begin
+    FListaValor := Value;
+end;
+
+procedure TCampo.SetNome(const Value: string);
+begin
+    FNome := Value;
+end;
+
+procedure TCampo.SetNomeCompente(const Value: string);
+begin
+    FNomeCompente := Value;
+end;
+
+procedure TCampo.SetNomeMetodo(const Value: string);
+begin
+    FNomeMetodo := Value;
+end;
+
+procedure TCampo.SetTamanhoGrid(const Value: Integer);
+begin
+    FTamanhoGrid := Value;
+end;
+
+procedure TCampo.SetTipoCampo(const Value: TFieldTypes);
+begin
+    FTipoCampo := Value;
+end;
+
+procedure TCampo.SetTipoMascara(const Value: TMaskTypes);
+begin
+    FTipoMascara := Value;
+end;
+
+procedure TCampo.SetValor(const Value: String);
+begin
+    FValor := Value;
+end;
+
+{ TFiltro }
+
+procedure TFiltro.SetCampos(const Value: TLista<TCampo>);
+begin
+    FCampos := Value;
+end;
+
+procedure TFiltro.SetDescricaoTela(const Value: string);
+begin
+    FDescricaoTela := Value;
+end;
+
+procedure TFiltro.SetIndices(const Value: TLista<TIndice>);
+begin
+    FIndices := Value;
+end;
+
+procedure TFiltro.SetMultiSelecao(const Value: Boolean);
+begin
+    FMultiSelecao := Value;
+end;
+
+procedure TFiltro.SetParametro(const Value: TParametro);
+begin
+    FParametro := Value;
+end;
+
+procedure TFiltro.SetTelaCadastro(const Value: TFormClass);
+begin
+    FTelaCadastro := Value;
+end;
+
+procedure TFiltro.SetTipoFiltro(const Value: TFilterType);
+begin
+    FTipoFiltro := Value;
+end;
+
+procedure TFiltro.SetTipoOperacao(const Value: TOparationTypes);
+begin
+    FTipoOperacao := Value;
+end;
+
+{ TIndice }
+
+constructor TIndice.Create(Ordem: Integer; Campo, Descricao: string);
+begin
+    Self.Ordem := Ordem;
+    Self.Campo := Campo;
+    Self.Descricao := Descricao;
+end;
+
+procedure TIndice.SetCampo(const Value: String);
+begin
+    FCampo := Value;
+end;
+
+procedure TIndice.SetDescricao(const Value: string);
+begin
+    FDescricao := Value;
+end;
+
+procedure TIndice.SetOrdem(const Value: Integer);
+begin
+    FOrdem := Value;
+end;
+
+end.

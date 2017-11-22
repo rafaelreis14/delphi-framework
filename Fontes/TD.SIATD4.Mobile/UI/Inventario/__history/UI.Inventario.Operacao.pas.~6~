@@ -1,0 +1,528 @@
+unit UI.Inventario.Operacao;
+
+interface
+
+uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, FrameWork.UI.FormBase, UntErrorProvider,
+    Vcl.ExtCtrls, Vcl.Grids, Vcl.DBGrids, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.Buttons,
+    Vcl.Mask, REdit, RGrid, Biz.Tarefa, Lib.Lista, // UI.Produto.Cadastro,
+    Lib.Enumeradores, Biz.Fila, Biz.Produto;
+
+type
+    TfrmInventario = class(TFrmBase)
+        pnLetreiro: TPanel;
+        Panel1: TPanel;
+        pgPrincipal: TPageControl;
+        tbsContagem: TTabSheet;
+        tbListaEnderecos: TTabSheet;
+        tpVerificaTarefa: TTimer;
+        gdTarefa: TRGrid;
+        edUsuario: TREdit;
+        Label1: TLabel;
+        pnContagem: TPanel;
+        lblObservacao: TLabel;
+        edProduto: TREdit;
+        edQuantidade: TREdit;
+        lblQuantidade: TLabel;
+        lblProduto: TLabel;
+        pnlBotoes: TPanel;
+        btnFechar: TBitBtn;
+        btnInformacaoProduto: TBitBtn;
+        btnZerarContador: TBitBtn;
+        edObservacao: TREdit;
+        lblNumeroOperacao: TLabel;
+        Label2: TLabel;
+        btnEnviar: TBitBtn;
+        btnFinalizar: TBitBtn;
+        btnAbandonar: TBitBtn;
+        Label3: TLabel;
+        edConferirProduto: TREdit;
+        Panel5: TPanel;
+        Label17: TLabel;
+        Label18: TLabel;
+        lblCont: TLabel;
+        tpLetreiro: TTimer;
+        lblLetreiro: TLabel;
+        lblLocalizacao: TLabel;
+        edLocalizacao: TREdit;
+        procedure btnFecharClick(Sender: TObject);
+        procedure tpVerificaTarefaTimer(Sender: TObject);
+        procedure FormShow(Sender: TObject);
+        procedure FormCreate(Sender: TObject);
+        procedure FormClose(Sender: TObject; var Action: TCloseAction);
+        procedure btnInformacaoProdutoClick(Sender: TObject);
+        procedure edProdutoExit(Sender: TObject);
+        procedure edQuantidadeExit(Sender: TObject);
+        procedure pgPrincipalChange(Sender: TObject);
+        procedure btnZerarContadorClick(Sender: TObject);
+        procedure btnEnviarClick(Sender: TObject);
+        procedure btnFinalizarClick(Sender: TObject);
+        procedure btnAbandonarClick(Sender: TObject);
+        procedure edConferirProdutoExit(Sender: TObject);
+        procedure tpLetreiroTimer(Sender: TObject);
+        procedure gdTarefaClick(Sender: TObject);
+        procedure gdTarefaKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure edLocalizacaoExit(Sender: TObject);
+
+    private
+        Fila: TFila;
+
+        procedure HabilitaContagem;
+        procedure AtivarLetreiro(pletreiro: string);
+        procedure VoltarLetreiro(pletreiro: string);
+        procedure AtualizaLetreidoPelaGrid;
+        function ValidarProduto(Produto: TProduto): boolean;
+    public
+
+      const
+        letreiro: string = 'SIATD MOBILE - Inventário';
+    end;
+
+var
+    frmInventario: TfrmInventario;
+
+implementation
+
+{$R *.dfm}
+
+uses Lib.Aguarde, Lib.Biblioteca, Biz.UsuarioLogado, UI.Produto.Cadastro;
+
+procedure TfrmInventario.btnInformacaoProdutoClick(Sender: TObject);
+var
+    Tarefa: TTarefa;
+begin
+    inherited;
+    Tarefa := gdTarefa.GetObject<TTarefa>;
+    if Tarefa.Produto.Codigo = EmptyStr then
+        Tarefa.Produto.Obter(Tarefa.CodigoProduto);
+
+     Tlib.AbrirFormulario(TfrmCadProdutoMobile, acVisualizacao, tarefa.Produto);
+end;
+
+procedure TfrmInventario.btnAbandonarClick(Sender: TObject);
+begin
+    if Tlib.MensagemPergunta('Deseja realmente abandonar a contagem?', '', 1) = mrYes then
+    begin
+        try
+            try
+                TAguarde.AguardandoFinalizacaoProcesso(self, 12, 'Aguarde, enviando informações.', $000080FF);
+                Fila.AbandonarContagem;
+            except
+                raise;
+            end;
+        finally
+            TAguarde.ProcessoFinalizado;
+            close;
+        end;
+    end;
+end;
+
+procedure TfrmInventario.btnEnviarClick(Sender: TObject);
+begin
+    inherited;
+    if Tlib.MensagemPergunta('Deseja realmente enviar as informações?', '', 1) = mrYes then
+    begin
+        try
+            try
+                TAguarde.AguardandoFinalizacaoProcesso(self, 12, 'Aguarde, enviando informações.', $000080FF);
+                Fila.EnviarInformacoesDasTarefas;
+            except
+                raise;
+            end;
+        finally
+            TAguarde.ProcessoFinalizado;
+        end;
+    end;
+    edProduto.SetFocus;
+end;
+
+procedure TfrmInventario.btnFecharClick(Sender: TObject);
+begin
+    self.close;
+    TAguarde.ProcessoFinalizado;
+end;
+
+procedure TfrmInventario.btnFinalizarClick(Sender: TObject);
+begin
+    if Tlib.MensagemPergunta('Deseja realmente finalizar a contagem?', '', 1) = mrYes then
+    begin
+        try
+            try
+                TAguarde.AguardandoFinalizacaoProcesso(self, 12, 'Aguarde, enviando informações.', $000080FF);
+                Fila.FinalizarContagem;
+            except
+                raise;
+            end;
+        finally
+            TAguarde.ProcessoFinalizado;
+            close;
+        end;
+    end;
+end;
+
+procedure TfrmInventario.btnZerarContadorClick(Sender: TObject);
+begin
+    inherited;
+    if Tlib.MensagemPergunta('Deseja, realmente zerar contador?', '', 1) = mrYes then
+    begin
+        gdTarefa.GetObject<TTarefa>.QuantidadeContada := 0;
+        gdTarefa.DataBind;
+    end;
+end;
+
+procedure TfrmInventario.edConferirProdutoExit(Sender: TObject);
+var
+    tarefa: TTarefa;
+begin
+    inherited;
+    if edConferirProduto.Value <> EmptyStr then
+    begin
+
+        for tarefa in Fila.ListaTarefas do
+        begin
+            if not tarefa.Produto.Preenchido then
+                tarefa.Produto.Obter(Tarefa.CodigoProduto);
+
+            if tarefa.Produto.ChecarCodigoProduto(edConferirProduto.Value) and (Tarefa.codigoEndereco = edLocalizacao.Value) then
+            begin
+                gdTarefa.Row := Fila.ListaTarefas.IndexOf(Tarefa) + 1;
+                edConferirProduto.Clear;
+                gdTarefa.SetFocus;
+                exit;
+            end;
+        end;
+        edConferirProduto.Clear;
+        gdTarefa.SetFocus;
+
+        Tlib.MensagemInformacao('Não existe esse produto na lista');
+    end;
+end;
+
+procedure TfrmInventario.edLocalizacaoExit(Sender: TObject);
+begin
+    inherited;
+    edProduto.SetFocus;
+end;
+
+function TfrmInventario.ValidarProduto(Produto: TProduto): boolean;
+begin
+    result := true;
+
+    if Fila.ProdutoConferir <> EmptyStr then
+    begin
+        if Fila.ProdutoConferir <> Produto.Codigo then
+            result := false;
+    end;
+
+    if Fila.FamiliaConferir <> EmptyStr then
+    begin
+        if Fila.FamiliaConferir <> Produto.Familia then
+            result := false;
+    end;
+
+    if Fila.GrupoConferir <> EmptyStr then
+    begin
+        if Fila.GrupoConferir <> Produto.Grupo then
+            result := false;
+    end;
+
+    if Fila.SubGrupoConferir <> EmptyStr then
+    begin
+        if Fila.SubGrupoConferir <> Produto.SubGrupo then
+            result := false;
+    end;
+
+    if Fila.TipologiaConferir <> EmptyStr then
+    begin
+        if Fila.TipologiaConferir <> Produto.Tipologia then
+            result := false;
+    end;
+
+    if Fila.FabricanteConferir <> EmptyStr then
+    begin
+        if Fila.FabricanteConferir <> Produto.Fabricante then
+            result := false;
+    end;
+
+    if result = false then
+        Tlib.MensagemInformacao('Produto não pode ser inventariado, pois esta fora do perfil da coleta');
+
+end;
+
+procedure TfrmInventario.edProdutoExit(Sender: TObject);
+var
+    qtdMultipla: double;
+    tarefa: TTarefa;
+    produto: TProduto;
+    codigoProdutoDigitado: string;
+begin
+    inherited;
+    if (edLocalizacao.Value = EmptyStr) and (edProduto.Value <> EmptyStr) then
+    begin
+        Tlib.MensagemInformacao('Localização não informada.', '');
+        edLocalizacao.SetFocus;
+        exit;
+    end;
+
+    try
+
+        if (edProduto.Value <> EmptyStr) then
+        begin
+            Tarefa := nil;
+            if edProduto.ToInteger > 0 then // verifica se não é descrição do produto
+            begin
+                TAguarde.AguardandoFinalizacaoProcesso(self, 12, 'Aguarde verificando itens', $000080FF);
+                tarefa := Fila.ObterTarefaPorCodigoProdutoEEndereco(edProduto.Value, edLocalizacao.Value);
+                TAguarde.ProcessoFinalizado;
+            end;
+
+            if Tarefa = nil then
+            begin
+                produto := TProduto.Create;
+                produto.Obter(edProduto.Value);
+
+                if (not Produto.Preenchido) or (not ValidarProduto(Produto)) then
+                begin
+                    edProduto.SetFocus;
+                    VoltarLetreiro(letreiro);
+                    exit;
+                end;
+
+                Tarefa := Fila.ObterTarefaPorCodigoProdutoEEndereco(Produto.Codigo, edLocalizacao.Value);
+
+                // substituo a descrição pelo codigo;
+                if edProduto.ToInteger = 0 then
+                    edProduto.Value := Produto.Codigo;
+
+                if tarefa = nil then
+                begin
+                    tarefa := TTarefa.Create;
+                    Fila.ListaTarefas.Add(Tarefa);
+                end;
+
+                Produto.CopiarPara(Tarefa.Produto);
+                Tarefa.CodigoFilial := TUsuarioLogado.ObterInstancia.Filial.Filial;
+                Tarefa.CodigoProduto := Produto.Codigo;
+                Tarefa.CodigoTipoOperacao := Fila.CodigoTipoOperacao;
+                Tarefa.CodigoTarefa := Fila.CodigoTarefa;
+                Tarefa.codigoEndereco := edLocalizacao.Value;
+                Tarefa.IDOperacao := Fila.IDOperacao;
+                Tarefa.Observacao := edObservacao.Value;
+                Tarefa.TipoManutencao := Inserir;
+            end
+            else
+            begin
+                if Tarefa.TipoManutencao <> Inserir then
+                begin
+                    Tarefa.TipoManutencao := Alterar;
+
+                end;
+            end;
+
+            if edQuantidade.ToDouble > 0 then
+            begin
+                if not Tarefa.Produto.ValidarQuantidadeMultipla(edQuantidade.ToDouble) then
+                begin
+                    edProduto.Clear;
+                    edQuantidade.SetFocus;
+                    VoltarLetreiro(letreiro);
+                    exit;
+                end;
+
+                qtdMultipla := edQuantidade.ToDouble;
+            end
+            else
+                qtdMultipla := Tarefa.Produto.ObterQuantidadeMultipla(edProduto.Value);
+
+            Tarefa.QuantidadeContada := Tarefa.QuantidadeContada + qtdMultipla;
+            Tarefa.Observacao := edObservacao.Value;
+            edProduto.Clear;
+            edObservacao.Clear;
+            edQuantidade.Value := '0,00';
+            edProduto.SetFocus;
+            TAguarde.AguardandoFinalizacaoProcesso(self, 12, 'Item OK - ' + floattostr(qtdMultipla), $000080FF);
+            Sleep(300);
+            TAguarde.ProcessoFinalizado;
+            AtivarLetreiro(Tarefa.Produto.descricao);
+        end;
+    finally
+        if Produto <> nil then
+            FreeAndNil(Produto);
+    end;
+end;
+
+procedure TfrmInventario.edQuantidadeExit(Sender: TObject);
+begin
+    edQuantidade.Value := Tlib.IfTernario(StrToFloat(edQuantidade.Value) = 0, '0,00', edQuantidade.Value);
+    edProduto.SetFocus;
+end;
+
+procedure TfrmInventario.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+    inherited;
+    FreeAndNil(Fila);
+    TAguarde.ProcessoFinalizado;
+end;
+
+procedure TfrmInventario.VoltarLetreiro(pletreiro: string);
+begin
+    lblLetreiro.Caption := pletreiro;
+    tpLetreiro.Enabled := false;
+    lblLetreiro.Alignment := taCenter;
+    lblLetreiro.Width := 233;
+    lblLetreiro.left := 3;
+end;
+
+procedure TfrmInventario.AtivarLetreiro(pletreiro: string);
+begin
+    lblLetreiro.Alignment := taLeftJustify;
+    lblLetreiro.Caption := ' ' + pletreiro;
+    tpLetreiro.Enabled := true;
+end;
+
+procedure TfrmInventario.AtualizaLetreidoPelaGrid;
+var
+    Tarefa: TTarefa;
+begin
+    Tarefa := gdTarefa.GetObject<TTarefa>;
+    if not Tarefa.Produto.Preenchido then
+        Tarefa.Produto.Obter(Tarefa.CodigoProduto);
+
+    AtivarLetreiro(Tarefa.Produto.descricao);
+end;
+
+procedure TfrmInventario.FormCreate(Sender: TObject);
+begin
+    inherited;
+    Fila := TFila.Create;
+    self.Width := MobileWidth;
+    self.Height := MobileHeight;
+end;
+
+procedure TfrmInventario.FormShow(Sender: TObject);
+begin
+    inherited;
+    tpVerificaTarefa.Enabled := true;
+    edUsuario.Value := TUsuarioLogado.ObterInstancia.Cracha + ' - ' + TUsuarioLogado.ObterInstancia.Nome;
+
+    gdTarefa.AddCol('CodigoProduto', 'Produto', 80, RGrid.mtString);
+    gdTarefa.AddCol('QuantidadeContada', 'Qtde', 50, RGrid.mtDouble);
+    gdTarefa.AddCol('CodigoEndereco', 'Local.', 80, RGrid.mtString);
+
+    pgPrincipal.ActivePageIndex := 0;
+
+    VoltarLetreiro(letreiro);
+
+    tpVerificaTarefa.OnTimer(Sender);
+
+    edLocalizacao.SetFocus;
+end;
+
+procedure TfrmInventario.gdTarefaClick(Sender: TObject);
+begin
+    inherited;
+    AtualizaLetreidoPelaGrid;
+end;
+
+procedure TfrmInventario.gdTarefaKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+    inherited;
+    AtualizaLetreidoPelaGrid;
+end;
+
+procedure TfrmInventario.HabilitaContagem;
+begin
+    lblObservacao.Enabled := true;
+    lblQuantidade.Enabled := true;
+    lblProduto.Enabled := true;
+    lblLocalizacao.Enabled := true;
+    pnContagem.Enabled := true;
+    btnFinalizar.Enabled := true;
+    btnAbandonar.Enabled := true;
+    btnEnviar.Enabled := true;
+    btnZerarContador.Enabled := true;
+    btnInformacaoProduto.Enabled := true;
+    edProduto.Clear;
+    edLocalizacao.SetFocus;
+end;
+
+procedure TfrmInventario.pgPrincipalChange(Sender: TObject);
+var
+    tarefa: TTarefa;
+begin
+    inherited;
+    if pgPrincipal.ActivePageIndex = 0 then
+    begin
+        VoltarLetreiro(letreiro);
+
+        edProduto.SetFocus
+
+    end
+    else
+    begin
+        gdTarefa.DataSource := Fila.ListaTarefas.ToList;
+        gdTarefa.DataBind;
+        lblCont.Caption := IntToStr(gdTarefa.GetTotalItens);
+
+        if not gdTarefa.IsEmpty then
+        begin
+            tarefa := nil;
+            tarefa := gdTarefa.GetObject<TTarefa>;
+
+            if not Tarefa.Produto.Preenchido then
+                tarefa.Produto.Obter(Tarefa.CodigoProduto);
+
+            AtivarLetreiro(tarefa.Produto.descricao);
+        end;
+    end;
+end;
+
+procedure TfrmInventario.tpLetreiroTimer(Sender: TObject);
+begin
+    inherited;
+    if lblLetreiro.left >= -(lblLetreiro.Width) then
+        lblLetreiro.left := lblLetreiro.left - 1
+    else
+        lblLetreiro.left := pnLetreiro.Width;
+end;
+
+procedure TfrmInventario.tpVerificaTarefaTimer(Sender: TObject);
+var
+    tarefa: TTarefa;
+begin
+    inherited;
+    tpVerificaTarefa.Enabled := false;
+    TAguarde.ProcessoFinalizado;
+    TAguarde.AguardandoFinalizacaoProcesso(self, 12, 'Aguarde recebimento da tarefa.', $000080FF);
+
+    Fila.ObterFilaAbertaPorUsuario(cpInventario);
+
+    // Verifica se existe alguma operação para o usuário logado.
+    if Fila.Preenchido then
+    begin
+
+        Fila.InicializarContagem;
+
+        lblNumeroOperacao.Caption := IntToStr(Fila.IDOperacao);
+
+        try
+            Fila.ObterListaTarefas;
+            gdTarefa.DataSource := Fila.ListaTarefas.ToList;
+            gdTarefa.DataBind;
+
+            for tarefa in Fila.ListaTarefas do
+                tarefa.TipoManutencao := Enviado;
+
+            tpVerificaTarefa.Enabled := false;
+            HabilitaContagem;
+
+            TAguarde.ProcessoFinalizado;
+        finally
+
+        end;
+    end;
+    tpVerificaTarefa.Enabled := true;
+end;
+
+end.

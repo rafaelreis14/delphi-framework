@@ -1,0 +1,114 @@
+inherited frmCadAcessoPermissao: TfrmCadAcessoPermissao
+  Caption = 'frmCadAcessoPermissao'
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited Panel2: TPanel
+    Width = 640
+    ExplicitWidth = 640
+    inherited Label1: TLabel
+      Width = 149
+      Caption = 'Cadastro de AcessoPermissao'
+      ExplicitWidth = 149
+    end
+  end
+  inherited pgcComponentes: TPageControl
+    inherited tbPrincipal: TTabSheet	
+      ExplicitLeft = 4
+      ExplicitTop = 24
+      ExplicitWidth = 620
+      ExplicitHeight = 255
+
+      object lbl: TLabel
+        Left = 12
+        Top = 16
+        Width = 31
+        Height = 13
+        Caption = ''
+      end
+      object ed: TREdit
+        Left = 12
+        Top = 32
+        Width = 80
+        Height = 21
+        CharCase = ecUpperCase 
+        TabOrder = 0
+        FieldName = ''
+        MaskType = mtString
+        MaxLength = 80
+        MandatoryField = False
+        PersistentField = true
+        SaveLiteralCharacters = False
+        DecimalPlaces = 2
+      end
+
+      object lblModulo: TLabel
+        Left = 12
+        Top = 56
+        Width = 31
+        Height = 13
+        Caption = 'Modulo'
+      end
+      object edModulo: TREdit
+        Left = 12
+        Top = 72
+        Width = 80
+        Height = 21
+        CharCase = ecUpperCase 
+        TabOrder = 1
+        FieldName = 'Modulo'
+        MaskType = mtString
+        MaxLength = 80
+        MandatoryField = False
+        PersistentField = true
+        SaveLiteralCharacters = False
+        DecimalPlaces = 2
+      end
+
+      object lblRotina: TLabel
+        Left = 12
+        Top = 96
+        Width = 31
+        Height = 13
+        Caption = 'Rotina'
+      end
+      object edRotina: TREdit
+        Left = 12
+        Top = 112
+        Width = 80
+        Height = 21
+        CharCase = ecUpperCase 
+        TabOrder = 2
+        FieldName = 'Rotina'
+        MaskType = mtString
+        MaxLength = 80
+        MandatoryField = False
+        PersistentField = true
+        SaveLiteralCharacters = False
+        DecimalPlaces = 2
+      end
+
+      object lblPermissao: TLabel
+        Left = 12
+        Top = 136
+        Width = 31
+        Height = 13
+        Caption = 'Permissao'
+      end
+      object edPermissao: TREdit
+        Left = 12
+        Top = 152
+        Width = 60
+        Height = 21
+        CharCase = ecUpperCase 
+        TabOrder = 3
+        FieldName = 'Permissao'
+        MaskType = mtString
+        MaxLength = 60
+        MandatoryField = False
+        PersistentField = true
+        SaveLiteralCharacters = False
+        DecimalPlaces = 2
+      end
+    end
+  end
+end

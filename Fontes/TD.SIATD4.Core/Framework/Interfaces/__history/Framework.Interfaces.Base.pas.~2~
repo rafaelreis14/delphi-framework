@@ -1,0 +1,17 @@
+unit Framework.Interfaces.Base;
+
+interface
+
+uses
+  Lib.Enumeradores;
+type
+    IBase =  interface
+        ['{DFE89A10-5832-4FEF-B825-7E0E6F371D9E}']
+        function GetTipoManutencao:TTipoManutencao;
+        procedure SetTipoManutencao(const Value: TTipoManutencao);
+        procedure CopiarPara(objeto: TObject);
+    end;
+
+implementation
+
+end.

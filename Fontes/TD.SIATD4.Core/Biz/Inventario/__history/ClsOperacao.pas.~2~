@@ -1,0 +1,690 @@
+unit ClsOperacao;
+
+interface
+
+uses
+    Classes, System.SysUtils, Dialogs, ClsBase, ClsParametro, ClsEnumeradores,
+    ClsPersistable, ClsFilial, ClsTipoOperacao, ClsDispositivo, Datasnap.DBClient,
+  ClsLista, ClsUsuario, ClsResultFilter;
+
+type
+    TCodigoOperacao = (cpInventario, cpConferenciEntrada, cpPedidoTransferenciaSaida, cpConferenciaRomaneioSaida, cpDistribuicao);
+
+
+    TOperacao = class(TBase)
+    private
+        FDescricaoBloqueio: string;
+        FIDUsuario: string;
+        FDelet: string;
+        FCodigoFilial: string;
+        FBloqueado: string;
+        FDataFim: string;
+        FIDOperacao: integer;
+        FStatus: string;
+        FDataInicio: string;
+        FRecno: integer;
+        FHoraFim: string;
+        FHoraInicio: string;
+        FCodigoTipoOperacao: string;
+        FFilial: TFilial;
+        FTipoOperacao: TTipoOperacao;
+        FCodigoDispositivo: string;
+        FDispositivo: TDispositivo;
+        FTipoExecucao: String;
+        FDataFimContagem: string;
+    FDescricaoStatus: string;
+        procedure SetBloqueado(const Value: string);
+        procedure SetCodigoFilial(const Value: string);
+        procedure SetDataFim(const Value: string);
+        procedure SetDataInicio(const Value: string);
+        procedure SetDelet(const Value: string);
+        procedure SetDescricaoBloqueio(const Value: string);
+        procedure SetHoraFim(const Value: string);
+        procedure SetHoraInicio(const Value: string);
+        procedure SetIDOperacao(const Value: integer);
+        procedure SetIDUsuario(const Value: string);
+        procedure SetRecno(const Value: integer);
+        procedure SetStatus(const Value: string);
+        procedure SetCodigoTipoOperacao(const Value: string);
+        procedure SetFilial(const Value: TFilial);
+        procedure SetTipoOperacao(const Value: TTipoOperacao);
+        procedure SetCodigoDispositivo(const Value: string);
+        procedure SetDispositivo(const Value: TDispositivo);
+        procedure SetTipoExecucao(const Value: String);
+        procedure SetDataFimContagem(const Value: string);
+        function GetDescricaoStatus: string;
+        function GetDescricaoTipoOperacao: string;
+
+    public
+        ///	<summary>
+        ///	  Metodo que faz a inserção da ClasseBase
+        ///	</summary>
+        function Inserir: integer; override;
+
+        ///	<summary>
+        ///	  Metodo que faz a alteração da ClasseBase
+        ///	</summary>
+        function Alterar: integer; override;
+
+        ///	<summary>
+        ///	  Métido que faz a Deleção da ClasseBase
+        ///	</summary>
+        ///	<param name="ID">
+        ///	  Chave  primária da tabela
+        ///	</param>
+        function Deletar(ID: string): integer; override;
+
+        ///	<summary>
+        ///	  Método que chama a tela de filtro
+        ///	</summary>
+        ///	<param name="tipoOperacao">
+        ///	  Tipo da operação, se é somente filtro, ou seleção de registro
+        ///	</param>
+        function Listar(tipoOperacao: TOparationTypes; MultiSelect: Boolean): TResultFilter; override;
+
+        ///	<summary>
+        ///	  retorna uma lista de Operacao de acordo com parametros passado
+        ///	</summary>
+        ///	<param name="parametros">
+        ///	  parametros consulta
+        ///	</param>
+        function Consultar(parametros: TParametro): TList; override;
+
+        ///	<summary>
+        ///	  Método que retorna um objeto preenchido
+        ///	</summary>
+        ///	<param name="ID">
+        ///	  Chave primária da tabela
+        ///	</param>
+        function Obter(ID: string): TObject; overload; override;
+
+        ///	<summary>
+        ///	  Método que retorna um objeto preenchido
+        ///	</summary>
+        ///	<param name="parametros">
+        ///	  Parametros para a consulta do objeto a ser preenchido
+        ///	</param>
+        function Obter(parametros:TParametro): TObject; overload;
+
+        ///	<summary>
+        ///	  Obtem um novo IDOper
+        ///	</summary>
+        function ObterIDOper: integer;
+
+        ///	<summary>
+        ///	  Obtem e popular a operacao, por operacao aberta e usuario
+        ///	</summary>
+        function ObterOperacaoAbertaPorUsuario(operacao:TCodigoOperacao): TOperacao;
+
+        ///	<summary>
+        ///	  Esta funcao retorna o codigo do tipo da operacao, pois se mantem
+        ///	  o codigo da operacao inicial em todo o processo, por este motivo
+        ///   preciso saber qual o código da operacao correta
+        ///	</summary>
+        function ObterCodigoTipoOperacao(tipo: TCodigoOperacao): string;
+
+        ///	<summary>
+        ///	  Finaliza o processo de contagem
+        ///	</summary>
+        procedure FinalizarOperacao;
+
+        ///	<summary>
+        ///	  Cancela o processo de contagem
+        ///	</summary>
+        procedure CancelarOperacao;
+
+        ///	<summary>
+        ///	  Finaliza contagem. Registra a data em que foi finalizada a contagem e desbloqueia o usuario
+        ///	</summary>
+        procedure FinalizarContagem;
+
+        procedure AbandonarContagem;
+
+        ///	<summary>
+        ///	  Inicializa a operacao. Registra a data e hora de inicio, bem como bloqueia o usuario
+        ///   e altera o status para Executando
+        ///	</summary>
+        procedure InicializarContagem;
+
+        constructor Create;
+
+        destructor Destroy;
+
+
+        ///	<summary>
+        ///	  Método que preenche a instância do Objeto
+        ///	</summary>
+        ///	<param name="ClasseBase">
+        ///	  objeto de parametro para preenchimento da instância
+        ///	</param>
+        procedure PopularObjeto(Operacao: TOperacao);
+
+        [TPersistable(fgUpdateable, 'R_E_C_N_O_')]
+        property Recno: integer read FRecno write SetRecno;
+
+        [TPersistable(fgPersistable, 'Z14_IDOPER')]
+        property IDOperacao: integer read FIDOperacao write SetIDOperacao;
+
+        [TPersistable(fgPersistable, 'Z14_OPERAC')]
+        property CodigoTipoOperacao: string read FCodigoTipoOperacao write SetCodigoTipoOperacao;
+
+        [TPersistable(fgReadOnly, 'Z16_DESCRI')]
+        property DescricaoTipoOperacao: string read GetDescricaoTipoOperacao;
+
+        property tipoOperacao: TTipoOperacao read FTipoOperacao write SetTipoOperacao;
+
+        [TPersistable(fgPersistable, 'Z14_FILIAL')]
+        property CodigoFilial: string read FCodigoFilial write SetCodigoFilial;
+
+        property Filial: TFilial read FFilial write SetFilial;
+
+        ///	<summary>
+        ///	  P = Pendente, F = Finalizado, E = Executando
+        ///	</summary>
+        [TPersistable(fgPersistable, 'Z14_STATUS')]
+        property Status: string read FStatus write SetStatus;
+
+        property DescricaoStatus: string read GetDescricaoStatus;
+
+        [TPersistable(fgPersistable, 'Z14_DATA')]
+        property DataInicio: string read FDataInicio write SetDataInicio;
+
+        [TPersistable(fgPersistable, 'Z14_HORA')]
+        property HoraInicio: string read FHoraInicio write SetHoraInicio;
+
+        [TPersistable(fgPersistable, 'Z14_DATAF')]
+        property DataFim: string read FDataFim write SetDataFim;
+
+        [TPersistable(fgPersistable, 'Z14_DTFIMCONTAGEM')]
+        property DataFimContagem: string read FDataFimContagem write SetDataFimContagem;
+
+        [TPersistable(fgPersistable, 'Z14_HORAF')]
+        property HoraFim: string read FHoraFim write SetHoraFim;
+
+        [TPersistable(fgPersistable, 'Z14_BLOQ')]
+        property Bloqueado: string read FBloqueado write SetBloqueado;
+
+        [TPersistable(fgPersistable, 'Z14_DISPO')]
+        property CodigoDispositivo: string read FCodigoDispositivo write SetCodigoDispositivo;
+
+        property Dispositivo: TDispositivo read FDispositivo write SetDispositivo;
+
+        [TPersistable(fgPersistable, 'Z14_DESCBL')]
+        property DescricaoBloqueio: string read FDescricaoBloqueio write SetDescricaoBloqueio;
+
+        [TPersistable(fgPersistable, 'Z14_USERID')]
+        property IDUsuario: string read FIDUsuario write SetIDUsuario;
+
+        ///	<summary>
+        ///	  E = Entrada, S = Saida, I = Inventario
+        ///	</summary>
+        [TPersistable(fgPersistable, 'Z14_TIPO')]
+        property TipoExecucao: String read FTipoExecucao write SetTipoExecucao;
+
+        [TPersistable(fgUpdateable, 'D_E_L_E_T_')]
+        property Delet: string read FDelet write SetDelet;
+
+    end;
+
+implementation
+
+{ TOperacao }
+
+uses ClsFilter, ClsFieldFilter, ClsLib, ClsErro;
+
+{$REGION 'Métodos CRUD'}
+
+procedure TOperacao.InicializarContagem;
+begin
+    // se operacao for igual a pendente inicializa a operacao
+    if (self.HoraInicio <> EmptyStr) and (self.HoraInicio <> EmptyStr) then
+    begin
+        self.DataInicio := Tlib.ObterDataAtual;
+        self.HoraInicio := tlib.ObterHoraAtual;
+        self.Status := 'E';
+        self.Bloqueado := 'S';
+        BaseLib.ExecutaTarefa('InicializarContagem', 'TOperacao' , ObjectToParameters(acAlteracao));
+    end;
+end;
+
+function TOperacao.Inserir: integer;
+begin
+    BaseLib.ExecutaTarefa('InserirOperacao', 'TOperacao', ObjectToParameters(acInsercao));
+end;
+
+function TOperacao.Alterar: integer;
+begin
+    BaseLib.ExecutaTarefa('AlterarOperacao', 'TOperacao' , ObjectToParameters(acAlteracao));
+end;
+
+procedure TOperacao.CancelarOperacao;
+begin
+    if Status <> 'E' then
+    begin
+        self.DataFim := Tlib.ObterDataAtual;
+        self.HoraFim := tlib.ObterHoraAtual;
+        self.Status := 'C';
+        BaseLib.ExecutaTarefa('AlterarOperacao', 'TOperacao' , ObjectToParameters(acAlteracao));
+    end
+    else
+      raise Erro.Create('Não é possível cancelar, operação em andamento');
+end;
+
+function TOperacao.Consultar(parametros: TParametro): TList;
+begin
+   result := BaseLib.XmlToObject<TOperacao>(BaseLib.ExecutaTarefa('ConsultarOperacao', 'TOperacao', parametros)).ToList;
+end;
+
+constructor TOperacao.Create;
+begin
+    FDispositivo := TDispositivo.Create;
+    FFilial := TFilial.Create;
+    FTipoOperacao := TTipoOperacao.Create;
+end;
+
+function TOperacao.Deletar(ID: string): integer;
+var
+    parametro: TParametro;
+begin
+    // try
+    // parametro := TParametro.Create;
+    // parametro.Add('', 'R_E_C_N_O_', ID);
+    //
+    // Lib.ExecutaTarefa('DeletarOperacao', 'TOperacao', parametro);
+    //
+    // //###Validar retorno da função
+    // result := 0;
+    // finally
+    // parametro.Free;
+    // end;
+end;
+
+destructor TOperacao.Destroy;
+begin
+    FDispositivo.Destroy;
+    FFilial.Destroy;
+    FTipoOperacao.Destroy;
+end;
+
+procedure TOperacao.FinalizarContagem;
+begin
+    self.DataFimContagem := Tlib.ObterDataAtual;
+    self.Status := 'P';
+    BaseLib.ExecutaTarefa('FinalizarContagem', 'TOperacao' , ObjectToParameters(acAlteracao));
+end;
+
+procedure TOperacao.AbandonarContagem;
+begin
+    self.DataFimContagem := Tlib.ObterDataAtual;
+    self.Status := 'P';
+    BaseLib.ExecutaTarefa('AbandonarContagem', 'TOperacao' , ObjectToParameters(acAlteracao));
+end;
+
+
+procedure TOperacao.FinalizarOperacao;
+begin
+    if (Status = 'P') and (DataFimContagem <> EmptyStr) then
+    begin
+        self.DataFim := Tlib.ObterDataAtual;
+        self.HoraFim := tlib.ObterHoraAtual;
+        self.Status := 'F';
+        self.Bloqueado := 'N';
+        BaseLib.ExecutaTarefa('Alterar', 'TOperacao' , ObjectToParameters(acAlteracao));
+    end
+    else
+        raise Erro.Create('Não é possível finalizar a operacao, é preciso finalizar a contagem');
+end;
+
+function TOperacao.GetDescricaoStatus: string;
+begin
+   if FStatus = 'F' then
+    result := 'FINALIZADO'
+   else
+   if FStatus = 'E' then
+    result := 'EXECUTANDO'
+   else
+   if FStatus = 'C' then
+    result := 'CANCELADO'
+   else
+   if FStatus = 'P' then
+    result := 'PENDENTE';
+end;
+
+function TOperacao.GetDescricaoTipoOperacao: string;
+begin
+
+end;
+
+function TOperacao.Listar(tipoOperacao: TOparationTypes; multiSelect: Boolean): TResultFilter;
+var
+    campoFiltro: TFieldFilter;
+    filtro: TFilter<TOperacao>;
+    lista:TLista<TDispositivo>;
+
+    dispositivo: TDispositivo;
+    usuario: TUsuario;
+begin
+    inherited;
+    try
+        filtro := TFilter<TOperacao>.Create;
+        filtro.ScreenName := 'Filtro de Operacao';
+        filtro.OperationType := tipoOperacao;
+        filtro.MultiSelect := multiselect;
+        filtro.Task := 'ConsultarOperacao';
+        filtro.AddIndex(1, 'IDOperacao=Z14_IDOPER, ' +
+                           'Status=Z14_STATUS, ' +
+                           'DataInicio=Z14_DATA, ' +
+                           'DataFimContagem=Z14_DTFIMCONTAGEM, ' +
+                           'CodigoDispositivo=Z14_DISPO, '+
+                           'IDUsuario=Z14_USERID ',
+                           'ID Operação + Status + Data Final. Operacao + Dt Final. Contagem + Dispositivo + Usuario');
+
+        filtro.AddIndex(2, 'IDUsuario=Z14_USERID ',
+                           'Usuario');
+
+         filtro.AddIndex(1, 'IDOperacao=Z14_IDOPER ',
+                            'ID Operação');
+
+
+
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'ID Operacao';
+        campoFiltro.Name := 'IDOperacao';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Status';
+        campoFiltro.Name := 'Status';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdListCombo;
+        campoFiltro.ListValue.Add('Executando = E');
+        campoFiltro.ListValue.Add('Finalizado = F');
+        campoFiltro.ListValue.Add('Pendente = P');
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Data Início';
+        campoFiltro.Name := 'DataInicio';
+        campoFiltro.MaskTypes := mtDate;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Data Contagem';
+        campoFiltro.Name := 'DataFimContagem';
+        campoFiltro.MaskTypes := mtDate;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Dispositivo';
+        campoFiltro.Name := 'CodigoDispositivo';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdDataListCombo;
+        Dispositivo := TDispositivo.Create;
+        campoFiltro.DataSource := dispositivo.ObterTodosDispositivosPorFilial.toList;
+        campoFiltro.IDFieldName := 'CodigoDispositivo';
+        campoFiltro.DescriptionFieldName := 'Descricao';
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'IDUsuario';
+        campoFiltro.Name := 'IDUsuario';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdDataListCombo;
+
+        usuario := tUsuario.Create;
+        campoFiltro.DataSource := usuario.ObterUsuariosSistema.ToList;
+        campoFiltro.IDFieldName := 'Login';
+        campoFiltro.DescriptionFieldName := 'Nome';
+        campoFiltro.MethodName := 'ObterUsuariosSistema';
+        filtro.AddField(campoFiltro);
+
+
+        result := filtro.Execute(filtro);
+    finally
+         FreeAndNil(usuario);
+         FreeAndNil(dispositivo);
+    end;
+end;
+
+function TOperacao.Obter(parametros: TParametro): TObject;
+var
+    lista: TLista<TOperacao>;
+begin
+    try
+        lista := BaseLib.XmlToObject<TOperacao>(BaseLib.ExecutaTarefa('ConsultarOperacao', 'TOperacao', parametros));
+
+        if lista.Count = 1 then
+        begin
+            PopularObjeto(lista[0]);
+            result := Self;
+        end
+        else
+        begin
+            MessageDlg('Nenhum registro encontrado.', mtError, [mbOk], 0);
+            result := nil;
+        end;
+    finally
+        lista.Destroy;
+    end;
+end;
+
+function TOperacao.ObterCodigoTipoOperacao(tipo: TCodigoOperacao): string;
+begin
+    case tipo of
+        cpInventario: result := '200000';
+        cpConferenciEntrada: result := '000002';
+        cpDistribuicao: result := '000003';
+        cpPedidoTransferenciaSaida: result := '000017';
+        cpConferenciaRomaneioSaida: result := '000016'
+    end;
+end;
+
+function TOperacao.ObterIDOper: integer;
+var
+    dataset: TClientDataSet;
+begin
+    try
+      dataset := BaseLib.XmlToDataset(BaseLib.ExecutaTarefa('ObterIDOper', 'TOperacao', nil));
+      dataset.first;
+      result := dataset.FieldByName('IDOPER').AsInteger;
+    finally
+      dataset.Free;
+    end;
+end;
+
+function TOperacao.ObterOperacaoAbertaPorUsuario(operacao:TCodigoOperacao): TOperacao;
+var
+    lista: TLista<TOperacao>;
+    parametro:TParametro;
+    codigoOperacao:string;
+    usuario: string;
+begin
+    try
+        parametro := TParametro.Create;
+
+//        usuario := tlib.ifternario(tlib.ObterVarAmbiente(vaClienteTS) = '', tlib.ObterVarAmbiente(vaUsuarioWindows), tlib.ObterVarAmbiente(vaClienteTS));
+
+        usuario :=  tlib.ObterVarAmbiente(vaUsuarioWindows);
+
+        parametro.Add('', 'USERTS', usuario);
+
+        codigoOperacao := ObterCodigoTipoOperacao(operacao);
+
+        parametro.Add('', 'OPERACAO', codigoOperacao);
+
+        lista := BaseLib.XmlToObject<TOperacao>(BaseLib.ExecutaTarefa('ObterOperacaoAbertaPorUsuario', 'TOperacao', parametro));
+
+        if lista.Count = 1 then
+        begin
+            PopularObjeto(lista[0]);
+            result := Self;
+        end
+        else
+        begin
+            result := nil;
+        end;
+    finally
+        if lista <> nil then
+            lista.Destroy;
+
+        if parametro <> nil then
+        parametro.free;
+    end;
+end;
+
+function TOperacao.Obter(ID: string): TObject;
+var
+    parametros: TParametro;
+
+begin
+    try
+        parametros := TParametro.Create;
+        parametros.Add('', 'COLOCAR_CAMPO_ID_AQUI', ID);
+        result := Obter(parametros);
+    finally
+        FreeAndNil(parametros);
+    end;
+end;
+
+{$ENDREGION}
+
+{$REGION 'Regras de Negócio'}
+
+procedure TOperacao.PopularObjeto(operacao: TOperacao);
+begin
+    operacao.CopiarPara(Self);
+    FPreenchido := true;
+//    Self.Recno := Operacao.Recno;
+//    Self.IDOperacao := Operacao.IDOperacao;
+//    Self.CodigoTipoOperacao := Operacao.CodigoTipoOperacao;
+//    Self.CodigoFilial := Operacao.CodigoFilial;
+//    Self.Status := Operacao.Status;
+//    Self.DataInicio := Operacao.DataInicio;
+//    Self.HoraInicio := Operacao.HoraInicio;
+//    Self.DataFim := Operacao.DataFim;
+//    Self.HoraFim := Operacao.HoraFim;
+//    Self.Bloqueado := Operacao.Bloqueado;
+//    Self.DescricaoBloqueio := Operacao.DescricaoBloqueio;
+//    self.CodigoDispositivo := Operacao.CodigoDispositivo;
+//    Self.IDUsuario := Operacao.IDUsuario;
+//
+//    Self.Delet := Operacao.Delet;
+end;
+
+{$ENDREGION}
+
+{$REGION 'Métodos de Propriedades'}
+
+procedure TOperacao.SetBloqueado(const Value: string);
+begin
+    FBloqueado := Value;
+end;
+
+procedure TOperacao.SetCodigoDispositivo(const Value: string);
+begin
+    FCodigoDispositivo := Value;
+end;
+
+procedure TOperacao.SetCodigoFilial(const Value: string);
+begin
+    FCodigoFilial := Value;
+end;
+
+procedure TOperacao.SetDataFim(const Value: string);
+begin
+    FDataFim := Value;
+end;
+
+procedure TOperacao.SetDataFimContagem(const Value: string);
+begin
+  FDataFimContagem := Value;
+end;
+
+procedure TOperacao.SetDataInicio(const Value: string);
+begin
+    FDataInicio := Value;
+end;
+
+procedure TOperacao.SetDelet(const Value: string);
+begin
+    FDelet := Value;
+end;
+
+procedure TOperacao.SetDescricaoBloqueio(const Value: string);
+begin
+    FDescricaoBloqueio := Value;
+end;
+
+procedure TOperacao.SetDispositivo(const Value: TDispositivo);
+begin
+    FDispositivo := Value;
+end;
+
+procedure TOperacao.SetFilial(const Value: TFilial);
+begin
+    FFilial := Value;
+end;
+
+procedure TOperacao.SetHoraFim(const Value: string);
+begin
+    FHoraFim := Value;
+end;
+
+procedure TOperacao.SetHoraInicio(const Value: string);
+begin
+    FHoraInicio := Value;
+end;
+
+procedure TOperacao.SetIDOperacao(const Value: integer);
+begin
+    FIDOperacao := Value;
+end;
+
+procedure TOperacao.SetIDUsuario(const Value: string);
+begin
+    FIDUsuario := Value;
+end;
+
+procedure TOperacao.SetRecno(const Value: integer);
+begin
+    FRecno := Value;
+end;
+
+procedure TOperacao.SetStatus(const Value: string);
+begin
+    FStatus := Value;
+end;
+
+procedure TOperacao.SetTipoExecucao(const Value: String);
+begin
+  FTipoExecucao := Value;
+end;
+
+procedure TOperacao.SetTipoOperacao(const Value: TTipoOperacao);
+begin
+    FTipoOperacao := Value;
+end;
+
+procedure TOperacao.SetCodigoTipoOperacao(const Value: string);
+begin
+    FCodigoTipoOperacao := Value;
+end;
+
+{$ENDREGION}
+
+end.
+
+
+
+

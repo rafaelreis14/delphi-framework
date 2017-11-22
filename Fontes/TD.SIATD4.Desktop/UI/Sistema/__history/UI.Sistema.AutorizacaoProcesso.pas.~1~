@@ -1,0 +1,68 @@
+unit UntAutorizacaoProcesso;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, UntFormBase, Vcl.StdCtrls, Vcl.Mask,
+  REdit, Vcl.ExtCtrls, Vcl.Imaging.pngimage, Vcl.Buttons, UntErrorProvider,
+  Vcl.Imaging.jpeg;
+
+type
+  TfrmAutorizacaoProcesso = class(TFrmBase)
+    btnCancelar: TBitBtn;
+    btnEntrar: TBitBtn;
+    Panel1: TPanel;
+    Panel2: TPanel;
+    edLogin: TREdit;
+    Label1: TLabel;
+    Label2: TLabel;
+    edSenha: TREdit;
+    Image1: TImage;
+    lblTiTuloAutorizacao: TLabel;
+    procedure btnEntrarClick(Sender: TObject);
+    procedure btnCancelarClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  frmAutorizacaoProcesso: TfrmAutorizacaoProcesso;
+
+implementation
+
+{$R *.dfm}
+
+uses ClsLib, ClsEnumeradores;
+
+procedure TfrmAutorizacaoProcesso.btnCancelarClick(Sender: TObject);
+begin
+  inherited;
+  close;
+end;
+
+procedure TfrmAutorizacaoProcesso.btnEntrarClick(Sender: TObject);
+begin
+  inherited;
+  if (edLogin.Value = EmptyStr) or (edSenha.Value = EmptyStr)  then
+  begin
+      TLib.MensagemAdvertencia('Necessário preencher todas as informações');
+      edLogin.SetFocus;
+      exit;
+  end;
+
+  RetornoFormulario := rfOK;
+  close;
+
+end;
+
+procedure TfrmAutorizacaoProcesso.FormShow(Sender: TObject);
+begin
+  inherited;
+  edLogin.SetFocus;
+end;
+
+end.

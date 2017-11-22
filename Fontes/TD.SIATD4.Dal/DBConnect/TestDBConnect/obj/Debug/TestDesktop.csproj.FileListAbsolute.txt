@@ -1,0 +1,11 @@
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\TestDBConnect\bin\Debug\TestDBConnect.exe.config
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\TestDBConnect\bin\Debug\TestDBConnect.exe
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\TestDBConnect\bin\Debug\TestDBConnect.pdb
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\TestDBConnect\bin\Debug\DBConnect.dll
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\TestDBConnect\bin\Debug\DBConnect.pdb
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\TestDBConnect\obj\Debug\TestDesktop.csprojResolveAssemblyReference.cache
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\TestDBConnect\obj\Debug\TestDBConnect.Form1.resources
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\TestDBConnect\obj\Debug\TestDBConnect.Properties.Resources.resources
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\TestDBConnect\obj\Debug\TestDesktop.csproj.GenerateResource.Cache
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\TestDBConnect\obj\Debug\TestDBConnect.exe
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\TestDBConnect\obj\Debug\TestDBConnect.pdb

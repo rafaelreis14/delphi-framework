@@ -1,0 +1,41 @@
+unit Framework.UI.FiltroBase;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Framework.UI.FormBase, Vcl.Menus, Vcl.StdCtrls, Vcl.Buttons, Vcl.ExtCtrls, RComboBox, Vcl.Grids, RGrid, UntErrorProvider;
+
+type
+  TFrmBase1 = class(TFrmBase)
+    grdSearch: TRGrid;
+    pnInformacoes: TPanel;
+    lbl1: TLabel;
+    Panel4: TPanel;
+    cbComponents: TScrollBox;
+    cbIndexes: TRComboBox;
+    pnBotoes: TPanel;
+    Bevel1: TBevel;
+    btnCancelar: TBitBtn;
+    btnFiltrar: TBitBtn;
+    btnSelecionar: TBitBtn;
+    btnImprimir: TBitBtn;
+    Panel2: TPanel;
+    Panel1: TPanel;
+    lblLetreiro: TLabel;
+    ppVisualizar: TPopupMenu;
+    VisualizarCadastro1: TMenuItem;
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  FrmBase1: TFrmBase1;
+
+implementation
+
+{$R *.dfm}
+
+end.

@@ -1,0 +1,36 @@
+[Diagram:]
+OffsetX=0
+OffsetY=0
+Visibility=0
+ShowAssoc=1
+
+[Box:  - ::Biz]
+X=20
+Y=125
+
+[Box:  - ::CadDetalhe]
+X=456
+Y=40
+
+[Box:  - ::ClsCampo]
+X=661
+Y=40
+
+[Box:  - ::ClsDetalhe]
+X=430
+Y=125
+
+[Box:  - ::Principal]
+X=251
+Y=40
+
+[Box:  - ::UI]
+X=936
+Y=141
+
+[Diagram: ]
+OffsetX=0
+OffsetY=0
+Visibility=4
+ShowAssoc=1
+

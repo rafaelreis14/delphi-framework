@@ -1,0 +1,12 @@
+inherited frmConGrupo: TfrmConGrupo
+  Caption = 'frmConGrupo'
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited pnlApresentacao: TPanel
+    inherited lblLetreiro: TLabel
+      Width = 174
+      Caption = 'Consulta de Grupo'
+      ExplicitWidth = 174
+    end
+  end
+end

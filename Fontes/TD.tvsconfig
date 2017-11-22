@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<TgConfig Version="3" SubLevelDisabled="False">
+  <Option Name="namespaceFolder.Biz.Vendedor" Type="System.String" Value="Biz\Vendedor" Category="General" IsBrowsable="False" />
+  <Option Name="namespaceFolder.Biz.OrcamentoItens" Type="System.String" Value="Biz\OrcamentoItens" Category="General" IsBrowsable="False" />
+  <Option Name="namespaceFolder.Biz.Adminsitradora" Type="System.String" Value="Biz\Adminsitradora" Category="General" IsBrowsable="False" />
+  <Option Name="namespaceFolder.Biz.Empresa.Namespace1" Type="System.String" Value="Biz\Empresa\Namespace1" Category="General" IsBrowsable="False" />
+  <Option Name="namespaceFolder.Biz.Empresa" Type="System.String" Value="Biz\Empresa" Category="General" IsBrowsable="False" />
+  <Option Name="namespaceFolder.Biz.Filial" Type="System.String" Value="Biz\Filial" Category="General" IsBrowsable="False" />
+  <Option Name="namespaceFolder.Biz.Filial.Namespace1" Type="System.String" Value="Biz\Filial\Namespace1" Category="General" IsBrowsable="False" />
+  <Option Name="namespaceFolder.Biz.Estoque" Type="System.String" Value="Biz\Estoque" Category="General" IsBrowsable="False" />
+  <Option Name="namespaceFolder.Biz.Acesso" Type="System.String" Value="Biz\Acesso" Category="General" IsBrowsable="False" />
+  <Option Name="namespaceFolder.Biz.Modulo" Type="System.String" Value="Biz\Modulo" Category="General" IsBrowsable="False" />
+  <Option Name="namespaceFolder.TD" Type="System.String" Value="TD" Category="General" IsBrowsable="False" />
+</TgConfig>

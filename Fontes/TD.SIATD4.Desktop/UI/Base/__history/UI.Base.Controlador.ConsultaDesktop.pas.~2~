@@ -1,0 +1,12 @@
+unit UI.Base.Controlador.ConsultaDesktop;
+
+interface
+
+type
+    TControladorConsultaDesktop<T> = class
+
+    end;
+
+implementation
+
+end.

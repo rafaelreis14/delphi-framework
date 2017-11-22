@@ -1,0 +1,442 @@
+unit ClsRotina;
+
+interface
+
+uses
+    Classes, System.SysUtils, Dialogs, ClsBase, ClsParametro, ClsEnumeradores,
+    ClsPersistable,  ClsLista, ClsResultFilter, ClsPermissao,
+   ClsModulo;
+
+type
+    TRotina = class(TBase)
+    private
+        FTipoRotina: string;
+        FRotina: string;
+        FDescricao: string;
+        FDelet: string;
+        FCategoria: string;
+        FRecno: integer;
+        FAcaoMenu: string;
+        FOrdem: integer;
+        FListaRotinaItemPermissao: string;
+        FGrupo: string;
+        FListaRotinaItem: string;
+        FPermissoesRotina: Tlista<TPermissao>;
+        procedure SetAcaoMenu(const Value: string);
+        procedure SetCategoria(const Value: string);
+        procedure SetDelet(const Value: string);
+        procedure SetDescricao(const Value: string);
+        procedure SetOrdem(const Value: integer);
+        procedure SetRecno(const Value: integer);
+        procedure SetRotina(const Value: string);
+        procedure SetTipoRotina(const Value: string);
+        procedure SetListaRotinaItemPermissao(const Value: string);
+        procedure SetListaRotinaItem(const Value: string);
+        procedure SetGrupo(const Value: string);
+
+    public
+        ///	<summary>
+        ///	  Metodo que faz a inserção da Rotina
+        ///	</summary>
+        function Inserir: integer; override;
+
+        ///	<summary>
+        ///	  Métodos que retorna uma lista  de objetos de uma consulta
+        ///	  pré-definida pelos parâmentros passados.
+        ///	</summary>
+        function Consultar(parametros: TParametro): Tlist;
+
+        ///	<summary>
+        ///	  Metodo que faz a alteração da Rotina
+        ///	</summary>
+        function Alterar: integer; override;
+
+        ///	<summary>
+        ///	  Métido que faz a Deleção da Rotina
+        ///	</summary>
+        ///	<param name="ID">
+        ///	  Chave  primária da tabela
+        ///	</param>
+        function Deletar(ID:string): integer; override;
+
+        ///	<summary>
+        ///	  Método que chama a tela de filtro
+        ///	</summary>
+        ///	<param name="tipoOperacao">
+        ///	  Tipo da operação, se é somente filtro, ou seleção de registro
+        ///	</param>
+        function Listar(tipoOperacao: TOparationTypes; multselect: Boolean): TResultFilter; override;
+
+        ///	<summary>
+        ///	  Método que retorna um objeto preenchido
+        ///	</summary>
+        ///	<param name="ID">
+        ///	  Chave primária da tabela
+        ///	</param>
+        function Obter(ID: string): TObject; overload; override;
+
+        ///	<summary>
+        ///	  Método que retorna um objeto preenchido
+        ///	</summary>
+        ///	<param name="parametros">
+        ///	  Parametros para a consulta do objeto a ser preenchido
+        ///	</param>
+        function Obter(parametros:TParametro): TObject; overload;
+
+
+        ///	<summary>
+        ///	  Método que preenche a instância do Objeto
+        ///	</summary>
+        ///	<param name="Rotina">
+        ///	  objeto de parametro para preenchimento da instância
+        ///	</param>
+        procedure PreencherObjeto(Rotina: TRotina);
+
+        ///	<summary>
+        ///	  Obtem todas as rotinas cadastradas
+        ///	</summary>
+        function ObterTodasRotinas: TLista<TRotina>;
+
+        procedure ProcessaRotinaItemPermissoes;
+
+        function ObterRotinaPorGrupoEModulo(grupo,modulo: string): TLista<TRotina>;
+
+        [TPersistable(fgPersistable, 'ROTINA_ITEM_PERMISSAO')]
+        property ListaRotinaItemPermissao : string read
+        FListaRotinaItemPermissao write SetListaRotinaItemPermissao;
+
+        [TPersistable(fgPersistable, 'ROTINA_ITEM')]
+        property ListaRotinaPermissao : string read
+        FListaRotinaItem write SetListaRotinaItem;
+
+        [TPersistable(fgPersistable, 'S02_GRUPO')]
+        property Grupo : string read FGrupo write SetGrupo;
+
+        [TPersistable(fgPersistable, 'S05_ROTINA')]
+        property Rotina: string read FRotina write SetRotina;
+
+        [TPersistable(fgPersistable, 'S05_CATEGORIA')]
+        property Categoria: string read FCategoria write SetCategoria;
+
+        [TPersistable(fgPersistable, 'S05_ACT_MENU')]
+        property AcaoMenu: string read FAcaoMenu write SetAcaoMenu;
+
+        [TPersistable(fgPersistable, 'S05_DESC')]
+        property Descricao: string read FDescricao write SetDescricao;
+
+        [TPersistable(fgPersistable, 'S05_TIPOROTINA')]
+        property TipoRotina: string read FTipoRotina write SetTipoRotina;
+
+        [TPersistable(fgPersistable, 'S05_ORDEM')]
+        property Ordem: integer read FOrdem write SetOrdem;
+
+        [TPersistable(fgUpdateable, 'D_E_L_E_T_')]
+        property Delet: string read FDelet write SetDelet;
+
+        [TPersistable(fgUpdateable, 'R_E_C_N_O_')]
+        property Recno: integer read FRecno write SetRecno;
+
+        property PermissoesRotina: Tlista<TPermissao> read FPermissoesRotina;
+        procedure ObterPermissoesRotina;
+
+        constructor Create;
+        destructor Destroy; override;
+    end;
+
+implementation
+
+
+{ TRotina }
+
+uses ClsFilter, ClsFieldFilter, UntPrincipal, ClsLib;
+
+{$REGION 'Métodos CRUD'}
+
+function TRotina.Inserir: integer;
+begin
+     BaseLib.ExecutaTarefa('InserirRotina', 'TRotina', ObjetoParaParametros(acInsercao));
+     //###Validar retorno da função
+     result := 0;
+end;
+
+function TRotina.Consultar(parametros: TParametro): Tlist;
+begin
+   Result := BaseLib.XmlToObject<TRotina>(
+    BaseLib.ExecutaTarefa('ConsultarUsuario', 'TRotina', parametros)).Tolist;
+end;
+
+function TRotina.Alterar: integer;
+begin
+    BaseLib.ExecutaTarefa('AlterarRotina', 'TRotina' , ObjetoParaParametros(acAlteracao));
+    //###Validar retorno da função
+    result := 0;
+end;
+
+constructor TRotina.Create;
+begin
+    FPermissoesRotina := TLista<TPermissao>.Create;
+end;
+
+function TRotina.Deletar(ID: string): integer;
+var
+    parametro: TParametro;
+begin
+    try
+        parametro := TParametro.Create;
+        parametro.Add('', 'R_E_C_N_O_', ID);
+
+        BaseLib.ExecutaTarefa('DeletarRotina', 'TRotina', parametro);
+
+        //###Validar retorno da função
+        result := 0;
+    finally
+        parametro.Free;
+    end;
+end;
+
+destructor TRotina.Destroy;
+begin
+  FreeandNil(FPermissoesRotina);
+  inherited;
+end;
+
+function TRotina.Listar(tipoOperacao: TOparationTypes; multselect: Boolean): TResultFilter;
+var
+    campoFiltro:TFieldFilter;
+    filtro : TFilter<TRotina>;
+    listaModulo:TLista<TModulo>;
+begin
+        filtro := TFilter<TRotina>.Create;
+        filtro.ScreenName := 'Filtro de Rotina';
+        filtro.OperationType := tipoOperacao;
+        filtro.MultiSelect := multselect;
+        filtro.AddIndex(1, 'Rotina=S05_ROTINA', 'Nome');
+        filtro.Task := 'ConsultarRotina';
+        //###Criar os Índices do filtro
+
+        {$REGION 'Campo Filtro'}
+
+        campoFiltro := TFieldFilter.Create; 
+        campoFiltro.Description := 'Rotina'; 
+        campoFiltro.Name := 'Rotina'; 
+        campoFiltro.MaskTypes := mtNone; 
+        campoFiltro.GridSize := 100; 
+        campoFiltro.FieldType := fdNormal; 
+        filtro.AddField(campoFiltro); 
+ 
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Categoria';
+        campoFiltro.Name := 'Categoria'; 
+        campoFiltro.MaskTypes := mtNone; 
+        campoFiltro.GridSize := 100; 
+        campoFiltro.FieldType := fdNormal; 
+        filtro.AddField(campoFiltro); 
+ 
+        campoFiltro := TFieldFilter.Create; 
+        campoFiltro.Description := 'AcaoMenu'; 
+        campoFiltro.Name := 'AcaoMenu'; 
+        campoFiltro.MaskTypes := mtNone; 
+        campoFiltro.GridSize := 100; 
+        campoFiltro.FieldType := fdNormal; 
+        filtro.AddField(campoFiltro); 
+ 
+        campoFiltro := TFieldFilter.Create; 
+        campoFiltro.Description := 'Descricao'; 
+        campoFiltro.Name := 'Descricao'; 
+        campoFiltro.MaskTypes := mtNone; 
+        campoFiltro.GridSize := 100; 
+        campoFiltro.FieldType := fdNormal; 
+        filtro.AddField(campoFiltro); 
+ 
+        campoFiltro := TFieldFilter.Create; 
+        campoFiltro.Description := 'TipoRotina'; 
+        campoFiltro.Name := 'TipoRotina'; 
+        campoFiltro.MaskTypes := mtNone; 
+        campoFiltro.GridSize := 100; 
+        campoFiltro.FieldType := fdNormal; 
+        filtro.AddField(campoFiltro); 
+ 
+        campoFiltro := TFieldFilter.Create; 
+        campoFiltro.Description := 'Ordem'; 
+        campoFiltro.Name := 'Ordem'; 
+        campoFiltro.MaskTypes := mtNone; 
+        campoFiltro.GridSize := 100; 
+        campoFiltro.FieldType := fdNormal; 
+        filtro.AddField(campoFiltro); 
+ 
+        campoFiltro := TFieldFilter.Create; 
+        campoFiltro.Description := 'Delet'; 
+        campoFiltro.Name := 'Delet'; 
+        campoFiltro.MaskTypes := mtNone; 
+        campoFiltro.GridSize := 100; 
+        campoFiltro.FieldType := fdNormal; 
+        filtro.AddField(campoFiltro); 
+ 
+        campoFiltro := TFieldFilter.Create; 
+        campoFiltro.Description := 'Recno'; 
+        campoFiltro.Name := 'Recno'; 
+        campoFiltro.MaskTypes := mtNone; 
+        campoFiltro.GridSize := 100; 
+        campoFiltro.FieldType := fdNormal; 
+        filtro.AddField(campoFiltro); 
+
+        {$ENDREGION}
+
+        Result := filtro.Execute(filtro);
+end;
+
+function TRotina.Obter(parametros: TParametro): TObject;
+var
+  lista: TLista<TRotina>;
+begin
+    try
+        lista := BaseLib.XmlToObject<TRotina>(BaseLib.ExecutaTarefa('ConsultarRotina', 'TRotina', parametros));
+
+        if lista.Count = 1 then
+        begin
+           PreencherObjeto(lista[0]);
+           Result := Self;
+        end
+        else
+        begin
+            TLib.MensagemAdvertencia('Nenhum registro encontrado.', 'Aviso');
+            Result := nil;
+        end;
+    finally
+        lista.Destroy;
+    end;
+end;
+
+function TRotina.Obter(ID: string): TObject;
+var
+    parametros: TParametro;
+
+begin
+    try
+        parametros := TParametro.Create;
+        parametros.Add('', 'R_E_C_N_O_', ID);
+        result := Obter(parametros);
+    finally
+        FreeAndNil(parametros);
+    end;
+end;
+
+{$ENDREGION}
+
+{$REGION 'Regras de Negócio'}
+
+
+procedure TRotina.ObterPermissoesRotina;
+var
+  parametro: TParametro;
+begin
+    try
+      parametro := TParametro.Create();
+      parametro.Add('', 'S19_S05_ROTINA', Rotina);
+      FPermissoesRotina := BaseLib.XmlToObject<TPermissao>(BaseLib.ExecutaTarefa('ObterPermissoesPorRotina','TPermissao',parametro));
+    finally
+        freeAndNil(parametro);
+    end;
+end;
+
+function TRotina.ObterRotinaPorGrupoEModulo(grupo,modulo: string): TLista<TRotina>;
+var
+  parametro: TParametro;
+  tipoRotina: string;
+begin
+    try
+      parametro := TParametro.Create();
+      tipoRotina := Tlib.IfTernario(Tlib.mobile,'MOBILE', 'DESKTOP');
+      parametro.Add('', 'S09_S02_GRUPO', grupo);
+      parametro.Add('', 'S09_S08_MODULO', modulo);
+      parametro.Add('', 'S05_TIPOROTINA', tipoRotina);
+      result := BaseLib.XmlToObject<TRotina>(BaseLib.ExecutaTarefa('ObterRotinaPorGrupoEModulo','TRotina',parametro));
+    finally
+      freeAndNil(parametro);
+    end;
+end;
+
+function TRotina.ObterTodasRotinas: TLista<TRotina>;
+begin
+    result := BaseLib.XmlToObject<TRotina>(BaseLib.ExecutaTarefa('ConsultarRotina', 'TRotina',nil));
+end;
+
+
+
+procedure TRotina.ProcessaRotinaItemPermissoes;
+begin
+     BaseLib.ExecutaTarefa('ProcessaRotinaItemPermissoes', 'TRotina', ObjetoParaParametros(acInsercao));
+end;
+
+procedure TRotina.PreencherObjeto(Rotina: TRotina);
+begin
+    Rotina.CopiarPara(Self);
+    FPreenchido := true;
+end;
+
+
+procedure TRotina.SetAcaoMenu(const Value: string);
+begin
+  FAcaoMenu := Value;
+end;
+
+procedure TRotina.SetCategoria(const Value: string);
+begin
+  FCategoria := Value;
+end;
+
+procedure TRotina.SetDelet(const Value: string);
+begin
+  FDelet := Value;
+end;
+
+procedure TRotina.SetDescricao(const Value: string);
+begin
+  FDescricao := Value;
+end;
+
+procedure TRotina.SetGrupo(const Value: string);
+begin
+  FGrupo := Value;
+end;
+
+procedure TRotina.SetListaRotinaItem(const Value: string);
+begin
+  FListaRotinaItem := Value;
+end;
+
+procedure TRotina.SetListaRotinaItemPermissao(
+  const Value: string);
+begin
+  FListaRotinaItemPermissao := Value;
+end;
+
+procedure TRotina.SetOrdem(const Value: integer);
+begin
+  FOrdem := Value;
+end;
+
+procedure TRotina.SetRecno(const Value: integer);
+begin
+  FRecno := Value;
+end;
+
+procedure TRotina.SetRotina(const Value: string);
+begin
+  FRotina := Value;
+end;
+
+procedure TRotina.SetTipoRotina(const Value: string);
+begin
+  FTipoRotina := Value;
+end;
+
+{$ENDREGION}
+
+{$REGION 'Métodos de Propriedades'}
+
+
+{$ENDREGION}
+
+end.
+

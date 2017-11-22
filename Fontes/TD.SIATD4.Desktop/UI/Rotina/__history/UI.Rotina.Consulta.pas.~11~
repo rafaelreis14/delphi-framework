@@ -1,0 +1,44 @@
+{*Created by @ReisCodeGenerator*}
+unit UI.Rotina.Consulta;
+
+interface
+
+uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, UntErrorProvider,
+    Vcl.ComCtrls, Vcl.Imaging.jpeg, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.Grids, RGrid,
+    Vcl.Buttons, Vcl.Menus, RTTI, UI.Base.Controlador.ConsultaDesktop,
+	Biz.Rotina, UI.Base.ConsultaPadrao;
+
+type
+    //TfrmConRotina = class(TFrmConsultaPadrao)
+	TfrmConRotina = class(TControladorConsultaDesktop<TRotina>)
+        procedure FormCreate(Sender: TObject);
+    private
+        { Private declarations }
+    public
+        { Public declarations }
+    end;
+
+var
+    frmConRotina: TfrmConRotina;
+
+implementation
+
+{$R *.dfm}
+
+uses UI.Rotina.Cadastro;
+
+
+procedure TfrmConRotina.FormCreate(Sender: TObject);
+begin
+    inherited;
+    grDados.AddCol('Rotina', 'Rotina', 130, RGrid.mtString);
+    grDados.AddCol('Categoria', 'Categoria', 130, RGrid.mtString);
+    grDados.AddCol('AcaoMenu', 'Ação Menu', 130, RGrid.mtString);
+    grDados.AddCol('Descricao', 'Descrição', 130, RGrid.mtString);
+    grDados.AddCol('Ordem', 'Ordem', 50, RGrid.mtInteger);
+    Inicializar(TfrmCadRotina);
+end;
+
+end.

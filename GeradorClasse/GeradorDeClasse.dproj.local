@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2012/08/25 18:07:46.000.122,=C:\Users\Reis\Documents\RAD Studio\Projects\Unit3.pas</Transaction>
+    <Transaction>2012/09/03 22:32:57.000.278,=C:\Users\Reis\Documents\RAD Studio\Projects\Unit3.pas</Transaction>
+    <Transaction>2012/09/04 21:38:51.000.129,=C:\Users\Reis\Documents\RAD Studio\Projects\Unit3.pas</Transaction>
+    <Transaction>2012/09/25 23:04:49.000.886,=C:\Users\Reis\Documents\RAD Studio\Projects\Unit3.pas</Transaction>
+    <Transaction>2012/09/25 23:18:28.000.405,=C:\Users\Reis\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2012/09/25 23:20:00.000.424,C:\Users\Reis\Documents\RAD Studio\Projects\Unit1.pas=D:\Reis\Desenvolvimento\Projetos\GeradorDeClasse\ClasseBase.pas</Transaction>
+    <Transaction>2012/09/25 23:20:11.000.485,C:\Users\Reis\Documents\RAD Studio\Projects\Unit3.pas=D:\Reis\Desenvolvimento\Projetos\GeradorDeClasse\Principal.pas</Transaction>
+    <Transaction>2012/09/25 23:20:11.000.485,C:\Users\Reis\Documents\RAD Studio\Projects\Unit3.dfm=D:\Reis\Desenvolvimento\Projetos\GeradorDeClasse\Principal.dfm</Transaction>
+    <Transaction>2012/09/25 23:20:19.000.310,C:\Users\Reis\Documents\RAD Studio\Projects\Project3.dproj=D:\Reis\Desenvolvimento\Projetos\GeradorDeClasse\GeradorDeClasse.dproj</Transaction>
+    <Transaction>2012/09/25 23:30:53.000.194,D:\Reis\Desenvolvimento\Projetos\GeradorDeClasse\ClasseBase.pas=</Transaction>
+    <Transaction>2012/09/26 09:47:18.000.163,=C:\FONTES SIATD\CLIENTE_LIB\BIBLIOTECAS COMUNS\ClsLib.pas</Transaction>
+    <Transaction>2012/09/26 09:47:52.000.723,C:\FONTES SIATD\CLIENTE_LIB\BIBLIOTECAS COMUNS\ClsLib.pas=</Transaction>
+    <Transaction>2012/09/26 09:48:15.000.191,=C:\FONTES SIATD\GERADOR_CLASSE\Unit1.pas</Transaction>
+    <Transaction>2012/09/26 09:48:30.000.750,C:\FONTES SIATD\GERADOR_CLASSE\ClsCampo.pas=C:\FONTES SIATD\GERADOR_CLASSE\Unit1.pas</Transaction>
+    <Transaction>2012/10/17 17:09:20.000.771,=C:\FONTES SIATD\GERADOR_CLASSE\ClasseBaseServidor.pas</Transaction>
+    <Transaction>2012/10/17 17:09:40.000.783,C:\FONTES SIATD\GERADOR_CLASSE\ClasseBaseServidor.pas=</Transaction>
+    <Transaction>2016/06/24 16:06:39.000.616,=C:\GeradorClasse\Unit1.pas</Transaction>
+    <Transaction>2016/06/24 16:07:09.000.465,C:\GeradorClasse\ClsDetalhe.pas=C:\GeradorClasse\Unit1.pas</Transaction>
+    <Transaction>2016/06/24 16:11:43.000.399,=C:\GeradorClasse\Unit1.pas</Transaction>
+    <Transaction>2016/06/24 16:19:34.000.773,C:\GeradorClasse\CadDetalhe.pas=C:\GeradorClasse\Unit1.pas</Transaction>
+    <Transaction>2016/06/24 16:19:34.000.773,C:\GeradorClasse\CadDetalhe.dfm=C:\GeradorClasse\Unit1.dfm</Transaction>
+    <Transaction>2016/06/24 16:51:03.000.468,=C:\SIATD4\Fontes\TD.SIATD4.Core\Lib\Lib.Lista.pas</Transaction>
+    <Transaction>2016/06/27 18:05:36.000.907,=C:\SIATD4\Fontes\TD.SIATD4.Core\Lib\Lib.Enumeradores.pas</Transaction>
+    <Transaction>2016/06/27 18:06:02.000.521,=C:\SIATD4\Fontes\TD.SIATD4.Core\Framework\Interfaces\Framework.Interfaces.Base.pas</Transaction>
+    <Transaction>2016/06/28 15:33:41.000.663,=C:\SIATD4\Fontes\TD.SIATD4.Core\Lib\Lib.Base.pas</Transaction>
+  </Transactions>
+</BorlandProject>

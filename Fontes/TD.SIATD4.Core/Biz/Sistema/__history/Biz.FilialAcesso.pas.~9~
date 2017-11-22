@@ -1,0 +1,390 @@
+{ *Created by @ReisCodeGenerator* }
+unit Biz.FilialAcesso;
+
+interface
+
+uses
+    Classes, System.SysUtils, Dialogs, Lib.Base, Lib.Parametro, Lib.Enumeradores,
+    Lib.Persistable, Lib.ResultFilter, Lib.Lista, Dal.ControleDados, Dal.CondicaoConsulta,
+    Framework.Interfaces.CRUD, Dal.FabricaSQL;
+
+type
+
+    [TReferenceTable('SIATD_S04')]
+    TFilialAcesso = class(TBase, ICRUD<TFilialAcesso>)
+    private
+
+        FDelet: string;
+        FCodigoFilial: string;
+        FRecno: integer;
+        FLogin: string;
+        FCodigoEmpresa: string;
+        FDescricaoFilial: string;
+        procedure SetCodigoEmpresa(const Value: string);
+        procedure SetCodigoFilial(const Value: string);
+        procedure SetDelet(const Value: string);
+        procedure SetLogin(const Value: string);
+        procedure SetRecno(const Value: integer);
+
+        class var dao: TControleDados<TLista<TFilialAcesso>, TListaDAO<TFilialAcesso>>;
+        procedure SetDescricaoFilial(const Value: string);
+    function GetEmpresaFilial: string;
+
+    public
+        /// <summary>
+        /// Metodo que faz a inserção da FilialAcesso
+        /// </summary>
+        function Inserir: boolean;
+        /// <summary>
+        /// Metodo que faz a alteração da FilialAcesso
+        /// </summary>
+        function Alterar: boolean;
+
+        /// <summary>
+        /// Métido que faz a Deleção da FilialAcesso
+        /// </summary>
+        function Excluir: boolean;
+
+        function ExcluirPorLoginEEmpresa(login: string; codigoEmpresa: string): boolean;
+
+        /// <summary>
+        /// Método que chama a tela de filtro
+        /// </summary>
+        /// <param name="tipoOperacao">
+        /// Tipo da operação, se é somente filtro, ou seleção de registro
+        /// </param>
+        function Listar(tipoOperacao: TOparationTypes; multselect: boolean): TResultFilter;
+
+        /// <summary>
+        /// Método que retorna um objeto preenchido
+        /// </summary>
+        /// <param name="ID">
+        /// Chave primária da tabela
+        /// </param>
+        function Obter(ID: string): TFilialAcesso; overload;
+
+        /// <summary>
+        /// Método que retorna um objeto preenchido
+        /// </summary>
+        /// <param name="parametros">
+        /// Parametros para a consulta do objeto a ser preenchido
+        /// </param>
+        function Obter(parametros: TParametro): TFilialAcesso; overload;
+
+        /// <summary>
+        /// Método que retonar uma lista com varios objetos de acordo com parametro passado
+        /// </summary>
+        /// <param name="parametros">
+        /// Parametros para a consulta do objeto a ser preenchido
+        /// </param>
+        function Consultar(parametros: TParametro): TLista<TFilialAcesso>;
+
+        /// <summary>
+        /// Método que preenche a instância do Objeto
+        /// </summary>
+        /// <param name="FilialAcesso">
+        /// objeto de parametro para preenchimento da instância
+        /// </param>
+        procedure PreencherObjeto(FilialAcesso: TFilialAcesso);
+
+        [TPersistable(fgPersistable, 'S04_S12_EMP')]
+        [TMaxLenght(2)]
+        property codigoEmpresa: string read FCodigoEmpresa write SetCodigoEmpresa;
+
+        [TPersistable(fgPersistable, 'S04_S13_FILIAL')]
+        [TMaxLenght(2)]
+        property CodigoFilial: string read FCodigoFilial write SetCodigoFilial;
+
+        [TPersistable(fgReadOnly, 'S13_DESC')]
+        property DescricaoFilial: string read FDescricaoFilial write SetDescricaoFilial;
+
+        property CodigoNomeFilial: string read GetEmpresaFilial;
+
+        [TPersistable(fgPersistable, 'S04_S01_LOGIN')]
+        [TMaxLenght(20)]
+        property login: string read FLogin write SetLogin;
+
+        [TPersistable(fgPersistable, 'D_E_L_E_T_')]
+        [TMaxLenght(1)]
+        property Delet: string read FDelet write SetDelet;
+
+        [TPersistable(fgUpdateable, 'R_E_C_N_O_')]
+        property Recno: integer read FRecno write SetRecno;
+
+    end;
+
+implementation
+
+{ TFilialAcesso }
+
+uses Lib.Filter, Lib.Biblioteca, Biz.UsuarioLogado;
+
+{$REGION 'Métodos CRUD'}
+
+function TFilialAcesso.Inserir: boolean;
+var
+    fabrica: TFabricaSQL;
+    sql: WideString;
+    Parametro: TParametro;
+begin
+    fabrica := TFabricaSQL.Create(Self);
+    try
+        try
+            sql := fabrica.GerarSqlInsercao;
+            Parametro := Self.ObjetoParaParametros(Insercao);
+            result := dao.Inserir(sql, Parametro);
+        except
+            on e: exception do
+                raise exception.Create('Erro ao inserir FilialAcesso' + '#13' + e.Message);
+        end;
+    finally
+        if Parametro <> nil then
+            FreeAndNil(Parametro);
+    end;
+end;
+
+function TFilialAcesso.Alterar: boolean;
+var
+    fabrica: TFabricaSQL;
+    sql: WideString;
+    Parametro: TParametro;
+begin
+    fabrica := TFabricaSQL.Create(Self);
+    try
+        try
+            sql := fabrica.GerarSqlAlteracao;
+            Parametro := Self.ObjetoParaParametros(Alteracao);
+            result := dao.Alterar(sql, Parametro);
+        except
+            on e: exception do
+                raise exception.Create('Erro ao alterar FilialAcesso' + '#13' + e.Message);
+        end;
+    finally
+        if Parametro <> nil then
+            FreeAndNil(Parametro);
+    end;
+end;
+
+function TFilialAcesso.Excluir: boolean;
+var
+    fabrica: TFabricaSQL;
+    sql: WideString;
+    Parametro: TParametro;
+begin
+    fabrica := TFabricaSQL.Create(Self);
+    try
+        try
+            sql := fabrica.GerarSqlExclusao;
+            Parametro := Self.ObjetoParaParametros(Exclusao);
+            result := dao.Excluir(sql, Parametro);
+        except
+            on e: exception do
+                raise exception.Create('Erro ao excluir FilialAcesso' + '#13' + e.Message);
+        end;
+    finally
+        if Parametro <> nil then
+            FreeAndNil(Parametro);
+    end;
+
+end;
+
+function TFilialAcesso.ExcluirPorLoginEEmpresa(login, codigoEmpresa: string): boolean;
+var
+    Parametro: TParametro;
+    query: string;
+begin
+    Parametro := TParametro.Create;
+    try
+        try
+            Parametro.Add('', 'S04_S12_EMP', codigoEmpresa);
+            Parametro.Add('', 'S04_S01_LOGIN', login);
+
+            query := 'DELETE FROM SIATD_S04 WHERE S04_S12_EMP = :S04_S12_EMP AND S04_S01_LOGIN = :S04_S01_LOGIN';
+
+            dao.Excluir(query, Parametro);
+        except
+            on e: exception do
+                raise exception.Create('Erro ao excluir Filiais de Acesso ' + '#13' + e.Message);
+        end;
+    finally
+        FreeAndNil(Parametro);
+    end;
+end;
+
+function TFilialAcesso.GetEmpresaFilial: string;
+begin
+    result := Self.CodigoFilial + ' - ' + Self.DescricaoFilial;
+end;
+
+function TFilialAcesso.Consultar(parametros: TParametro): TLista<TFilialAcesso>;
+var
+    query: string;
+    condicao: TCondicaoConsulta;
+begin
+    try
+        condicao := TCondicaoConsulta.Create(parametros);
+        condicao.Adiciona('S04_S12_EMP', ccIgual, lgAnd);
+        condicao.Adiciona('S04_S13_FILIAL', ccIgual, lgAnd);
+        condicao.Adiciona('S04_S01_LOGIN', ccIgual, lgAnd);
+        condicao.Adiciona('D_E_L_E_T_', ccIgual, lgAnd);
+        condicao.Adiciona('R_E_C_N_O_', ccIgual, lgAnd);
+
+        query := 'SELECT ' + Self.ObterCamposSeparadosPorVirgula(Consulta, ['DescricaoFilial'], 'S04') + ', S13.S13_DESC FROM ' + Self.TabelaReferencia + ' AS S04 ' +
+          ' INNER JOIN SIATD_S13 AS S13 ON S13_FILIAL  = S04_S13_FILIAL WHERE S04.D_E_L_E_T_ = '''' ' +
+          condicao.ToString(true);
+
+        result := dao.Consultar(query, parametros);
+    finally
+        condicao.Free;
+    end;
+end;
+
+function TFilialAcesso.Listar(tipoOperacao: TOparationTypes; multselect: boolean): TResultFilter;
+var
+    campoFiltro: TFieldFilter;
+    filtro: TFilter<TFilialAcesso>;
+    // parametro : TParametro;
+    // lista:TLista<TFilialAcesso>
+begin
+    try
+        filtro := TFilter<TFilialAcesso>.Create;
+        filtro.ScreenName := 'Filtro de FilialAcesso';
+        filtro.OperationType := tipoOperacao;
+        filtro.MultiSelect := multselect;
+        filtro.AddIndex(1, 'CodigoEmpresa=S04_S12_EMP', 'CodigoEmpresa');
+        filtro.AddIndex(2, 'CodigoFilial=S04_S13_FILIAL', 'CodigoFilial');
+        filtro.AddIndex(3, 'Login=S04_S01_LOGIN', 'Login');
+        filtro.AddIndex(4, 'Delet=D_E_L_E_T_', 'Delet');
+        filtro.AddIndex(5, 'Recno=R_E_C_N_O_', 'Recno');
+        // ###Criar os Índices do filtro
+        // filtro.AddIndex(99, 'Empresa=S01_EMP, Filial=S01_FILIAL, Descricao=S01_DESC', 'Empresa + Filial + Descrição');
+
+{$REGION 'Campo Filtro'}
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'CodigoEmpresa';
+        campoFiltro.Name := 'CodigoEmpresa';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'CodigoFilial';
+        campoFiltro.Name := 'CodigoFilial';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Login';
+        campoFiltro.Name := 'Login';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Delet';
+        campoFiltro.Name := 'Delet';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+        campoFiltro := TFieldFilter.Create;
+        campoFiltro.Description := 'Recno';
+        campoFiltro.Name := 'Recno';
+        campoFiltro.MaskTypes := mtNone;
+        campoFiltro.GridSize := 100;
+        campoFiltro.FieldType := fdNormal;
+        filtro.AddField(campoFiltro);
+
+{$ENDREGION}
+        result := filtro.Execute;
+    finally
+        // FreeAndNil(parametro);
+        // FreeAndNil(lista);
+    end;
+end;
+
+function TFilialAcesso.Obter(parametros: TParametro): TFilialAcesso;
+var
+    Lista: TLista<TFilialAcesso>;
+begin
+    try
+        Lista := Self.Consultar(parametros);
+
+        if Lista.Count = 1 then
+        begin
+            PreencherObjeto(Lista[0]);
+            result := Self;
+        end
+        else
+        begin
+            TLib.MensagemAdvertencia('Nenhum registro encontrado.', 'Aviso');
+            result := nil;
+        end;
+    finally
+        Lista.Destroy;
+    end;
+end;
+
+function TFilialAcesso.Obter(ID: string): TFilialAcesso;
+var
+    parametros: TParametro;
+
+begin
+    try
+        parametros := TParametro.Create;
+        parametros.Add('', 'R_E_C_N_O_', ID);
+        result := Obter(parametros);
+    finally
+        FreeAndNil(parametros);
+    end;
+end;
+
+{$ENDREGION}
+{$REGION 'Regras de Negócio'}
+
+procedure TFilialAcesso.PreencherObjeto(FilialAcesso: TFilialAcesso);
+begin
+    FilialAcesso.CopiarPara(Self);
+    FPreenchido := true;
+end;
+
+procedure TFilialAcesso.SetCodigoEmpresa(const Value: string);
+begin
+    FCodigoEmpresa := Value;
+end;
+
+procedure TFilialAcesso.SetCodigoFilial(const Value: string);
+begin
+    FCodigoFilial := Value;
+end;
+
+procedure TFilialAcesso.SetDelet(const Value: string);
+begin
+    FDelet := Value;
+end;
+
+procedure TFilialAcesso.SetDescricaoFilial(const Value: string);
+begin
+    FDescricaoFilial := Value;
+end;
+
+procedure TFilialAcesso.SetLogin(const Value: string);
+begin
+    FLogin := Value;
+end;
+
+procedure TFilialAcesso.SetRecno(const Value: integer);
+begin
+    FRecno := Value;
+end;
+
+{$ENDREGION}
+{$REGION 'Métodos de Propriedades'}
+{$ENDREGION}
+
+end.

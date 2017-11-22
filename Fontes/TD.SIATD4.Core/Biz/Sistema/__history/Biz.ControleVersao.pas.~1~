@@ -1,0 +1,369 @@
+{*Created by @ReisCodeGenerator*}
+unit Biz.ControleVersao;
+
+interface
+
+uses
+    Classes, System.SysUtils, Dialogs, Lib.ClasseBase, Lib.Parametro, Lib.Enumeradores,
+    Lib.Persistable, Lib.ResultFilter, Lib.Lista, Dal.ControleDados, Dal.CondicaoConsulta,
+	Framework.Interfaces.CRUD, Dal.FabricaSQL;
+
+type
+    [TReferenceTable('SIATD_S10_01')]
+	TControleVersao = class(TClasseBase, ICRUD<TControleVersao>)
+	private
+        FCodigoFilial: string;
+        FVersao: string;
+        FTipo: string;
+        FStatus: string;
+        FDelet: string;
+        FRecno: integer;
+        procedure SetCodigoFilial(const Value: string);
+        procedure SetVersao(const Value: string);
+        procedure SetTipo(const Value: string);
+        procedure SetStatus(const Value: string);
+        procedure SetDelet(const Value: string);
+        procedure SetRecno(const Value: integer);
+
+
+    public
+        class var dao: TControleDados<TLista<TControleVersao>,TListaDAO<TControleVersao>>;
+
+        ///	<summary>
+        ///	  Metodo que faz a inserção da ClasseBase
+        ///	</summary>
+        function Inserir: integer;
+        ///	<summary>
+        ///	  Metodo que faz a alteração da ClasseBase
+        ///	</summary>
+        function Alterar: boolean;
+
+        ///	<summary>
+        ///	  Métido que faz a Deleção da ClasseBase
+        ///	</summary>
+        function Excluir: boolean;
+
+        ///	<summary>
+        ///	  Método que chama a tela de filtro
+        ///	</summary>
+        ///	<param name="tipoOperacao">
+        ///	  Tipo da operação, se é somente filtro, ou seleção de registro
+        ///	</param>
+        function Listar(tipoOperacao: TOparationTypes; multselect: Boolean): TResultFilter; 
+
+
+        ///	<summary>
+        ///	  Método que retorna um objeto preenchido
+        ///	</summary>
+        ///	<param name="ID">
+        ///	  Chave primária da tabela
+        ///	</param>
+        function Obter(ID: string): TControleVersao; overload;
+
+        ///	<summary>
+        ///	  Método que retorna um objeto preenchido
+        ///	</summary>
+        ///	<param name="parametros">
+        ///	  Parametros para a consulta do objeto a ser preenchido
+        ///	</param>
+        function Obter(parametros:TParametro): TControleVersao; overload;
+
+
+        ///	<summary>
+        ///	  Método que retonar uma lista com varios objetos de acordo com parametro passado
+        ///	</summary>
+        ///	<param name="parametros">
+        ///	  Parametros para a consulta do objeto a ser preenchido
+        ///	</param>
+        function Consultar(parametros:TParametro): TLista<TControleVersao>;
+
+
+        ///	<summary>
+        ///	  Método que preenche a instância do Objeto
+        ///	</summary>
+        ///	<param name="ClasseBase">
+        ///	  objeto de parametro para preenchimento da instância
+        ///	</param>
+        procedure PreencherObjeto(ControleVersao: TControleVersao);
+
+        [TPersistable(fgPersistable, 'S10_S13_FILIAL')]
+        [TMaxLenght(2)]
+        property CodigoFilial: string read FCodigoFilial write SetCodigoFilial;
+
+        [TPersistable(fgPersistable, 'S10_VERCLI')]
+        [TMaxLenght(10)]
+        property Versao: string read FVersao write SetVersao;
+
+        [TPersistable(fgPersistable, 'S10_TIPO')]
+        [TMaxLenght(1)]
+        property Tipo: string read FTipo write SetTipo;
+
+        [TPersistable(fgPersistable, 'S10_STATUS')]
+        [TMaxLenght(1)]
+        property Status: string read FStatus write SetStatus;
+
+        [TPersistable(fgPersistable, 'D_E_L_E_T_')]
+        [TMaxLenght(1)]
+        property Delet: string read FDelet write SetDelet;
+
+        [TPersistable(fgUpdateable, 'R_E_C_N_O_')]
+        property Recno: integer read FRecno write SetRecno;
+
+
+        constructor Create; override;
+        destructor Destroy; override;
+
+    end;
+
+implementation
+
+
+{ TControleVersao }
+
+uses Lib.Filter, Lib.Biblioteca, Biz.UsuarioLogado;
+
+{$REGION 'Métodos CRUD'}
+
+function TControleVersao.Inserir: integer;
+begin
+    try
+        try
+            result := dao.Inserir(Self);
+        except
+          on e: exception do
+              raise Exception.Create('Erro ao inserir ControleVersao'+#13+ e.Message);
+        end;
+    finally
+    end;
+end;
+
+function TControleVersao.Alterar: boolean;
+begin
+    try
+        try
+            result := dao.Alterar(Self);
+        except
+          on e: exception do
+              raise Exception.Create('Erro ao alterar ControleVersao'+#13+ e.Message);
+        end;
+    finally
+    end;
+end;
+
+
+function TControleVersao.Excluir: boolean;
+begin
+    try
+        try
+            result := dao.Excluir(Self);
+        except
+          on e: exception do
+              raise Exception.Create('Erro ao excluir ControleVersao'+#13+ e.Message);
+        end;
+    finally
+    end;
+
+end;
+
+function TControleVersao.Consultar(parametros: TParametro): Tlista<TControleVersao>;
+var
+    query: string;
+    condicao: TCondicaoConsulta;
+begin
+    try
+        condicao := TCondicaoConsulta.Create(parametros);
+        condicao.Adiciona('S10_S13_FILIAL',ccIgual, lgAnd); 
+        condicao.Adiciona('S10_VERCLI',ccIgual, lgAND); 
+        condicao.Adiciona('S10_TIPO',ccIgual, lgAND); 
+        condicao.Adiciona('S10_STATUS',ccIgual, lgAND); 
+        condicao.Adiciona('D_E_L_E_T_',ccIgual, lgAND); 
+        condicao.Adiciona('R_E_C_N_O_',ccIgual, lgAND); 
+
+        query := 'SELECT '+Self.ObterCamposSeparadosPorVirgula(Consulta,[]) + ' FROM ' + Self.TabelaReferencia + ' WHERE D_E_L_E_T_ = '''' ' + condicao.ToString(true);
+
+        Result := dao.Consultar(query,parametros);
+    finally
+        condicao.Free;
+    end;
+end;
+
+constructor TControleVersao.Create;
+begin
+  inherited;
+
+end;
+
+destructor TControleVersao.Destroy;
+begin
+
+  inherited;
+end;
+
+function TControleVersao.Listar(tipoOperacao: TOparationTypes; multselect: Boolean): TResultFilter;
+var
+    campoFiltro:TFieldFilter;
+    filtro : TFilter<TControleVersao>;
+    //parametro : TParametro;
+    //lista:TLista<TControleVersao>
+begin
+    try
+        filtro := TFilter<TControleVersao>.Create;
+        filtro.ScreenName := 'Filtro de ControleVersao';
+        filtro.OperationType := tipoOperacao;
+        filtro.MultiSelect := multselect;
+        filtro.AddIndex(1, 'CodigoFilial=S10_S13_FILIAL', 'CodigoFilial'); 
+        filtro.AddIndex(2, 'Versao=S10_VERCLI', 'Versao'); 
+        filtro.AddIndex(3, 'Tipo=S10_TIPO', 'Tipo'); 
+        filtro.AddIndex(4, 'Status=S10_STATUS', 'Status'); 
+        filtro.AddIndex(5, 'Delet=D_E_L_E_T_', 'Delet'); 
+        filtro.AddIndex(6, 'Recno=R_E_C_N_O_', 'Recno'); 
+        //###Criar os Índices do filtro
+		// filtro.AddIndex(99, 'Empresa=S01_EMP, Filial=S01_FILIAL, Descricao=S01_DESC', 'Empresa + Filial + Descrição');
+
+        {$REGION 'Campo Filtro'}
+
+        campoFiltro := TFieldFilter.Create; 
+        campoFiltro.Description := 'CodigoFilial'; 
+        campoFiltro.Name := 'CodigoFilial'; 
+        campoFiltro.MaskTypes := mtNone; 
+        campoFiltro.GridSize := 100; 
+        campoFiltro.FieldType := fdNormal; 
+        filtro.AddField(campoFiltro); 
+ 
+        campoFiltro := TFieldFilter.Create; 
+        campoFiltro.Description := 'Versao'; 
+        campoFiltro.Name := 'Versao'; 
+        campoFiltro.MaskTypes := mtNone; 
+        campoFiltro.GridSize := 100; 
+        campoFiltro.FieldType := fdNormal; 
+        filtro.AddField(campoFiltro); 
+ 
+        campoFiltro := TFieldFilter.Create; 
+        campoFiltro.Description := 'Tipo'; 
+        campoFiltro.Name := 'Tipo'; 
+        campoFiltro.MaskTypes := mtNone; 
+        campoFiltro.GridSize := 100; 
+        campoFiltro.FieldType := fdNormal; 
+        filtro.AddField(campoFiltro); 
+ 
+        campoFiltro := TFieldFilter.Create; 
+        campoFiltro.Description := 'Status'; 
+        campoFiltro.Name := 'Status'; 
+        campoFiltro.MaskTypes := mtNone; 
+        campoFiltro.GridSize := 100; 
+        campoFiltro.FieldType := fdNormal; 
+        filtro.AddField(campoFiltro); 
+ 
+        campoFiltro := TFieldFilter.Create; 
+        campoFiltro.Description := 'Delet'; 
+        campoFiltro.Name := 'Delet'; 
+        campoFiltro.MaskTypes := mtNone; 
+        campoFiltro.GridSize := 100; 
+        campoFiltro.FieldType := fdNormal; 
+        filtro.AddField(campoFiltro); 
+ 
+        campoFiltro := TFieldFilter.Create; 
+        campoFiltro.Description := 'Recno'; 
+        campoFiltro.Name := 'Recno'; 
+        campoFiltro.MaskTypes := mtNone; 
+        campoFiltro.GridSize := 100; 
+        campoFiltro.FieldType := fdNormal; 
+        filtro.AddField(campoFiltro); 
+ 
+
+        {$ENDREGION}
+
+        result := filtro.Execute;
+    finally
+        // FreeAndNil(parametro);
+        // FreeAndNil(lista);
+    end;
+end;
+
+function TControleVersao.Obter(parametros: TParametro): TControleVersao;
+var
+  lista: TLista<TControleVersao>;
+begin
+    try
+        lista := Self.Consultar(parametros);
+
+        if lista.Count = 1 then
+        begin
+           PreencherObjeto(lista[0]);
+           Result := Self;
+        end
+        else
+        begin
+            TLib.MensagemAdvertencia('Nenhum registro encontrado.', 'Aviso');
+            Result := nil;
+        end;
+    finally
+        lista.Destroy;
+    end;
+end;
+
+function TControleVersao.Obter(ID: string): TControleVersao;
+var
+    parametros: TParametro;
+
+begin
+    try
+        parametros := TParametro.Create;
+        parametros.Add('', 'R_E_C_N_O_', ID);
+        result := Obter(parametros);
+    finally
+        FreeAndNil(parametros);
+    end;
+end;
+
+
+{$ENDREGION}
+
+{$REGION 'Regras de Negócio'}
+
+procedure TControleVersao.PreencherObjeto(ControleVersao: TControleVersao);
+begin
+    ControleVersao.CopiarPara(Self);
+    FPreenchido := true;
+end;
+
+
+{$ENDREGION}
+
+{$REGION 'Métodos de Propriedades'}
+
+procedure TControleVersao.SetCodigoFilial(const Value: string);
+begin
+    FCodigoFilial := Value;
+end;
+
+procedure TControleVersao.SetVersao(const Value: string);
+begin
+    FVersao := Value;
+end;
+
+procedure TControleVersao.SetTipo(const Value: string);
+begin
+    FTipo := Value;
+end;
+
+procedure TControleVersao.SetStatus(const Value: string);
+begin
+    FStatus := Value;
+end;
+
+procedure TControleVersao.SetDelet(const Value: string);
+begin
+    FDelet := Value;
+end;
+
+procedure TControleVersao.SetRecno(const Value: integer);
+begin
+    FRecno := Value;
+end;
+
+
+{$ENDREGION}
+
+end.
+

@@ -1,0 +1,9 @@
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\TesteWeb\bin\Config.ini
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\TesteWeb\bin\TesteWeb.dll.config
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\TesteWeb\bin\TesteWeb.dll
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\TesteWeb\bin\TesteWeb.pdb
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\TesteWeb\bin\DBConnect.dll
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\TesteWeb\bin\DBConnect.pdb
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\TesteWeb\obj\Debug\TesteWeb.dll
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\TesteWeb\obj\Debug\TesteWeb.pdb
+C:\Projetos TD\SIATD4\Fontes\TD.SIATD4.Dal\DBConnect\TesteWeb\obj\Debug\TestWeb.csprojResolveAssemblyReference.cache

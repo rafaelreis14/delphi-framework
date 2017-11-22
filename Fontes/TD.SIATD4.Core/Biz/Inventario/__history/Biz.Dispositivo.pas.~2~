@@ -1,0 +1,261 @@
+unit Biz.Dispositivo;
+
+interface
+
+uses
+    Classes, System.SysUtils, Dialogs, Lib.Base, Lib.Parametro, Lib.Enumeradores,
+    Lib.Persistable, Lib.Biblioteca, Biz.Filial, Lib.Lista, Lib.ResultFilter;
+
+type
+    TDispositivo = class(TBase)
+    private
+        FCodigoDispositivo: string;
+        FDescricao: string;
+        FDelet: string;
+        FCodigoFilial: string;
+        FCodigoUltimoUsuario: string;
+        FStatus: string;
+        FFilial: TFilial;
+    FRecno: integer;
+        procedure SetCodigoDispositivo(const Value: string);
+        procedure SetCodigoFilial(const Value: string);
+        procedure SetCodigoUltimoUsuario(const Value: string);
+        procedure SetDelet(const Value: string);
+        procedure SetDescricao(const Value: string);
+        procedure SetStatus(const Value: string);
+        procedure SetFilial(const Value: TFilial);
+    procedure SetRecno(const Value: integer);
+
+    public
+
+        ///	<summary>
+        ///	  Metodo que faz a alteração da ClasseBase
+        ///	</summary>
+        function Alterar: integer; override;
+
+        ///	<summary>
+        ///	  Método que retorna um objeto preenchido
+        ///	</summary>
+        ///	<param name="ID">
+        ///	  Chave primária da tabela
+        ///	</param>
+        function Obter(ID: string): TObject; overload; override;
+
+        ///	<summary>
+        ///	  Método que retorna um objeto preenchido
+        ///	</summary>
+        ///	<param name="parametros">
+        ///	  Parametros para a consulta do objeto a ser preenchido
+        ///	</param>
+        function Obter(parametros:TParametro): TObject; overload;
+
+
+        /// <summary>
+        /// Obtem todos os dispositivos livres da filial logada
+        /// </summary>
+        function ObterDispositivosLivresPorFilial: TLista<TDispositivo>;
+
+
+        ///	<summary>
+        ///	  Obtem todos dispositivos cadastados
+        ///	</summary>
+        function ObterTodosDispositivosPorFilial: TLista<TDispositivo>;
+
+        ///	<summary>
+        ///	  Método que preenche a instância do Objeto
+        ///	</summary>
+        ///	<param name="ClasseBase">
+        ///	  objeto de parametro para preenchimento da instância
+        ///	</param>
+        procedure PopularObjeto(Dispositivo: TDispositivo);
+
+
+        ///	<summary>
+        ///	  Bloquear dispositivo instanciado
+        ///	</summary>
+        procedure BloquearDispositivo(iduser:string);
+
+        ///	<summary>
+        ///	  Desbloquear dispositivo instanciado
+        ///	</summary>
+        procedure DesbloquearDispositivo;
+
+
+        [TPersistable(fgPersistable, 'R_E_C_N_O_')]
+        property Recno: integer read FRecno write SetRecno;
+
+        [TPersistable(fgPersistable, 'Z15_FILIAL')]
+        property CodigoFilial: string read FCodigoFilial write SetCodigoFilial;
+
+        property Filial: TFilial read FFilial write SetFilial;
+
+        [TPersistable(fgPersistable, 'Z15_DISPO')]
+        property CodigoDispositivo: string read FCodigoDispositivo write SetCodigoDispositivo;
+
+        [TPersistable(fgPersistable, 'Z15_DESCRI')]
+        property Descricao: string read FDescricao write SetDescricao;
+
+        [TPersistable(fgPersistable, 'Z15_STATUS')]
+        property Status: string read FStatus write SetStatus;
+
+        [TPersistable(fgPersistable, 'Z15_USERID')]
+        property CodigoUltimoUsuario: string read FCodigoUltimoUsuario write SetCodigoUltimoUsuario;
+
+        [TPersistable(fgUpdateable, 'D_E_L_E_T_')]
+        property Delet: string read FDelet write SetDelet;
+
+    end;
+
+implementation
+
+uses
+  Biz.UsuarioLogado;
+
+{ TDispositivo }
+
+
+{$REGION 'Métodos CRUD'}
+
+
+function TDispositivo.Alterar: integer;
+begin
+    // Lib.ExecutaTarefa('AlterarDispositivo', 'TDispositivo' , TLib.ObjectToParameters(Self,acAlteracao));
+    // ###Validar retorno da função
+    // result := 0;
+end;
+
+
+procedure TDispositivo.DesbloquearDispositivo;
+begin
+   self.Status := 'LIVRE';
+   Self.Alterar;
+end;
+
+
+
+procedure TDispositivo.BloquearDispositivo(iduser: string);
+begin
+    self.CodigoUltimoUsuario := iduser;
+    self.Status := 'OCUPADO';
+    Self.Alterar;
+end;
+
+function TDispositivo.Obter(parametros: TParametro): TObject;
+var
+    lista: TLista<TDispositivo>;
+begin
+    try
+     //   lista := BaseLib.XmlToObject<TDispositivo>(BaseLib.ExecutaTarefa('ConsultarDispositivo', 'TDispositivo', parametros));
+
+        if lista.Count = 1 then
+        begin
+            PopularObjeto(lista[0]);
+            result := Self;
+        end
+        else
+        begin
+            MessageDlg('Nenhum registro encontrado.', mtError, [mbOk], 0);
+            result := nil;
+        end;
+    finally
+        lista.Destroy;
+    end;
+end;
+
+function TDispositivo.ObterDispositivosLivresPorFilial: TLista<TDispositivo>;
+var
+    parametro: TParametro;
+begin
+    parametro := TParametro.Create;
+    parametro.Add('', 'Z15_FILIAL', TUsuarioLogado.ObterInstancia.Filial.Filial);
+    parametro.Add('', 'Z15_STATUS', 'LIVRE');
+    //result := BaseLib.XmlToObject<TDispositivo>(BaseLib.ExecutaTarefa('ConsultarDispositivo', 'TDispositivo', parametro));
+end;
+
+function TDispositivo.ObterTodosDispositivosPorFilial: TLista<TDispositivo>;
+var
+    parametro: TParametro;
+begin
+    parametro := TParametro.Create;
+    parametro.Add('', 'Z15_FILIAL', TUsuarioLogado.ObterInstancia.Filial.Filial);
+    //sult := BaseLib.XmlToObject<TDispositivo>(BaseLib.ExecutaTarefa('ConsultarDispositivo', 'TDispositivo', parametro));
+end;
+
+function TDispositivo.Obter(ID: string): TObject;
+var
+    parametros: TParametro;
+
+begin
+    try
+        parametros := TParametro.Create;
+        parametros.Add('', 'Z15_DISPO', ID);
+        parametros.Add('', 'Z15_FILIAL', TUsuarioLogado.ObterInstancia.Filial.FIlial);
+        result := Obter(parametros);
+    finally
+        FreeAndNil(parametros);
+    end;
+end;
+
+{$ENDREGION}
+
+{$REGION 'Regras de Negócio'}
+
+procedure TDispositivo.PopularObjeto(Dispositivo: TDispositivo);
+begin
+    Self.CodigoFilial := Dispositivo.CodigoFilial;
+    Self.CodigoDispositivo := Dispositivo.CodigoDispositivo;
+    Self.Descricao := Dispositivo.Descricao;
+    Self.Status := Dispositivo.Status;
+    Self.CodigoUltimoUsuario := Dispositivo.CodigoUltimoUsuario;
+    Self.Delet := Dispositivo.Delet;
+    self.Recno := Dispositivo.Recno;
+
+end;
+
+{$ENDREGION}
+
+{$REGION 'Métodos de Propriedades'}
+
+procedure TDispositivo.SetCodigoDispositivo(const Value: string);
+begin
+    FCodigoDispositivo := Value;
+end;
+
+procedure TDispositivo.SetCodigoFilial(const Value: string);
+begin
+    FCodigoFilial := Value;
+end;
+
+procedure TDispositivo.SetCodigoUltimoUsuario(const Value: string);
+begin
+    FCodigoUltimoUsuario := Value;
+end;
+
+procedure TDispositivo.SetDelet(const Value: string);
+begin
+    FDelet := Value;
+end;
+
+procedure TDispositivo.SetDescricao(const Value: string);
+begin
+    FDescricao := Value;
+end;
+
+procedure TDispositivo.SetFilial(const Value: TFilial);
+begin
+    FFilial := Value;
+end;
+
+procedure TDispositivo.SetRecno(const Value: integer);
+begin
+  FRecno := Value;
+end;
+
+procedure TDispositivo.SetStatus(const Value: string);
+begin
+    FStatus := Value;
+end;
+
+{$ENDREGION}
+
+end.

@@ -1,0 +1,12 @@
+inherited frmConModulo: TfrmConModulo
+  Caption = 'frmConModulo'
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited pnlApresentacao: TPanel
+    inherited Label1: TLabel
+      Width = 169
+      Caption = 'Consulta de Modulo'
+      ExplicitWidth = 169
+    end
+  end
+end
